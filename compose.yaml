@@ -1,0 +1,138 @@
+name: campuskit
+x-common: &common
+  build: .
+  restart: unless-stopped
+  environment: &env
+    JWT_SECRET: ${JWT_SECRET:-campuskit-local-demo-signing-secret-change-me-2026}
+    INTERNAL_SECRET: ${INTERNAL_SECRET:-campuskit-local-internal-service-secret-2026}
+    DEMO_MODE: ${DEMO_MODE:-true}
+    IDENTITY_URL: http://identity:3001
+    LISTING_URL: http://listing:3002
+    RENTAL_URL: http://rental:3003
+    PAYMENT_URL: http://payment:3004
+    REVIEW_URL: http://review:3005
+    NOTIFICATION_URL: http://notification:3006
+    BOOKING_ADDR: booking:50051
+    AMQP_URL: amqp://campuskit:campuskit_demo@rabbitmq:5672
+  depends_on:
+    postgres: { condition: service_healthy }
+    mongo: { condition: service_healthy }
+    rabbitmq: { condition: service_healthy }
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      {
+        POSTGRES_USER: campuskit_admin,
+        POSTGRES_PASSWORD: campuskit_admin_demo,
+      }
+    volumes:
+      [
+        postgres-data:/var/lib/postgresql/data,
+        ./infra/postgres.sql:/docker-entrypoint-initdb.d/01-init.sql:ro,
+      ]
+    healthcheck:
+      {
+        test: [CMD-SHELL, pg_isready -U campuskit_admin],
+        interval: 5s,
+        timeout: 3s,
+        retries: 20,
+      }
+  mongo:
+    image: mongo:8.0
+    environment:
+      {
+        MONGO_INITDB_ROOT_USERNAME: campuskit_admin,
+        MONGO_INITDB_ROOT_PASSWORD: campuskit_admin_demo,
+      }
+    volumes:
+      [
+        mongo-data:/data/db,
+        ./infra/mongo.js:/docker-entrypoint-initdb.d/01-init.js:ro,
+      ]
+    healthcheck:
+      {
+        test: [CMD, mongosh, --quiet, --eval, "db.adminCommand('ping')"],
+        interval: 5s,
+        timeout: 5s,
+        retries: 20,
+      }
+  rabbitmq:
+    image: rabbitmq:4.1-management-alpine
+    environment:
+      {
+        RABBITMQ_DEFAULT_USER: campuskit,
+        RABBITMQ_DEFAULT_PASS: campuskit_demo,
+      }
+    ports: ["127.0.0.1:15672:15672"]
+    volumes: [rabbit-data:/var/lib/rabbitmq]
+    healthcheck:
+      {
+        test: [CMD, rabbitmq-diagnostics, -q, ping],
+        interval: 5s,
+        timeout: 5s,
+        retries: 30,
+      }
+  identity:
+    <<: *common
+    command: [node, services/identity/server.js]
+    environment:
+      {
+        <<: *env,
+        DATABASE_URL: postgres://identity_app:identity_demo@postgres/identity_db,
+      }
+  listing:
+    <<: *common
+    command: [node, rest/server.js]
+    environment:
+      {
+        <<: *env,
+        DATABASE_URL: postgres://listing_app:listing_demo@postgres/listing_db,
+      }
+  booking:
+    <<: *common
+    command: [node, grpc/server/server.js]
+    environment:
+      {
+        <<: *env,
+        DATABASE_URL: postgres://booking_app:booking_demo@postgres/booking_db,
+      }
+  rental:
+    <<: *common
+    command: [node, services/rental/server.js]
+    environment:
+      {
+        <<: *env,
+        DATABASE_URL: postgres://rental_app:rental_demo@postgres/rental_db,
+      }
+  payment:
+    <<: *common
+    command: [node, services/payment/server.js]
+    environment:
+      {
+        <<: *env,
+        DATABASE_URL: postgres://payment_app:payment_demo@postgres/payment_db,
+      }
+  review:
+    <<: *common
+    command: [node, services/review/server.js]
+    environment:
+      { <<: *env, MONGO_URL: mongodb://review_app:review_demo@mongo/review_db }
+  notification:
+    <<: *common
+    command: [node, services/notification/server.js]
+    environment:
+      {
+        <<: *env,
+        MONGO_URL: mongodb://notification_app:notification_demo@mongo/notification_db,
+      }
+  gateway:
+    <<: *common
+    command: [node, gateway/server.js]
+    ports: ["127.0.0.1:${PORT:-8080}:8080"]
+    depends_on:
+      [identity, listing, booking, rental, payment, review, notification]
+volumes:
+  postgres-data:
+  mongo-data:
+  rabbit-data:

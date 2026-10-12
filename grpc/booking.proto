@@ -1,0 +1,16 @@
+syntax = "proto3";
+package campuskit;
+// Domain RPCs replace the unauthorised CRUD contract. JSON carries versioned
+// DTOs validated by the server; a future ADR can introduce generated DTO types.
+service BookingService {
+ rpc ListBookings (Envelope) returns (Envelope);
+ rpc GetBooking (Envelope) returns (Envelope);
+ rpc RequestBooking (Envelope) returns (Envelope);
+ rpc ApproveBooking (Envelope) returns (Envelope);
+ rpc CancelBooking (Envelope) returns (Envelope);
+ rpc SetBlackouts (Envelope) returns (Envelope);
+ rpc Availability (Envelope) returns (Envelope);
+ rpc AffectedBookings (Envelope) returns (Envelope);
+ rpc ReleaseCalendar (Envelope) returns (Envelope);
+}
+message Envelope { string json = 1; }
