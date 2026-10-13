@@ -1,0 +1,4 @@
+# Kept out of content search (Claude Code Grep, ripgrep, VS Code search). See AGENTS.md.
+# Claude Code Glob still lists these files; the project hook guards opening them.
+archived/
+docs/reference/sources/

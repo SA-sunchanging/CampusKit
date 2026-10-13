@@ -1,0 +1,14 @@
+node_modules/
+web/dist/
+.env
+*.db
+*.db-shm
+*.db-wal
+tmp/
+test-results/
+playwright-report/
+docs/
+tests/
+output/
+load/
+scripts/
