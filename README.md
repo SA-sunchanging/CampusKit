@@ -66,13 +66,19 @@ node scripts/dev-token.mjs <userId> student
 curl -H "Authorization: Bearer <token>" http://localhost:3000/api/listing/listings
 ```
 
-## Checks before a pull request
+## Checks before pushing
+
+`npm install` sets up Git hooks: staged files are linted and formatted on commit, commit messages
+must follow Conventional Commits, and typecheck and tests run on push. CI runs the full list below
+on every push; coding rules are in `AGENTS.md`.
 
 ```sh
 npm run typecheck
 npm run lint
+npm run format:check
 npm test
 npm run build:all
+(cd web && npm run lint && npm run build)
 ```
 
 ## Ports

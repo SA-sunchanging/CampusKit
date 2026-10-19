@@ -8,6 +8,14 @@ services, from database to web page, so that members rarely edit the same files.
 - **Should:** makes the system more complete and full marks safer. Start after your Core works end to end.
 - **Other:** further work. Not planned for this term.
 
+Core and Should items are checkboxes:
+
+- Tick an item (`- [x]`) only when it is on `main`, passes CI, and works in the running stack,
+  with the tests that `AGENTS.md` asks for. Work on a local or side branch is not done.
+- To take over another member's item, agree with its owner first, then append `(taken by <role>)`
+  to the line, for example `(taken by A)`. Tell the owner when you push, because the code lands
+  in their folders.
+
 The requirements come from `docs/reference/course-syllabus.md`. The design is in
 `docs/architecture/services.md` and `docs/adr/`. How to run the code is in `README.md`.
 
@@ -29,18 +37,18 @@ commits; Git contribution counts toward the progress grade.
 ### A: Platform and Identity
 
 **Core**
-- Identity: register and log in with email and password (hash passwords), issue the JWT, log out on the client.
-- Identity: internal eligibility and profile lookup for Listing and Booking (`canPublish`, `canBook`, payout profile).
-- Seed script with demo accounts: two verified students and one administrator.
-- Web shell: routing, login and register pages, token handling, mobile-width layout.
-- Gateway: keep routing and JWT checks working as services grow.
-- Slides: service discovery (Compose DNS and environment configuration), C4 context and container views.
+- [ ] Identity: register and log in with email and password (hash passwords), issue the JWT, log out on the client.
+- [ ] Identity: internal eligibility and profile lookup for Listing and Booking (`canPublish`, `canBook`, payout profile).
+- [ ] Seed script with demo accounts: two verified students and one administrator.
+- [ ] Web shell: routing, login and register pages, token handling, mobile-width layout.
+- [ ] Gateway: keep routing and JWT checks working as services grow.
+- [ ] Slides: service discovery (Compose DNS and environment configuration), C4 context and container views.
 
 **Should**
-- Email verification code (shown on the UI in demo mode) and administrator review of student status, with a page for the admin.
-- Identity writes `identity.verified` events through the outbox.
-- Internal service authentication between services (still an open question in `docs/architecture/services.md`).
-- GitHub Actions that run typecheck, lint, test, and build on each pull request.
+- [ ] Email verification code (shown on the UI in demo mode) and administrator review of student status, with a page for the admin.
+- [ ] Identity writes `identity.verified` events through the outbox.
+- [ ] Internal service authentication between services (still an open question in `docs/architecture/services.md`).
+- [ ] GitHub Actions that run typecheck, lint, test, and build on each push.
 
 **Other**
 - University identity provider, account restriction and erasure, TLS between services.
@@ -48,17 +56,17 @@ commits; Git contribution counts toward the progress grade.
 ### B: Listing
 
 **Core**
-- Create a listing: validate, save a DRAFT, check eligibility with Identity, set up the calendar with Booking (gRPC), then publish.
-- Search by keyword and category; listing detail; internal quote endpoint for Booking (fee, deposit, late-fee rule, owner).
-- Photos as compressed inline data URLs.
-- Web: search, listing detail, and create-listing pages.
-- Load test with k6, two types (for example load and stress) on search and detail, with 1,500 seeded listings; explain the results.
+- [ ] Create a listing: validate, save a DRAFT, check eligibility with Identity, set up the calendar with Booking (gRPC), then publish.
+- [ ] Search by keyword and category; listing detail; internal quote endpoint for Booking (fee, deposit, late-fee rule, owner).
+- [ ] Photos as compressed inline data URLs.
+- [ ] Web: search, listing detail, and create-listing pages.
+- [ ] Load test with k6, two types (for example load and stress) on search and detail, with 1,500 seeded listings; explain the results.
 
 **Should**
-- Moderation: flagged or high-value listings wait for administrator approval; admin moderation page; `listing.published` and `listing.rejected` events.
-- Filter by dates and campus location; owner reputation in search results (from Review).
-- Unpublish a listing.
-- Second quality attribute: scalability, by running more Listing replicas and comparing k6 results.
+- [ ] Moderation: flagged or high-value listings wait for administrator approval; admin moderation page; `listing.published` and `listing.rejected` events.
+- [ ] Filter by dates and campus location; owner reputation in search results (from Review).
+- [ ] Unpublish a listing.
+- [ ] Second quality attribute: scalability, by running more Listing replicas and comparing k6 results.
 
 **Other**
 - Editing and resubmitting a rejected listing, object storage for photos, full-text search.
@@ -66,18 +74,18 @@ commits; Git contribution counts toward the progress grade.
 ### C: Booking
 
 **Core**
-- Finish `libs/contracts/proto/booking.proto` first: calendar setup, availability, request, approve, decline, get, list, and release calendar.
-- Calendar with the PostgreSQL exclusion constraint (raw SQL migration; `btree_gist` is already installed).
-- Request a booking (eligibility from Identity, quote from Listing, atomic reservation), owner approves or declines.
-- On approval: authorize with Payment, create the rental with Rental, mark CONFIRMED, write `booking.*` events.
-- Gateway REST routes for booking in `apps/gateway/src/booking`.
-- Web: request form on the listing page, my bookings, owner approve or decline.
-- Slides: sequence diagrams; assemble the final slide deck and the live-demo script.
+- [ ] Finish `libs/contracts/proto/booking.proto` first: calendar setup, availability, request, approve, decline, get, list, and release calendar.
+- [ ] Calendar with the PostgreSQL exclusion constraint (raw SQL migration; `btree_gist` is already installed).
+- [ ] Request a booking (eligibility from Identity, quote from Listing, atomic reservation), owner approves or declines.
+- [ ] On approval: authorize with Payment, create the rental with Rental, mark CONFIRMED, write `booking.*` events.
+- [ ] Gateway REST routes for booking in `apps/gateway/src/booking`.
+- [ ] Web: request form on the listing page, my bookings, owner approve or decline.
+- [ ] Slides: sequence diagrams; assemble the final slide deck and the live-demo script.
 
 **Should**
-- Expiry worker for requests the owner does not answer; cancellation before pickup.
-- Compensation: void authorizations and release dates when confirmation fails; authorization retry window.
-- Concurrency test: many overlapping requests at once, exactly one succeeds.
+- [ ] Expiry worker for requests the owner does not answer; cancellation before pickup.
+- [ ] Compensation: void authorizations and release dates when confirmation fails; authorization retry window.
+- [ ] Concurrency test: many overlapping requests at once, exactly one succeeds.
 
 **Other**
 - Calendar reconciliation, rescheduling bookings affected by a late return.
@@ -85,17 +93,17 @@ commits; Git contribution counts toward the progress grade.
 ### D: Rental and Payment
 
 **Core**
-- Payment: demo ledger with fee and deposit authorization, capture, void, and settlement (late fee, deposit release, payout); every operation carries a unique operation ID so a retry never repeats it.
-- Payment: payment status per booking for the web.
-- Rental: create the rental (idempotent per booking), issue pickup and return codes.
-- Rental: confirm pickup (recheck the booking over gRPC, capture the fee, ACTIVE); confirm return (SETTLEMENT_PENDING, release the calendar, settle, CLOSED); internal rental lookup for Review.
-- Web: rental page showing codes, code entry, status, and payment status.
-- Slides: risk matrix with at least three risks.
+- [ ] Payment: demo ledger with fee and deposit authorization, capture, void, and settlement (late fee, deposit release, payout); every operation carries a unique operation ID so a retry never repeats it.
+- [ ] Payment: payment status per booking for the web.
+- [ ] Rental: create the rental (idempotent per booking), issue pickup and return codes.
+- [ ] Rental: confirm pickup (recheck the booking over gRPC, capture the fee, ACTIVE); confirm return (SETTLEMENT_PENDING, release the calendar, settle, CLOSED); internal rental lookup for Review.
+- [ ] Web: rental page showing codes, code entry, status, and payment status.
+- [ ] Slides: risk matrix with at least three risks.
 
 **Should**
-- Condition evidence (photos, condition, accessories) at pickup and return.
-- Overdue job, late-fee calculation, and return-reminder events.
-- Settlement retry endpoint and a test that a duplicate capture is not charged twice.
+- [ ] Condition evidence (photos, condition, accessories) at pickup and return.
+- [ ] Overdue job, late-fee calculation, and return-reminder events.
+- [ ] Settlement retry endpoint and a test that a duplicate capture is not charged twice.
 
 **Other**
 - Real payment provider sandbox, provider reconciliation, deposit-expiry alerts, dispute handling.
@@ -103,16 +111,16 @@ commits; Git contribution counts toward the progress grade.
 ### E: Events and Reviews
 
 **Core**
-- Outbox in `libs/messaging`: an outbox table that producers write in the same transaction, and a relay that publishes with confirmation and marks entries sent. Help Identity, Listing, Booking, and Rental plug it in.
-- Notification: store each event once per recipient in the MongoDB inbox; list the caller's inbox; mark as read.
-- Event names and payloads agreed with every producer in `libs/contracts/src/events.ts`.
-- Web: inbox page with an unread count.
-- Quality attribute: resilience. Stop RabbitMQ during bookings and measure that no booking fails and every event arrives after recovery.
+- [ ] Outbox in `libs/messaging`: an outbox table that producers write in the same transaction, and a relay that publishes with confirmation and marks entries sent. Help Identity, Listing, Booking, and Rental plug it in.
+- [ ] Notification: store each event once per recipient in the MongoDB inbox; list the caller's inbox; mark as read.
+- [ ] Event names and payloads agreed with every producer in `libs/contracts/src/events.ts`.
+- [ ] Web: inbox page with an unread count.
+- [ ] Quality attribute: resilience. Stop RabbitMQ during bookings and measure that no booking fails and every event arrives after recovery.
 
 **Should**
-- Reviews: submit after a CLOSED rental (participants only, one review each), reputation summary for Listing; web review form.
-- Automatic reconnect to RabbitMQ (`amqplib` has a recovery option); a way to inspect dead-lettered events.
-- Correlation IDs in every log line, across services and events.
+- [ ] Reviews: submit after a CLOSED rental (participants only, one review each), reputation summary for Listing; web review form.
+- [ ] Automatic reconnect to RabbitMQ (`amqplib` has a recovery option); a way to inspect dead-lettered events.
+- [ ] Correlation IDs in every log line, across services and events.
 
 **Other**
 - External email and push delivery, broker high availability, a metrics and tracing stack.
@@ -156,12 +164,12 @@ Services find each other through environment variables such as `BOOKING_GRPC_URL
 
 ## Working without conflicts
 
-- Change only the folders your role owns. If you need a change elsewhere, ask the owner or open a pull request for them to review.
-- Fill in `.github/CODEOWNERS` with GitHub usernames so the right owner reviews each pull request.
-- A change to `booking.proto` or `events.ts` needs review from every service that uses it.
-- One branch per task (`feat/listing-search`), small pull requests into `main`.
+- Change only the folders your role owns, unless you have taken over an item as described at the top. If you need a change elsewhere, ask the owner first.
+- Push small commits straight to `main` (no pull requests). Run `git pull --rebase` before every push; a branch is optional for longer work.
+- Before pushing a change to `booking.proto` or `events.ts`, tell every service that uses it in the team chat.
 - Add npm packages in their own small commit; `package.json` is shared.
-- Run the checks in `README.md` before opening a pull request.
+- If CI fails after your push, fixing it comes before anything else.
+- Follow the coding rules in `AGENTS.md`: tests with code, small files, Conventional Commits, one topic at a time.
 
 ## Timeline
 
