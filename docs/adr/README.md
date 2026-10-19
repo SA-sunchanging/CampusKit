@@ -23,6 +23,12 @@ ADR numbers are never reused, renumbered, or deleted. To change a decision, writ
 
 When an ADR mentions another decision, refer to it by its repo-relative file path, not by its number.
 
+**Exception: revisions in a submitted document.** The team writes and submits ADRs in Google Docs, exported as PDFs to `docs/reference/sources/`. If a submitted document revises an ADR under its existing number, mirror that revision in place here so the numbers match what was submitted, and say in the ADR's Context that it was revised in place. Outside that case, the supersede rule above applies.
+
+## Source of truth
+
+The submitted Google Docs (exported as PDFs) are always newer than the files in this folder, which may lag behind. When the two disagree, follow the PDF or ask the user which is current, then update the file here to match.
+
 ## Adding ADRs
 
 New ADRs are added as course topics introduce new decisions.

@@ -10,8 +10,8 @@ Gateway-only authorisation centralises checks but cannot reliably evaluate curre
 
 ## Decision
 
-Authenticate at the gateway and propagate a verifiable identity context over authenticated internal connections. Services reject missing or unverifiable context and ignore client-supplied identity headers. At each protected endpoint, check the caller's role and current resource ownership or rental participation before reading or changing data. Deny access by default; internal calls do not bypass these checks.
+Student Identity authenticates email/password login and issues JWTs. The gateway and protected services validate JWTs; the gateway propagates the token to REST services and as metadata on gRPC calls. Services ignore client-supplied identity headers and user IDs as evidence of permission. The data-owning service checks the caller's role, ownership, and rental participation. Service-to-service operations require internal service authentication and endpoint-specific permissions; internal calls do not bypass authorisation. Local HTTP and insecure gRPC are restricted to the Docker demo network; TLS is the production transport target.
 
 ## Consequences
 
-Resource permissions remain with the owning service. The team must configure trusted identity propagation, secure internal routes, and test forged identities, unauthorised direct calls, and access to another student's records. Every new resource requires an explicit authorisation check.
+Resource permissions remain with the owning service. Configure JWT validation, trusted token propagation, internal service credentials, and production TLS; test forged identities, missing or invalid tokens, unauthorised direct calls, and access to another student's records. Email verification and administrator review of student status remain separate eligibility checks. Every new protected resource requires explicit authorisation.

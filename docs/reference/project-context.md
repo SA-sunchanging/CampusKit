@@ -49,28 +49,31 @@ user survey.
 | Owner | List personally owned items, set availability, approve requests, and record handovers. |
 | Renter | Find an item, request a rental, arrange payment, collect the item, and return it. |
 | Platform Administrator | Review student verification and listing approval, and investigate failed payment or notification operations. |
-| Payment Gateway | Authorize, capture, release, refund, and pay out funds through the payment integration. |
-| Email Provider | Deliver verification messages, booking updates, and rental reminders. |
+| Payment Gateway | Production external actor that authorizes, captures, releases, refunds, and pays out funds. The current demo uses a local Payment Service ledger adapter without real money. |
+| Email Provider | Production external actor that delivers verification messages, booking updates, and reminders. External email and push delivery are deferred; the current demo uses an in-app inbox. |
 
 ## Role rules
 
 - Owner and Renter are roles of the same Student account. A student can take either role in
   different transactions.
 - A student cannot rent their own item.
+- Authentication uses email/password login and a JWT. Authentication identifies the caller; it
+  does not by itself make the student eligible.
 - Publishing a listing and booking an item both require verified current-student status.
-- An email verification code proves control of an email address. Current-student status is
-  reviewed separately.
+- An email verification code proves control of an email address. In demo mode the code is shown
+  on the UI. An administrator reviews current-student status separately.
 
 ## Scope of this iteration
 
 **In scope:**
 
+- Authentication (register, login, logout)
 - Listing
 - Booking
-- Payment
+- Demo payment (local ledger, no real money)
 - Handover and return
 - Reviews
-- Notifications
+- In-app notifications
 - Administrator verification, listing approval, and technical recovery
 
 **Deferred (out of scope for this iteration):**
@@ -79,14 +82,18 @@ user survey.
 - Damage and loss claims
 - Dispute adjudication
 - A claim-window workflow
+- University Identity Provider integration
+- A real payment provider
+- External email and push delivery
+- Object storage (S3). Demo photographs are compressed inline data URLs.
 
 ## Localization
 
-- The website supports Thai and English.
+- The demo has Thai and English labels. Complete bilingual localization is deferred.
 - All amounts are in THB.
 
 ## Before operating with real users
 
-The team must validate identity verification, payment-provider capabilities, privacy notices, and
-data-retention rules before the system is used with real users. These are deployment dependencies,
+The team must validate identity verification, payment-provider capabilities, TLS, privacy notices,
+and data-retention rules before the system is used with real users. These are deployment dependencies,
 not claims of completed integration.
