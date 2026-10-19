@@ -1,0 +1,81 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "types": [
+      "vitest/globals",
+      "node"
+    ],
+    "paths": {
+      "@app/common": [
+        "./libs/common/src/index.ts"
+      ],
+      "@app/common/*": [
+        "./libs/common/src/*"
+      ],
+      "@app/contracts": [
+        "./libs/contracts/src/index.ts"
+      ],
+      "@app/contracts/*": [
+        "./libs/contracts/src/*"
+      ],
+      "@app/messaging": [
+        "./libs/messaging/src/index.ts"
+      ],
+      "@app/messaging/*": [
+        "./libs/messaging/src/*"
+      ]
+    }
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/gateway/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/identity/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/listing/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/booking/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/rental/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/payment/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/review/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/notification/tsconfig.app.json"
+    },
+    {
+      "path": "./libs/common/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/contracts/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/messaging/tsconfig.lib.json"
+    }
+  ]
+}

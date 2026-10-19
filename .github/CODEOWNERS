@@ -1,0 +1,26 @@
+# Who reviews changes to which folder. Replace each role with the member's GitHub username,
+# for example `@octocat`, then uncomment the lines. Roles are described in docs/team-plan.md.
+
+# /apps/gateway/                    @role-a
+# /apps/gateway/src/booking/        @role-c
+# /apps/identity/                   @role-a
+# /apps/listing/                    @role-b
+# /apps/booking/                    @role-c
+# /apps/rental/                     @role-d
+# /apps/payment/                    @role-d
+# /apps/review/                     @role-e
+# /apps/notification/               @role-e
+# /libs/common/                     @role-a
+# /libs/messaging/                  @role-e
+# /libs/contracts/src/events.ts     @role-e @role-a @role-b @role-c @role-d
+# /libs/contracts/proto/            @role-c @role-a @role-b @role-d
+# /infra/  /compose.yaml  /Dockerfile  /package.json   @role-a
+# /web/src/app/                     @role-a
+# /web/src/features/account/        @role-a
+# /web/src/features/admin/          @role-b
+# /web/src/features/listing/        @role-b
+# /web/src/features/booking/        @role-c
+# /web/src/features/rental/         @role-d
+# /web/src/features/inbox/          @role-e
+# /web/src/features/review/         @role-e
+# /loadtest/                        @role-b

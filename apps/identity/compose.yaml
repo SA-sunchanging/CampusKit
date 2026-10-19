@@ -1,0 +1,17 @@
+services:
+  identity:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        APP: identity
+    environment:
+      PORT: 3001
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
+      DATABASE_URL: postgres://identity_user:identity_pass@postgres:5432/identity_db
+      RABBITMQ_URL: amqp://campuskit:campuskit@rabbitmq:5672
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy

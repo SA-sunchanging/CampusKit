@@ -1,0 +1,14 @@
+services:
+  payment:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        APP: payment
+    environment:
+      PORT: 3004
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
+      DATABASE_URL: postgres://payment_user:payment_pass@postgres:5432/payment_db
+    depends_on:
+      postgres:
+        condition: service_healthy

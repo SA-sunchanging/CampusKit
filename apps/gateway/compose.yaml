@@ -1,0 +1,34 @@
+services:
+  gateway:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        APP: gateway
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
+      BOOKING_GRPC_URL: booking:50051
+      IDENTITY_URL: http://identity:3001
+      LISTING_URL: http://listing:3002
+      RENTAL_URL: http://rental:3003
+      PAYMENT_URL: http://payment:3004
+      REVIEW_URL: http://review:3005
+      NOTIFICATION_URL: http://notification:3006
+    depends_on:
+      identity:
+        condition: service_started
+      listing:
+        condition: service_started
+      booking:
+        condition: service_started
+      rental:
+        condition: service_started
+      payment:
+        condition: service_started
+      review:
+        condition: service_started
+      notification:
+        condition: service_started

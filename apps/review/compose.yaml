@@ -1,0 +1,15 @@
+services:
+  review:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        APP: review
+    environment:
+      PORT: 3005
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
+      MONGO_URL: mongodb://review_user:review_pass@mongo:27017/review_db
+      RENTAL_URL: http://rental:3003
+    depends_on:
+      mongo:
+        condition: service_healthy

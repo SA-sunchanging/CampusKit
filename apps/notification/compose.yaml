@@ -1,0 +1,17 @@
+services:
+  notification:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        APP: notification
+    environment:
+      PORT: 3006
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
+      MONGO_URL: mongodb://notification_user:notification_pass@mongo:27017/notification_db
+      RABBITMQ_URL: amqp://campuskit:campuskit@rabbitmq:5672
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy

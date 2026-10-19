@@ -1,0 +1,20 @@
+services:
+  listing:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        APP: listing
+    environment:
+      PORT: 3002
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
+      DATABASE_URL: postgres://listing_user:listing_pass@postgres:5432/listing_db
+      RABBITMQ_URL: amqp://campuskit:campuskit@rabbitmq:5672
+      BOOKING_GRPC_URL: booking:50051
+      IDENTITY_URL: http://identity:3001
+      REVIEW_URL: http://review:3005
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy

@@ -1,0 +1,15 @@
+# Full local stack: docker compose up --build
+# Each service keeps its own compose file next to its code, so members do not edit one shared file.
+name: campuskit
+
+include:
+  - infra/compose.yaml
+  - apps/gateway/compose.yaml
+  - apps/identity/compose.yaml
+  - apps/listing/compose.yaml
+  - apps/booking/compose.yaml
+  - apps/rental/compose.yaml
+  - apps/payment/compose.yaml
+  - apps/review/compose.yaml
+  - apps/notification/compose.yaml
+  - web/compose.yaml

@@ -1,0 +1,39 @@
+// gRPC contract of the Booking service. Owner: Booking.
+// Clients: Gateway, Listing, Rental. Change only through a PR that every client owner reviews.
+// This is a starting point: add the remaining operations before other services depend on them.
+syntax = "proto3";
+
+package campuskit.booking;
+
+service BookingService {
+  // Listing calls this before a listing can be published.
+  rpc SetupCalendar (SetupCalendarRequest) returns (SetupCalendarReply);
+  rpc GetBooking (GetBookingRequest) returns (Booking);
+}
+
+// Half-open interval [start, end), ISO-8601 UTC.
+message DateRange {
+  string start = 1;
+  string end = 2;
+}
+
+message SetupCalendarRequest {
+  string listing_id = 1;
+  repeated DateRange blackouts = 2;
+}
+
+message SetupCalendarReply {
+  bool ok = 1;
+}
+
+message GetBookingRequest {
+  string id = 1;
+}
+
+message Booking {
+  string id = 1;
+  string listing_id = 2;
+  string renter_id = 3;
+  string status = 4;
+  DateRange period = 5;
+}
