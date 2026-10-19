@@ -5,5 +5,5 @@ export default function ListingsPage() {
       <h2>Listings</h2>
       <p>Search, listing detail, create listing (role B).</p>
     </section>
-  )
+  );
 }

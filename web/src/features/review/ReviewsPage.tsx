@@ -5,5 +5,5 @@ export default function ReviewsPage() {
       <h2>Reviews</h2>
       <p>Review the other participant (role E).</p>
     </section>
-  )
+  );
 }

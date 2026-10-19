@@ -5,5 +5,5 @@ export default function AccountPage() {
       <h2>Account</h2>
       <p>Register, log in, verify email (role A).</p>
     </section>
-  )
+  );
 }

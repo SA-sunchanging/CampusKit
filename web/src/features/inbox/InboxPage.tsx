@@ -5,5 +5,5 @@ export default function InboxPage() {
       <h2>Inbox</h2>
       <p>In-app notifications (role E).</p>
     </section>
-  )
+  );
 }

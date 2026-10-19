@@ -5,5 +5,5 @@ export default function AdminPage() {
       <h2>Admin</h2>
       <p>Student verification and listing moderation (role B).</p>
     </section>
-  )
+  );
 }
