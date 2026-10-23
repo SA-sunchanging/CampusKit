@@ -48,7 +48,7 @@ commits; Git contribution counts toward the progress grade.
 - [ ] Email verification code (shown on the UI in demo mode) and administrator review of student status, with a page for the admin.
 - [ ] Identity writes `identity.verified` events through the outbox.
 - [ ] Internal service authentication between services (still an open question in `docs/architecture/services.md`).
-- [ ] GitHub Actions that run typecheck, lint, test, and build on each push.
+- [x] GitHub Actions that run typecheck, lint, test, and build on each push.
 
 **Other**
 - University identity provider, account restriction and erasure, TLS between services.
@@ -74,7 +74,7 @@ commits; Git contribution counts toward the progress grade.
 ### C: Booking
 
 **Core**
-- [ ] Finish `libs/contracts/proto/booking.proto` first: calendar setup, availability, request, approve, decline, get, list, and release calendar.
+- [x] Finish `libs/contracts/proto/booking.proto` first: calendar setup, availability, request, approve, decline, get, list, and release calendar.
 - [ ] Calendar with the PostgreSQL exclusion constraint (raw SQL migration; `btree_gist` is already installed).
 - [ ] Request a booking (eligibility from Identity, quote from Listing, atomic reservation), owner approves or declines.
 - [ ] On approval: authorize with Payment, create the rental with Rental, mark CONFIRMED, write `booking.*` events.
