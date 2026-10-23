@@ -1,20 +1,82 @@
 // gRPC contract of the Booking service. Owner: Booking.
-// Clients: Gateway, Listing, Rental. Change only through a PR that every client owner reviews.
-// This is a starting point: add the remaining operations before other services depend on them.
+// Clients: Gateway, Listing, Rental. Before pushing a change, tell every client owner in the team chat.
+// Add fields with new numbers; never reuse or renumber an existing field.
+//
+// Caller identity (docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md):
+// the caller sends its bearer token as gRPC metadata ("authorization": "Bearer <JWT>").
+// Booking reads the user from that token, never from a field in the request, and checks
+// ownership and participation itself. Every call also carries "x-correlation-id" metadata.
+//
+// Errors use gRPC status codes, which the gateway maps to HTTP (apps/gateway/src/booking/grpc-error.ts):
+// INVALID_ARGUMENT for bad input, NOT_FOUND for an unknown ID, PERMISSION_DENIED for a caller who is
+// not allowed, ALREADY_EXISTS when the dates overlap another reservation, FAILED_PRECONDITION when
+// the booking is not in a status that allows the operation.
 syntax = "proto3";
 
 package campuskit.booking;
 
 service BookingService {
-  // Listing calls this before a listing can be published.
+  // Listing calls this before a listing can be published. Repeating it for the same listing
+  // replaces the owner blackouts and returns ok.
   rpc SetupCalendar (SetupCalendarRequest) returns (SetupCalendarReply);
+
+  // Advisory check for search and the request form; RequestBooking rechecks atomically.
+  rpc CheckAvailability (CheckAvailabilityRequest) returns (CheckAvailabilityReply);
+
+  // The renter (token caller) asks for a period. Booking checks eligibility with Identity,
+  // gets the quote from Listing, and reserves the dates atomically. Returns status PENDING.
+  rpc RequestBooking (RequestBookingRequest) returns (Booking);
+
+  // The listing owner accepts a PENDING request. Booking authorizes the fee and deposit with
+  // Payment and creates the rental with Rental, then returns status CONFIRMED (or AUTHORIZING
+  // while authorization is retried within its window).
+  rpc ApproveBooking (ApproveBookingRequest) returns (Booking);
+
+  // The listing owner rejects a PENDING request. The dates are released. Returns status DECLINED.
+  rpc DeclineBooking (DeclineBookingRequest) returns (Booking);
+
+  // The renter or the listing owner reads one booking. Rental uses it to recheck before pickup.
   rpc GetBooking (GetBookingRequest) returns (Booking);
+
+  // Bookings where the caller is the renter or the listing owner, newest first.
+  rpc ListBookings (ListBookingsRequest) returns (ListBookingsReply);
+
+  // Rental calls this after the item is returned, so the dates are free again.
+  // Repeating it for the same booking returns ok without changing anything.
+  rpc ReleaseCalendar (ReleaseCalendarRequest) returns (ReleaseCalendarReply);
 }
 
 // Half-open interval [start, end), ISO-8601 UTC.
 message DateRange {
   string start = 1;
   string end = 2;
+}
+
+// Terms agreed when the request was made, copied from the Listing quote.
+// Money is integer satang (THB); int32 holds up to about 21 million THB.
+message Terms {
+  int32 rental_fee = 1;
+  int32 deposit = 2;
+  int32 late_fee_per_day = 3;
+}
+
+message Booking {
+  string id = 1;
+  string listing_id = 2;
+  string renter_id = 3;
+  // PENDING, AUTHORIZING, CONFIRMED, DECLINED, EXPIRED, or CANCELLED.
+  string status = 4;
+  DateRange period = 5;
+  string owner_id = 6;
+  Terms terms = 7;
+  // Set when status is DECLINED; empty otherwise.
+  string decline_reason = 8;
+  // ISO-8601 UTC. A PENDING request expires at this time if the owner does not answer.
+  string expires_at = 9;
+  // ISO-8601 UTC.
+  string created_at = 10;
+  // ISO-8601 UTC.
+  string updated_at = 11;
 }
 
 message SetupCalendarRequest {
@@ -26,14 +88,49 @@ message SetupCalendarReply {
   bool ok = 1;
 }
 
+message CheckAvailabilityRequest {
+  string listing_id = 1;
+  DateRange period = 2;
+}
+
+message CheckAvailabilityReply {
+  bool available = 1;
+}
+
+message RequestBookingRequest {
+  string listing_id = 1;
+  DateRange period = 2;
+}
+
+message ApproveBookingRequest {
+  string id = 1;
+}
+
+message DeclineBookingRequest {
+  string id = 1;
+  // Optional message shown to the renter.
+  string reason = 2;
+}
+
 message GetBookingRequest {
   string id = 1;
 }
 
-message Booking {
-  string id = 1;
-  string listing_id = 2;
-  string renter_id = 3;
-  string status = 4;
-  DateRange period = 5;
+message ListBookingsRequest {
+  // "renter" for the caller's own requests, "owner" for requests on the caller's listings.
+  string role = 1;
+  // Optional. Return only bookings with this status.
+  string status = 2;
+}
+
+message ListBookingsReply {
+  repeated Booking bookings = 1;
+}
+
+message ReleaseCalendarRequest {
+  string booking_id = 1;
+}
+
+message ReleaseCalendarReply {
+  bool ok = 1;
 }
