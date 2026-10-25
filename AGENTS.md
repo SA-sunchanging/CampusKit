@@ -17,7 +17,8 @@ topic.
 | `docs/reference/project-context.md` | Problem, team, actors, role rules, scope | Stable |
 | `docs/reference/use-cases.md` | Core and supporting use cases | Stable |
 | `docs/requirements.md` | Functional and non-functional requirements | Living |
-| `docs/adr/` | Architecture decision records; conventions are in its README | Living |
+| `docs/adr/` | Architecture decision records; the README is the index | Living |
+| `docs/standards/` | Writing standards for requirements, use cases, and ADRs | Stable (changes only when the team changes a standard) |
 | `docs/architecture/` | Service catalogue, container view, sequences, service discovery, open questions | Living |
 | `docs/team-plan.md` | Roles, Core/Should/Other work per member, interfaces between members, timeline | Living |
 | `docs/reference/sources/` | PDFs exported from the team's Google Docs and the syllabus | Guarded: open only when asked |
@@ -58,6 +59,10 @@ topic.
 8. **Respect service ownership.** Each service owns its database; never read another service's
    tables or collections. Cross-service calls go through REST, gRPC (`libs/contracts/proto`), or
    events (`libs/contracts/src/events.ts`). Keep `libs/` free of business logic.
+9. **Write documents to their standard.** Requirements, use cases, and ADRs follow their standard
+   in `docs/standards/`, in Google Docs and in the replica here. When you notice a violation while
+   working on another topic, report it in one line at the end of your reply and do not fix it in
+   that session.
 
 ## Coding rules
 
@@ -90,6 +95,9 @@ topic.
 
 - The guard hook needs Node.js and bash; on Windows, bash means Git Bash. The hook is
   `.claude/hooks/guard-paths.mjs`, registered in `.claude/settings.json`.
+- A second hook, `.claude/hooks/inject-doc-standards.mjs`, adds the matching standard from
+  `docs/standards/` to the context the first time a session touches a governed document or a
+  Google Doc. `/review-docs` (user-invoked only) runs a read-only review against the standards.
 - The backend is a NestJS 12 monorepo: ES modules (relative imports end in `.js`), rspack builds,
   Vitest tests, oxlint. Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`,
   `npm test`, `npm run build:all`; for the web app, `npm run lint` and `npm run build` in `web/`.
