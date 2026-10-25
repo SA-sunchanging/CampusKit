@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2198" viewBox="0 0 1600 2198" font-family="Arial, Helvetica, 'Liberation Sans', sans-serif">
+<title>Figure 7.1: Service discovery on Docker Compose (UML deployment diagram)</title>
+<rect x="0" y="0" width="1600" height="2198" fill="#ffffff"/>
+<path d="M14 40 L30 24 L1586 24 L1570 40 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
+<path d="M1570 40 L1586 24 L1586 1704 L1570 1720 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/>
+<rect x="14" y="40" width="1556" height="1680" fill="#ffffff" stroke="#1a1a1a" stroke-width="3"/>
+<text x="40" y="90" font-size="32" text-anchor="start" fill="#1a1a1a">&#171;device&#187; </text>
+<text x="176.984" y="90" font-size="32" text-anchor="start" fill="#1a1a1a" font-weight="bold">Docker host</text>
+<path d="M34 140 L46 128 L1556 128 L1544 140 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M1544 140 L1556 128 L1556 1674 L1544 1686 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="34" y="140" width="1510" height="1546" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="56" y="184" font-size="32" text-anchor="start" fill="#1a1a1a">&#171;executionEnvironment&#187;</text>
+<text x="56" y="224" font-size="32" text-anchor="start" fill="#1a1a1a" font-weight="bold">Docker Compose network (campuskit)</text>
+<path d="M695 262 L707 250 L957 250 L945 262 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M945 262 L957 250 L957 582 L945 594 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="695" y="262" width="250" height="332" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="820" y="302" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="820" y="342" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">gateway:3000</text>
+<path d="M1112 262 L1124 250 L1434 250 L1422 262 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M1422 262 L1434 250 L1434 360 L1422 372 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="1112" y="262" width="310" height="110" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="1267" y="302" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="1267" y="342" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">web:80</text>
+<line x1="820" y1="40" x2="820" y2="250" stroke="#1a1a1a" stroke-width="2.5"/>
+<rect x="810" y="30" width="20" height="20" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="840" y="90" font-size="32" text-anchor="start" fill="#1a1a1a">host 3000</text>
+<line x1="1267" y1="40" x2="1267" y2="250" stroke="#1a1a1a" stroke-width="2.5"/>
+<rect x="1257" y="30" width="20" height="20" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="1287" y="90" font-size="32" text-anchor="start" fill="#1a1a1a">host 8080</text>
+<path d="M210 612 L222 600 L532 600 L520 612 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M520 612 L532 600 L532 836 L520 848 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="210" y="612" width="310" height="236" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="365" y="652" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="365" y="692" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">payment:3004</text>
+<rect x="228" y="712" width="274" height="120" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+<path d="M468 722 L484 722 L492 730 L492 752 L468 752 Z M484 722 L484 730 L492 730" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+<text x="365" y="748" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;artifact&#187;</text>
+<text x="365" y="786" font-size="32" text-anchor="middle" fill="#1a1a1a">payment app</text>
+<text x="365" y="822" font-size="32" text-anchor="middle" fill="#1a1a1a">GET /health</text>
+<path d="M210 878 L222 866 L532 866 L520 878 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M520 878 L532 866 L532 1102 L520 1114 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="210" y="878" width="310" height="236" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="365" y="918" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="365" y="958" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">identity:3001</text>
+<rect x="228" y="978" width="274" height="120" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+<path d="M468 988 L484 988 L492 996 L492 1018 L468 1018 Z M484 988 L484 996 L492 996" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+<text x="365" y="1014" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;artifact&#187;</text>
+<text x="365" y="1052" font-size="32" text-anchor="middle" fill="#1a1a1a">identity app</text>
+<text x="365" y="1088" font-size="32" text-anchor="middle" fill="#1a1a1a">GET /health</text>
+<path d="M210 1144 L222 1132 L532 1132 L520 1144 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M520 1144 L532 1132 L532 1368 L520 1380 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="210" y="1144" width="310" height="236" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="365" y="1184" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="365" y="1224" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">listing:3002</text>
+<rect x="228" y="1244" width="274" height="120" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+<path d="M468 1254 L484 1254 L492 1262 L492 1284 L468 1284 Z M484 1254 L484 1262 L492 1262" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+<text x="365" y="1280" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;artifact&#187;</text>
+<text x="365" y="1318" font-size="32" text-anchor="middle" fill="#1a1a1a">listing app</text>
+<text x="365" y="1354" font-size="32" text-anchor="middle" fill="#1a1a1a">GET /health</text>
+<path d="M1112 612 L1124 600 L1434 600 L1422 612 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M1422 612 L1434 600 L1434 836 L1422 848 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="1112" y="612" width="310" height="236" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="1267" y="652" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="1267" y="692" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">booking:50051</text>
+<rect x="1130" y="712" width="274" height="120" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+<path d="M1370 722 L1386 722 L1394 730 L1394 752 L1370 752 Z M1386 722 L1386 730 L1394 730" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+<text x="1267" y="748" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;artifact&#187;</text>
+<text x="1267" y="786" font-size="32" text-anchor="middle" fill="#1a1a1a">booking app</text>
+<text x="1267" y="822" font-size="32" text-anchor="middle" fill="#1a1a1a">GET /health :3007</text>
+<path d="M1112 878 L1124 866 L1434 866 L1422 878 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M1422 878 L1434 866 L1434 1102 L1422 1114 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="1112" y="878" width="310" height="236" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="1267" y="918" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="1267" y="958" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">rental:3003</text>
+<rect x="1130" y="978" width="274" height="120" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+<path d="M1370 988 L1386 988 L1394 996 L1394 1018 L1370 1018 Z M1386 988 L1386 996 L1394 996" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+<text x="1267" y="1014" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;artifact&#187;</text>
+<text x="1267" y="1052" font-size="32" text-anchor="middle" fill="#1a1a1a">rental app</text>
+<text x="1267" y="1088" font-size="32" text-anchor="middle" fill="#1a1a1a">GET /health</text>
+<path d="M1112 1144 L1124 1132 L1434 1132 L1422 1144 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M1422 1144 L1434 1132 L1434 1368 L1422 1380 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="1112" y="1144" width="310" height="236" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="1267" y="1184" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="1267" y="1224" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">notification:3006</text>
+<rect x="1130" y="1244" width="274" height="120" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+<path d="M1370 1254 L1386 1254 L1394 1262 L1394 1284 L1370 1284 Z M1386 1254 L1386 1262 L1394 1262" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+<text x="1267" y="1280" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;artifact&#187;</text>
+<text x="1267" y="1318" font-size="32" text-anchor="middle" fill="#1a1a1a">notification app</text>
+<text x="1267" y="1354" font-size="32" text-anchor="middle" fill="#1a1a1a">GET /health</text>
+<path d="M1112 1410 L1124 1398 L1434 1398 L1422 1410 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M1422 1410 L1434 1398 L1434 1634 L1422 1646 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="1112" y="1410" width="310" height="236" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="1267" y="1450" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="1267" y="1490" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">review:3005</text>
+<rect x="1130" y="1510" width="274" height="120" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+<path d="M1370 1520 L1386 1520 L1394 1528 L1394 1550 L1370 1550 Z M1386 1520 L1386 1528 L1394 1528" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+<text x="1267" y="1546" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;artifact&#187;</text>
+<text x="1267" y="1584" font-size="32" text-anchor="middle" fill="#1a1a1a">review app</text>
+<text x="1267" y="1620" font-size="32" text-anchor="middle" fill="#1a1a1a">GET /health</text>
+<rect x="210" y="1466" width="310" height="130" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<rect x="479" y="1478" width="26" height="32" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+<rect x="472" y="1484" width="14" height="7" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+<rect x="472" y="1497" width="14" height="7" fill="#ffffff" stroke="#1a1a1a" stroke-width="2"/>
+<text x="365" y="1523" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;component&#187;</text>
+<text x="365" y="1563" font-size="34" text-anchor="middle" fill="#1a1a1a" font-weight="bold">Embedded DNS</text>
+<polyline points="695,400 62,400 62,1200 210,1200" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="210" y1="1200" x2="192.341" y2="1190.61" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="210" y1="1200" x2="192.341" y2="1209.39" stroke="#1a1a1a" stroke-width="2.5"/>
+<rect x="589.656" y="361" width="93.3438" height="38" fill="#ffffff"/>
+<text x="679" y="391" font-size="32" text-anchor="end" fill="#1a1a1a">REST</text>
+<polyline points="695,446 90,446 90,934 210,934" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="210" y1="934" x2="192.341" y2="924.611" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="210" y1="934" x2="192.341" y2="943.389" stroke="#1a1a1a" stroke-width="2.5"/>
+<rect x="589.656" y="407" width="93.3438" height="38" fill="#ffffff"/>
+<text x="679" y="437" font-size="32" text-anchor="end" fill="#1a1a1a">REST</text>
+<polyline points="695,492 118,492 118,668 210,668" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="210" y1="668" x2="192.341" y2="658.611" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="210" y1="668" x2="192.341" y2="677.389" stroke="#1a1a1a" stroke-width="2.5"/>
+<rect x="589.656" y="453" width="93.3438" height="38" fill="#ffffff"/>
+<text x="679" y="483" font-size="32" text-anchor="end" fill="#1a1a1a">REST</text>
+<polyline points="957,400 1530,400 1530,1466 1434,1466" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="1434" y1="1466" x2="1451.66" y2="1475.39" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="1434" y1="1466" x2="1451.66" y2="1456.61" stroke="#1a1a1a" stroke-width="2.5"/>
+<rect x="969" y="361" width="93.3438" height="38" fill="#ffffff"/>
+<text x="973" y="391" font-size="32" text-anchor="start" fill="#1a1a1a">REST</text>
+<polyline points="957,446 1506,446 1506,1200 1434,1200" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="1434" y1="1200" x2="1451.66" y2="1209.39" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="1434" y1="1200" x2="1451.66" y2="1190.61" stroke="#1a1a1a" stroke-width="2.5"/>
+<rect x="969" y="407" width="93.3438" height="38" fill="#ffffff"/>
+<text x="973" y="437" font-size="32" text-anchor="start" fill="#1a1a1a">REST</text>
+<polyline points="957,492 1482,492 1482,934 1434,934" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="1434" y1="934" x2="1451.66" y2="943.389" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="1434" y1="934" x2="1451.66" y2="924.611" stroke="#1a1a1a" stroke-width="2.5"/>
+<rect x="969" y="453" width="93.3438" height="38" fill="#ffffff"/>
+<text x="973" y="483" font-size="32" text-anchor="start" fill="#1a1a1a">REST</text>
+<polyline points="957,538 1458,538 1458,668 1434,668" fill="none" stroke="#1f5fbf" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="1434" y1="668" x2="1451.66" y2="677.389" stroke="#1f5fbf" stroke-width="2.5"/>
+<line x1="1434" y1="668" x2="1451.66" y2="658.611" stroke="#1f5fbf" stroke-width="2.5"/>
+<rect x="969" y="499" width="93.3594" height="38" fill="#ffffff"/>
+<text x="973" y="529" font-size="32" text-anchor="start" fill="#1f5fbf">gRPC</text>
+<path d="M695 650 L707 638 L957 638 L945 650 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M945 650 L957 638 L957 828 L945 840 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="695" y="650" width="250" height="190" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="820" y="690" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="820" y="730" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">postgres:5432</text>
+<text x="820" y="772" font-size="32" text-anchor="middle" fill="#1a1a1a">host 5432</text>
+<text x="820" y="810" font-size="32" text-anchor="middle" fill="#1a1a1a">(dev only)</text>
+<rect x="810" y="830" width="20" height="20" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<path d="M695 958 L707 946 L957 946 L945 958 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M945 958 L957 946 L957 1136 L945 1148 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="695" y="958" width="250" height="190" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="820" y="998" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="820" y="1038" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">rabbitmq:5672</text>
+<text x="820" y="1080" font-size="32" text-anchor="middle" fill="#1a1a1a">host 5672</text>
+<text x="820" y="1118" font-size="32" text-anchor="middle" fill="#1a1a1a">(dev only)</text>
+<rect x="810" y="1138" width="20" height="20" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<path d="M695 1290 L707 1278 L957 1278 L945 1290 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M945 1290 L957 1278 L957 1468 L945 1480 Z" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<rect x="695" y="1290" width="250" height="190" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<text x="820" y="1330" font-size="32" text-anchor="middle" fill="#1a1a1a">&#171;container&#187;</text>
+<text x="820" y="1370" font-size="32" text-anchor="middle" fill="#1a1a1a" font-weight="bold">mongo:27017</text>
+<text x="820" y="1412" font-size="32" text-anchor="middle" fill="#1a1a1a">host 27017</text>
+<text x="820" y="1450" font-size="32" text-anchor="middle" fill="#1a1a1a">(dev only)</text>
+<rect x="810" y="1470" width="20" height="20" fill="#ffffff" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="532,762 695,750" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="695" y1="750" x2="676.699" y2="741.932" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="695" y1="750" x2="678.078" y2="760.661" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="532,948 695,800" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="695" y1="800" x2="675.614" y2="804.919" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="695" y1="800" x2="688.238" y2="818.822" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="532,1018 695,1058" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="695" y1="1058" x2="680.088" y2="1044.67" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="695" y1="1058" x2="675.612" y2="1062.91" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="532,1194 695,828" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="695" y1="828" x2="679.238" y2="840.312" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="695" y1="828" x2="696.393" y2="847.951" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="532,1264 695,1118" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="695" y1="1118" x2="675.582" y2="1122.79" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="695" y1="1118" x2="688.111" y2="1136.78" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="1112,762 957,750" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="957" y1="750" x2="973.882" y2="760.724" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="957" y1="750" x2="975.331" y2="742.002" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="1112,822 957,1018" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="957" y1="1018" x2="975.319" y2="1009.97" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="957" y1="1018" x2="960.589" y2="998.325" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="1112,948 957,800" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="957" y1="800" x2="963.288" y2="818.986" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="957" y1="800" x2="976.256" y2="805.404" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="1112,1018 957,1078" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="957" y1="1078" x2="976.858" y2="1080.38" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="957" y1="1078" x2="970.079" y2="1062.87" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="957,1128 1112,1204" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="1112" y1="1204" x2="1100.28" y2="1187.8" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="1112" y1="1204" x2="1092.01" y2="1204.66" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="1112,1294 957,1370" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="957" y1="1370" x2="976.989" y2="1370.66" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="957" y1="1370" x2="968.722" y2="1353.8" stroke="#1a1a1a" stroke-width="2.5"/>
+<polyline points="1112,1510 957,1440" fill="none" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+<line x1="957" y1="1440" x2="969.229" y2="1455.83" stroke="#1a1a1a" stroke-width="2.5"/>
+<line x1="957" y1="1440" x2="976.958" y2="1438.71" stroke="#1a1a1a" stroke-width="2.5"/>
+<rect x="577.484" y="737" width="72.0312" height="38" fill="#ffffff"/>
+<text x="613.5" y="767" font-size="32" text-anchor="middle" fill="#1a1a1a">SQL</text>
+<rect x="548.144" y="881.64" width="72.0312" height="38" fill="#ffffff"/>
+<text x="584.16" y="911.64" font-size="32" text-anchor="middle" fill="#1a1a1a">SQL</text>
+<rect x="529.783" y="1011" width="102.234" height="38" fill="#ffffff"/>
+<text x="580.9" y="1041" font-size="32" text-anchor="middle" fill="#1a1a1a">AMQP</text>
+<rect x="597.044" y="948.08" width="72.0312" height="38" fill="#ffffff"/>
+<text x="633.06" y="978.08" font-size="32" text-anchor="middle" fill="#1a1a1a">SQL</text>
+<rect x="554.233" y="1179.3" width="102.234" height="38" fill="#ffffff"/>
+<text x="605.35" y="1209.3" font-size="32" text-anchor="middle" fill="#1a1a1a">AMQP</text>
+<rect x="998.484" y="737" width="72.0312" height="38" fill="#ffffff"/>
+<text x="1034.5" y="767" font-size="32" text-anchor="middle" fill="#1a1a1a">SQL</text>
+<rect x="964.783" y="924.52" width="102.234" height="38" fill="#ffffff"/>
+<text x="1015.9" y="954.52" font-size="32" text-anchor="middle" fill="#1a1a1a">AMQP</text>
+<rect x="959.734" y="818" width="72.0312" height="38" fill="#ffffff"/>
+<text x="995.75" y="848" font-size="32" text-anchor="middle" fill="#1a1a1a">SQL</text>
+<rect x="991.133" y="1026" width="102.234" height="38" fill="#ffffff"/>
+<text x="1042.25" y="1056" font-size="32" text-anchor="middle" fill="#1a1a1a">AMQP</text>
+<rect x="998.883" y="1154.6" width="102.234" height="38" fill="#ffffff"/>
+<text x="1050" y="1184.6" font-size="32" text-anchor="middle" fill="#1a1a1a">AMQP</text>
+<rect x="959.352" y="1313" width="150.297" height="38" fill="#ffffff"/>
+<text x="1034.5" y="1343" font-size="32" text-anchor="middle" fill="#1a1a1a">MongoDB</text>
+<rect x="959.352" y="1456" width="150.297" height="38" fill="#ffffff"/>
+<text x="1034.5" y="1486" font-size="32" text-anchor="middle" fill="#1a1a1a">MongoDB</text>
+<path d="M14 1760 L442 1760 L464 1782 L464 1952 L14 1952 Z M442 1760 L442 1782 L464 1782" fill="#ffffff" stroke="#555555" stroke-width="2" stroke-linejoin="round"/>
+<text x="32" y="1806" font-size="32" text-anchor="start" fill="#1a1a1a">1. Register: Compose adds</text>
+<text x="32" y="1846" font-size="32" text-anchor="start" fill="#1a1a1a">each container to DNS</text>
+<text x="32" y="1886" font-size="32" text-anchor="start" fill="#1a1a1a">under its service name when</text>
+<text x="32" y="1926" font-size="32" text-anchor="start" fill="#1a1a1a">it starts.</text>
+<path d="M490 1760 L1058 1760 L1080 1782 L1080 1912 L490 1912 Z M1058 1760 L1058 1782 L1080 1782" fill="#ffffff" stroke="#555555" stroke-width="2" stroke-linejoin="round"/>
+<text x="508" y="1806" font-size="32" text-anchor="start" fill="#1a1a1a">2. Resolve: the caller reads e.g.</text>
+<text x="508" y="1846" font-size="32" text-anchor="start" fill="#1a1a1a">LISTING_URL=http://listing:3002 and</text>
+<text x="508" y="1886" font-size="32" text-anchor="start" fill="#1a1a1a">asks DNS for 'listing'.</text>
+<path d="M1106 1760 L1564 1760 L1586 1782 L1586 1952 L1106 1952 Z M1564 1760 L1564 1782 L1586 1782" fill="#ffffff" stroke="#555555" stroke-width="2" stroke-linejoin="round"/>
+<text x="1124" y="1806" font-size="32" text-anchor="start" fill="#1a1a1a">3. Health: GET /health on each</text>
+<text x="1124" y="1846" font-size="32" text-anchor="start" fill="#1a1a1a">service; Compose health</text>
+<text x="1124" y="1886" font-size="32" text-anchor="start" fill="#1a1a1a">checks gate startup on</text>
+<text x="1124" y="1926" font-size="32" text-anchor="start" fill="#1a1a1a">postgres/mongo/rabbitmq.</text>
+<line x1="300" y1="1760" x2="300" y2="1596" stroke="#555555" stroke-width="2" stroke-dasharray="8 6"/>
+<line x1="640" y1="1760" x2="520" y2="1596" stroke="#555555" stroke-width="2" stroke-dasharray="8 6"/>
+<line x1="700" y1="1760" x2="532" y2="1350" stroke="#555555" stroke-width="2" stroke-dasharray="8 6"/>
+<line x1="1180" y1="1760" x2="765" y2="1480" stroke="#555555" stroke-width="2" stroke-dasharray="8 6"/>
+<line x1="1300" y1="1760" x2="1267" y2="1646" stroke="#555555" stroke-width="2" stroke-dasharray="8 6"/>
+<path d="M14 1982 L1564 1982 L1586 2004 L1586 2174 L14 2174 Z M1564 1982 L1564 2004 L1586 2004" fill="#ffffff" stroke="#555555" stroke-width="2" stroke-linejoin="round"/>
+<text x="32" y="2028" font-size="32" text-anchor="start" fill="#1a1a1a">Internal calls between services (paths not drawn):</text>
+<text x="32" y="2068" font-size="32" text-anchor="start" fill="#1a1a1a">listing &#8594; identity (REST), booking (gRPC), review (REST)</text>
+<text x="32" y="2108" font-size="32" text-anchor="start" fill="#1a1a1a">booking &#8594; identity, listing, payment, rental (REST)</text>
+<text x="32" y="2148" font-size="32" text-anchor="start" fill="#1a1a1a">rental &#8594; booking (gRPC), payment (REST);   review &#8594; rental (REST)</text>
+</svg>
