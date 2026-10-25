@@ -1,6 +1,8 @@
 # 2110521 Software Architecture — Course Reference
 
-> Transcribed from the course syllabus dated 3 Aug 2026 (5 pages).
+> Transcribed from the course syllabus dated 19 Oct 2026 (5 pages), which replaces the 3 Aug 2026
+> issue. The revision moved topics between weeks 11–14 and changed which lectures each quiz covers;
+> all dates stayed the same.
 >
 > The syllabus gives dates in the Thai Buddhist Era (B.E. 2569 = C.E. 2026). All dates below are
 > C.E. Text marked _(derived)_ is the transcriber's inference, not syllabus wording.
@@ -87,22 +89,22 @@ means it is submitted at the end of the class.
 | 2026-08-26 (Wed) | 4 | Project customer group (กลุ่มลูกค้าของ project), in class | Term project |
 | **2026-09-08 (Tue)** | 5 | **Microservice Design with Collaborations** | Term project 2% |
 | **2026-09-08 (Tue)** | 5 | **Project Proposal and ADR (draft)** | Term project 5% + 3% |
-| 2026-09-09 (Wed) | 6 | Quiz 2 (lecture from week 4) | Quiz |
+| 2026-09-09 (Wed) | 6 | Quiz 2 (lecture from week 5) | Quiz |
 | 2026-09-09 (Wed) | 6 | Assignment 1: develop service(s) from tutorial using REST, in class | Assignment |
 | 2026-09-16 (Wed) | 7 | Assignment 2: develop service(s) from tutorial using gRPC, in class | Assignment |
 | **2026-09-29 (Tue)** | 8 | **Project progress 1** (video) | Term project 5% |
-| 2026-10-07 (Wed) | 10 | Quiz 3 (lectures from weeks 5–6) | Quiz |
+| 2026-10-07 (Wed) | 10 | Quiz 3 (lectures from weeks 6–7) | Quiz |
 | 2026-10-07 (Wed) | 10 | Assignment 3: develop service(s) using message broker, in class | Assignment |
 | **2026-10-13 (Tue)** | 10 | **Project progress 2** (video) | Term project 5% |
-| 2026-10-14 (Wed) | 11 | Quiz 4 (lecture from week 7) | Quiz |
+| 2026-10-14 (Wed) | 11 | Quiz 4 (lecture from week 10) | Quiz |
 | 2026-10-14 (Wed) | 11 | Assignment 4: develop an API gateway service, end of class | Assignment |
-| 2026-10-21 (Wed) | 12 | Quiz 5 (lecture from week 10) | Quiz |
-| 2026-10-21 (Wed) | 12 | Assignment 5: develop load testing, end of class | Assignment |
+| 2026-10-21 (Wed) | 12 | Quiz 5 (lecture from week 11) | Quiz |
+| 2026-10-21 (Wed) | 12 | Assignment 5: GenAI for ADR generation, end of class | Assignment |
 | **2026-10-27 (Tue)** | 12 | **Project progress 3** (video) | Term project 5% |
-| 2026-10-28 (Wed) | 13 | Quiz 6 (lecture from week 13) | Quiz |
-| 2026-10-28 (Wed) | 13 | Assignment 6: GenAI for ADR generation, end of class | Assignment |
-| 2026-11-04 (Wed) | 14 | Quiz 7 (lecture from week 14) | Quiz |
-| 2026-11-04 (Wed) | 14 | Assignment 7: deployment topologies and trade-offs of AI-enabled systems, end of class | Assignment |
+| 2026-10-28 (Wed) | 13 | Quiz 6 (lecture from week 12) | Quiz |
+| 2026-10-28 (Wed) | 13 | Assignment 6: deployment topologies and trade-offs of AI-enabled systems, end of class | Assignment |
+| 2026-11-04 (Wed) | 14 | Quiz 7 (lecture from week 13) | Quiz |
+| 2026-11-04 (Wed) | 14 | Assignment 7: develop load testing, end of class | Assignment |
 | **2026-11-11 (Wed)** | 15 | **Project presentation and live demo** (final work product, demo, documentation) | Term project 15% + 5% + 5% |
 | **2026-11-22 (Sun)** | 16 | **Final exam**, held on Sunday for all sections together | Final 25% |
 
@@ -132,10 +134,10 @@ Instructor initials are in brackets.
 | 8 | 09-23 / 09-27 | _No class: midterm exam week_ | Project progress 1, due 09-29 / 10-03 |
 | 9 | 09-30 / 10-04 | _No class: graduation ceremony_ | — |
 | 10 | 10-07 / 10-11 | Interprocess Communication (Asynchronous) (DW); Service Discovery; Brokerless vs Broker-based; Implementing message broker (DW); Tutorial 3: Implementing message broker (DW) | Quiz 3; Assignment 3 (message broker, in class); project progress 2, due 10-13 / 10-17 |
-| 11 | 10-14 / 10-18 | Implementing queries (WWW); API composition pattern; External API Pattern (WWW); Implementing an API gateway; Tutorial 4: API Gateway (WWW) | Quiz 4; Assignment 4 (API gateway, end of class) |
-| 12 | 10-21 / 10-25 | Deploying Microservices (PKV); Service Mesh; Testing Microservice (PKV); Tutorial 5: Testing Microservice (PKV) | Quiz 5; Assignment 5 (load testing, end of class); project progress 3, due 10-27 / 10-31 |
-| 13 | 10-28 / 11-01 | AI for Software Architecture (AI4SA) (CR): GenAI to generate ADR; automated architectural reconstruction & reverse engineering; GenAI for system design. Tutorial 6: GenAI for ADR generation | Quiz 6; Assignment 6 (GenAI for ADR, end of class) |
-| 14 | 11-04 / 11-08 | Software Architecture of AI-enabled System (CR): deployment topologies & trade-offs of AI-enabled systems; LLM orchestration & RAG patterns; architecture for telemetry & silent failures. Tutorial 7: implement a simple AI-system architecture pattern | Quiz 7; Assignment 7 (end of class) |
+| 11 | 10-14 / 10-18 | API composition pattern; External API Pattern (WWW); Implementing an API gateway; Tutorial 4: API Gateway (WWW) | Quiz 4; Assignment 4 (API gateway, end of class) |
+| 12 | 10-21 / 10-25 | AI for Software Architecture (AI4SA) (CR): GenAI to generate ADR; automated architectural reconstruction & reverse engineering; GenAI for system design. Tutorial 5: GenAI for ADR generation | Quiz 5; Assignment 5 (GenAI for ADR, end of class); project progress 3, due 10-27 / 10-31 |
+| 13 | 10-28 / 11-01 | Software Architecture of AI-enabled System (CR): deployment topologies & trade-offs of AI-enabled systems; LLM orchestration & RAG patterns; architecture for telemetry & silent failures. Tutorial 7: implement a simple AI-system architecture pattern | Quiz 6; Assignment 6 (AI deployment topologies, end of class) |
+| 14 | 11-04 / 11-08 | Implementing queries (PKV); Deploying Microservices (PKV); Testing Microservice (PKV); Tutorial 6: Testing Microservice (PKV) | Quiz 7; Assignment 7 (load testing, end of class) |
 | 15 | 11-11 / 11-15 | **Project Presentation** | — |
 | 16 | 11-22 (Sun) | **Final exam** (all sections, Sunday) | — |
 
@@ -193,11 +195,11 @@ the week whose lecture covers each topic _(derived)_.
 | An **API gateway** service | W11 | |
 | **Service discovery**: describe how it is managed | W10 | Must be explained in the presentation. |
 | At least 2 database types: **one RDBMS and one NoSQL** | W5 (Selecting Service Database) | |
-| **Load test**: at least **2 types**, with the results explained and interpreted | W12 | The minimum requirements ask for at least 2 types. The presentation guidelines give no count. Do 2. |
+| **Load test**: at least **2 types**, with the results explained and interpreted | W14 | The minimum requirements ask for at least 2 types. The presentation guidelines give no count. Do 2. |
 | **Risk matrix**: at least 3 issues, explained | — | The count comes from the presentation guidelines. |
 | **1 measurable quality attribute**, demonstrated and measured | — | Minimum-requirements examples: Scalability, Reusability, Maintainability, Security. Presentation-guidelines examples: Scalability, Resilience, Performance, Observability. Scalability appears in both lists. |
 | **C4 model**, all four levels (Context, Container, Component, Code), plus sequence diagram(s) | — | In the final slides. |
-| ADRs | W5 | Graded with the proposal (3%). Week 13 covers using GenAI to generate ADRs. |
+| ADRs | W5 | Graded with the proposal (3%). Week 12 covers using GenAI to generate ADRs. |
 | Git contribution from every member | — | Counted in progress 1–3. |
 
 ### Deliverable formats
@@ -224,10 +226,10 @@ can add.
 | 6 | REST | REST service(s) |
 | 7 | gRPC | gRPC service(s) |
 | 10 | Async IPC, service discovery, broker vs brokerless, message broker | Message-broker service(s), a description of service discovery |
-| 11 | Queries, API composition, external API, API gateway | API gateway, query and composition patterns |
-| 12 | Deployment, service mesh, microservice testing | Deployment view, load tests (at least 2 types) |
-| 13 | AI for software architecture | GenAI-assisted ADRs, architecture reconstruction |
-| 14 | Architecture of AI-enabled systems | Optional. The minimum requirements do not include an AI component. |
+| 11 | API composition, external API, API gateway | API gateway, composition patterns |
+| 12 | AI for software architecture | GenAI-assisted ADRs, architecture reconstruction |
+| 13 | Architecture of AI-enabled systems | Optional. The minimum requirements do not include an AI component. |
+| 14 | Queries, deployment, microservice testing | Query patterns, deployment view, load tests (at least 2 types) |
 
 ## Textbooks
 
@@ -248,7 +250,8 @@ Further reading:
 - The two requirement lists differ on the number of load-test types, the risk-matrix count, and the
   example quality attributes. The merged checklist above resolves each difference toward the
   stricter reading.
-- Quiz 1 (week 4) covers "Lecture from week 2", but week 2 was a holiday. Quiz 6 (week 13) covers
-  "Lecture from week 13", its own week. Both are transcribed as written.
+- Quiz 1 (week 4) covers "Lecture from week 2", but week 2 was a holiday. Transcribed as written.
+- Tutorials are numbered out of order: week 13 has Tutorial 7 and week 14 has Tutorial 6.
+  Transcribed as written.
 - "at lease" appears in the source and means "at least".
 - The syllabus does not state a team size for the term project.
