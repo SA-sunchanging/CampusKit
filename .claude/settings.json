@@ -12,6 +12,19 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Read|Edit|Write|mcp__claude_ai_Google_Docs__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/inject-doc-standards.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   }
 }
