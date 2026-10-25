@@ -1,56 +1,20 @@
 # Architecture Decision Records
 
-This folder holds CampusKit's architecture decision records (ADRs), one decision per file. This page describes the conventions only.
+This folder holds CampusKit's architecture decision records (ADRs), one decision per file. The
+format, numbering rules, quality checklist, and template are in `docs/standards/adr.md`.
 
-## Structure
+## Index
 
-Every ADR follows the Nygard structure:
-
-- **Status** — `Proposed`, `Accepted`, `Deprecated`, or `Superseded by <file path>`.
-- **Context** — the forces, constraints, and trade-offs behind the decision. Alternatives considered are described here, not in a separate section.
-- **Decision** — the selected approach, stated plainly.
-- **Consequences** — what becomes easier or harder, and the work and tests the decision requires.
-
-In each file the H1 is `# ADR-NNN: <Title>`, followed by `## Status`, `## Context`, `## Decision`, and `## Consequences`.
-
-## File naming
-
-Name files `adr-NNN-kebab-title.md`, where `NNN` is the next unused three-digit number (for example, `adr-008-some-new-decision.md`).
-
-## Numbers are permanent
-
-ADR numbers are never reused, renumbered, or deleted. To change a decision, write a new ADR and set the old ADR's status to `Superseded by <file path>`, giving the new file's repo-relative path. The new ADR may state `Supersedes <file path>` in its Context.
-
-When an ADR mentions another decision, refer to it by its repo-relative file path, not by its number.
-
-**Exception: revisions in a submitted document.** The team writes and submits ADRs in Google Docs, exported as PDFs to `docs/reference/sources/`. If a submitted document revises an ADR under its existing number, mirror that revision in place here so the numbers match what was submitted, and say in the ADR's Context that it was revised in place. Outside that case, the supersede rule above applies.
-
-## Source of truth
-
-The submitted Google Docs (exported as PDFs) are always newer than the files in this folder, which may lag behind. When the two disagree, follow the PDF or ask the user which is current, then update the file here to match.
-
-## Adding ADRs
+| File | Status |
+| --- | --- |
+| `docs/adr/adr-001-decompose-by-business-capability.md` | Accepted |
+| `docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md` | Accepted |
+| `docs/adr/adr-003-prevent-overlapping-reservations-with-database-constraints.md` | Accepted |
+| `docs/adr/adr-004-database-per-service.md` | Accepted |
+| `docs/adr/adr-005-orchestrate-workflows-with-idempotent-recovery.md` | Accepted |
+| `docs/adr/adr-006-isolate-payment-integration-behind-adapter.md` | Accepted |
+| `docs/adr/adr-007-frontend-framework.md` | Accepted |
+| `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md` | Accepted |
+| `docs/adr/adr-009-backend-framework.md` | Proposed |
 
 New ADRs are added as course topics introduce new decisions.
-
-## Template
-
-```markdown
-# ADR-NNN: <Title>
-
-## Status
-
-Proposed.
-
-## Context
-
-<The forces and constraints. The alternatives considered and their trade-offs.>
-
-## Decision
-
-<The selected approach.>
-
-## Consequences
-
-<What becomes easier or harder. The work and tests this decision requires.>
-```
