@@ -1,4 +1,4 @@
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { QueryFailedError, type Repository } from 'typeorm';
 import type { PasswordHasher } from '../passwords/password-hasher.js';
 import type { Account } from './account.entity.js';
@@ -108,5 +108,28 @@ describe('AccountsService.findByEmail', () => {
     const { repo, service } = setup();
     await service.findByEmail(' A@X.com');
     expect(repo.findOneBy).toHaveBeenCalledWith({ email: 'a@x.com' });
+  });
+});
+
+describe('AccountsService.getProfile', () => {
+  it('returns the profile with emailVerified and studentStatus', async () => {
+    const { repo, service } = setup();
+    repo.findOneBy.mockResolvedValue(
+      savedAccount({
+        emailVerifiedAt: new Date(),
+        studentStatus: 'VERIFIED',
+      }),
+    );
+    await expect(service.getProfile('a1')).resolves.toMatchObject({
+      id: 'a1',
+      emailVerified: true,
+      studentStatus: 'VERIFIED',
+    });
+    expect(repo.findOneBy).toHaveBeenCalledWith({ id: 'a1' });
+  });
+
+  it('fails with 404 when the account no longer exists', async () => {
+    const { service } = setup();
+    await expect(service.getProfile('gone')).rejects.toThrow(NotFoundException);
   });
 });

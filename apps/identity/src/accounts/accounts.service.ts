@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { PasswordHasher } from '../passwords/password-hasher.js';
@@ -50,5 +54,13 @@ export class AccountsService {
 
   findByEmail(email: string): Promise<Account | null> {
     return this.accounts.findOneBy({ email: normalizeEmail(email) });
+  }
+
+  async getProfile(id: string): Promise<Profile> {
+    const account = await this.accounts.findOneBy({ id });
+    if (!account) {
+      throw new NotFoundException('Account not found');
+    }
+    return toProfile(account);
   }
 }
