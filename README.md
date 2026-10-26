@@ -66,6 +66,38 @@ node scripts/dev-token.mjs <userId> student
 curl -H "Authorization: Bearer <token>" http://localhost:3000/api/listing/listings
 ```
 
+## Web app: routes and login
+
+The web app uses `react-router` (`createBrowserRouter`). Each feature owns its routes in
+`web/src/features/<name>/routes.tsx`, and `web/src/app/router.tsx` only combines them, so add a
+page in your own folder:
+
+```tsx
+// web/src/features/booking/routes.tsx
+export const bookingRoutes: RouteObject[] = [
+  {
+    path: 'bookings/:id',
+    element: (
+      <RequireAuth role="student">
+        <BookingDetailPage />
+      </RequireAuth>
+    ),
+  },
+];
+```
+
+- Leave out `RequireAuth` for a public page. `<RequireAuth>` with no `role` admits any logged-in
+  user; `role="student"` or `role="admin"` admits only that role. A guest goes to `/login` and comes
+  back after logging in; a user with the wrong role goes to `/`.
+- The menu for each role (guest, student, admin) is in `web/src/app/nav.ts`; add your link there.
+- Call the gateway with `api()` from `web/src/api/client.ts`. It adds the token, turns the
+  `{ error: { code, message } }` shape into an `Error`, and on a 401 deletes the token and sends the
+  user to `/login`.
+- Read the user with `useAuth()` from `web/src/auth/useAuth.ts`: `user` is `{ id, role }` or `null`.
+  The token lives in `localStorage` under `campuskit.token`; only `web/src/auth/token.ts` touches it.
+- The guard and the menu only shape the UI. Every service still checks the token and the role.
+- Tests are Vitest on pure functions (`*.spec.ts` next to the file); there is no DOM test setup yet.
+
 ## Checks before pushing
 
 `npm install` sets up Git hooks: staged files are linted and formatted on commit, commit messages
@@ -78,7 +110,7 @@ npm run lint
 npm run format:check
 npm test
 npm run build:all
-(cd web && npm run lint && npm run build)
+(cd web && npm run lint && npm test && npm run build)
 ```
 
 ## Ports
