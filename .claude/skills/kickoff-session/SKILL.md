@@ -1,25 +1,29 @@
 ---
 name: kickoff-session
-description: Hand a plan agreed in this conversation to a new session (cloud session, or a copyable prompt when local), with an instruction to ask the user about every decision through AskUserQuestion.
+description: Hand a plan agreed in this conversation to a new session (a copyable prompt, or a cloud session if the user chooses), with an instruction to ask the user about every decision through AskUserQuestion.
 argument-hint: "<session topic, for example identity: register/login>"
 disable-model-invocation: true
 ---
 
-Start a new cloud session for $ARGUMENTS, using the plan agreed earlier in this conversation. If
+Hand off $ARGUMENTS to a new session, using the plan agreed earlier in this conversation. If
 no plan was agreed, run the same steps as `/plan-item` first and get the user's approval.
 
 Reply in the language the user writes in.
 
 1. Check whether `create_session` (claude-code-remote MCP) is available; search for it with
-   ToolSearch if needed. It exists only in cloud sessions.
-2. Cloud: get the repository URL with `git remote get-url origin`, then call `create_session`
-   with `source_url` set to that URL, a short title, the model the user asks for (default: this
-   session's model), the prompt from step 3, and no `plan` permission mode. Effort cannot be
-   set; say so if asked.
-   Local (no `create_session`): write no file. Print the prompt from step 3 as one fenced code
-   block with nothing else inside it, so the user can copy it. Tell the user to open a new
-   Claude Code session in the repository, set the model and effort there if they want, and
-   paste it.
+   ToolSearch if needed. It can be available in local sessions too, so its presence does not
+   mean the user wants a cloud session.
+2. Never start a cloud session without asking. Ask with AskUserQuestion how to hand off:
+   - "Copy prompt (Recommended)": starts nothing and uses no extra quota.
+   - "Open a cloud session": offer it only when `create_session` is available, and say it uses
+     the account's usage quota.
+   Copy prompt: write no file. Print the prompt from step 3 as one fenced code block with
+   nothing else inside it, so the user can copy it. Tell the user to open a new Claude Code
+   session in the repository, set the model and effort there if they want, and paste it.
+   Cloud session: get the repository URL with `git remote get-url origin`, then call
+   `create_session` with `source_url` set to that URL, a short title, the model the user asks
+   for (default: this session's model), the prompt from step 3, and no `plan` permission mode.
+   Effort cannot be set; say so if asked.
 3. Write the prompt in English so it stays self-contained. Include:
    - Read AGENTS.md first and follow it.
    - Reply to the user in the language they write in; code, comments, and commits in English,
