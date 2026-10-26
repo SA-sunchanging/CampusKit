@@ -1,6 +1,6 @@
 ---
 name: kickoff-session
-description: Start a new cloud session that implements a plan agreed in this conversation, with an instruction to ask the user about every decision through AskUserQuestion.
+description: Hand a plan agreed in this conversation to a new session (cloud session, or a copyable prompt when local), with an instruction to ask the user about every decision through AskUserQuestion.
 argument-hint: "<session topic, for example identity: register/login>"
 disable-model-invocation: true
 ---
@@ -10,10 +10,16 @@ no plan was agreed, run the same steps as `/plan-item` first and get the user's 
 
 Reply in the language the user writes in.
 
-1. Get the repository URL with `git remote get-url origin`.
-2. Call `create_session` (claude-code-remote MCP; load it with ToolSearch if needed) with
-   `source_url` set to that URL, a short title, the model the user asks for (default: this
-   session's model), and no `plan` permission mode. Effort cannot be set; say so if asked.
+1. Check whether `create_session` (claude-code-remote MCP) is available; search for it with
+   ToolSearch if needed. It exists only in cloud sessions.
+2. Cloud: get the repository URL with `git remote get-url origin`, then call `create_session`
+   with `source_url` set to that URL, a short title, the model the user asks for (default: this
+   session's model), the prompt from step 3, and no `plan` permission mode. Effort cannot be
+   set; say so if asked.
+   Local (no `create_session`): write no file. Print the prompt from step 3 as one fenced code
+   block with nothing else inside it, so the user can copy it. Tell the user to open a new
+   Claude Code session in the repository, set the model and effort there if they want, and
+   paste it.
 3. Write the prompt in English so it stays self-contained. Include:
    - Read AGENTS.md first and follow it.
    - Reply to the user in the language they write in; code, comments, and commits in English,
@@ -32,4 +38,5 @@ Reply in the language the user writes in.
    - Ask which git name and email to commit as before the first commit.
    - Do not read `archived/` or the PDFs; report doc-standard violations in one line only.
    - Finish with a summary of what was done and tested, and what the next session should do.
-4. Tell the user the session title and ID, and what the prompt instructs.
+4. Cloud: tell the user the session title and ID. In both cases, say in a few lines what the
+   prompt instructs.
