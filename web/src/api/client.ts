@@ -1,13 +1,8 @@
+import { expireSession, getToken } from '../auth/token.ts';
+
 // Every call goes to the API gateway under /api. Services are never called directly.
-const TOKEN_KEY = 'campuskit.token';
-
-export function setToken(token: string | null): void {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
-}
-
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = getToken();
   const res = await fetch(`/api${path}`, {
     ...init,
     headers: {
@@ -16,6 +11,9 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       ...init.headers,
     },
   });
+  // A 401 on a call that sent a token means the token is expired or revoked.
+  // Without a token (for example a failed login) there is nothing to forget.
+  if (res.status === 401 && token) expireSession();
   const body = res.status === 204 ? undefined : await res.json();
   if (!res.ok) {
     // Services answer errors as { error: { code, message } }.
