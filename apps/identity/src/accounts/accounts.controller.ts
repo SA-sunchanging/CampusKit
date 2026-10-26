@@ -1,5 +1,14 @@
-import { Controller, Get, NotImplementedException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotImplementedException,
+  Post,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { AccountsService } from './accounts.service.js';
+import { RegisterDto } from './dto/register.dto.js';
+import type { Profile } from './profile.js';
 
 /**
  * REST endpoints of the identity service, reached through the gateway at /api/identity/accounts.
@@ -8,6 +17,13 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('accounts')
 @Controller('accounts')
 export class AccountsController {
+  constructor(private readonly accounts: AccountsService) {}
+
+  @Post()
+  register(@Body() dto: RegisterDto): Promise<Profile> {
+    return this.accounts.register(dto);
+  }
+
   @Get()
   list(): never {
     throw new NotImplementedException();
