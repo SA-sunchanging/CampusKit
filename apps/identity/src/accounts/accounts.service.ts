@@ -47,4 +47,8 @@ export class AccountsService {
       throw err;
     }
   }
+
+  findByEmail(email: string): Promise<Account | null> {
+    return this.accounts.findOneBy({ email: normalizeEmail(email) });
+  }
 }
