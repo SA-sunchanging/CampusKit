@@ -66,6 +66,14 @@ export function setToken(token: string | null): void {
   changeListeners.forEach((listener) => listener());
 }
 
+/** Stores a token from a login response; throws when the token is unusable. */
+export function storeToken(token: string): Session {
+  const session = decodeToken(token);
+  if (!session) throw new Error('The server returned an unusable token.');
+  setToken(token);
+  return session;
+}
+
 /** Calls the listener whenever the stored token changes. Returns an unsubscribe function. */
 export function subscribeToken(listener: () => void): () => void {
   changeListeners.add(listener);

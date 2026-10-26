@@ -6,6 +6,7 @@ import {
   getToken,
   onSessionExpired,
   setToken,
+  storeToken,
   subscribeToken,
   TOKEN_KEY,
 } from './token.ts';
@@ -69,6 +70,21 @@ describe('token storage', () => {
     expect(localStorage.getItem(TOKEN_KEY)).toBe('abc');
     expect(getToken()).toBe('abc');
     setToken(null);
+    expect(getToken()).toBeNull();
+  });
+
+  it('storeToken keeps a valid token and returns its session', () => {
+    const token = fakeToken({
+      sub: 'u1',
+      role: 'student',
+      exp: Date.now() / 1000 + 3600,
+    });
+    expect(storeToken(token).id).toBe('u1');
+    expect(getToken()).toBe(token);
+  });
+
+  it('storeToken rejects an unusable token and stores nothing', () => {
+    expect(() => storeToken('not-a-token')).toThrow('unusable token');
     expect(getToken()).toBeNull();
   });
 
