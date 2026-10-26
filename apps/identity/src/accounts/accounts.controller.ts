@@ -1,11 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  NotImplementedException,
-  Post,
-} from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { type AuthUser, CurrentUser, JwtAuthGuard } from '@app/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccountsService } from './accounts.service.js';
 import { RegisterDto } from './dto/register.dto.js';
 import type { Profile } from './profile.js';
@@ -24,8 +19,10 @@ export class AccountsController {
     return this.accounts.register(dto);
   }
 
-  @Get()
-  list(): never {
-    throw new NotImplementedException();
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  me(@CurrentUser() user: AuthUser): Promise<Profile> {
+    return this.accounts.getProfile(user.sub);
   }
 }
