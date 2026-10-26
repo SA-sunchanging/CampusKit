@@ -9,5 +9,6 @@ import { AccountsService } from './accounts.service.js';
   imports: [TypeOrmModule.forFeature([Account]), PasswordsModule],
   controllers: [AccountsController],
   providers: [AccountsService],
+  exports: [AccountsService],
 })
 export class AccountsModule {}

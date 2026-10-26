@@ -102,3 +102,11 @@ describe('AccountsService.register', () => {
     await expect(service.register(dto)).rejects.toBe(err);
   });
 });
+
+describe('AccountsService.findByEmail', () => {
+  it('looks up the normalized email', async () => {
+    const { repo, service } = setup();
+    await service.findByEmail(' A@X.com');
+    expect(repo.findOneBy).toHaveBeenCalledWith({ email: 'a@x.com' });
+  });
+});
