@@ -74,6 +74,14 @@ describe('AuthService.login', () => {
     expect(hasher.hash).toHaveBeenCalledTimes(1);
   });
 
+  it('tries the dummy hash again after it failed once', async () => {
+    const { hasher, service } = setup(null, false);
+    hasher.hash.mockRejectedValueOnce(new Error('out of memory'));
+    await expect(service.login(dto)).rejects.toThrow('out of memory');
+    await expect(service.login(dto)).rejects.toThrow(UnauthorizedException);
+    expect(hasher.hash).toHaveBeenCalledTimes(2);
+  });
+
   it('refuses a suspended account with the right password', async () => {
     const { jwt, service } = setup(makeAccount(new Date()), true);
     await expect(service.login(dto)).rejects.toThrow(ForbiddenException);

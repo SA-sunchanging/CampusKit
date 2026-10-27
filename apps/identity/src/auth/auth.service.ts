@@ -52,7 +52,13 @@ export class AuthService {
   }
 
   private getDummyHash(): Promise<string> {
-    this.dummyHash ??= this.hasher.hash('not-a-real-password');
+    // Forget a failed attempt, so one failure does not break every later unknown-email login.
+    this.dummyHash ??= this.hasher
+      .hash('not-a-real-password')
+      .catch((err: unknown) => {
+        this.dummyHash = undefined;
+        throw err;
+      });
     return this.dummyHash;
   }
 }
