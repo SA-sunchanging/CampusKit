@@ -12,9 +12,10 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     },
   });
   // A 401 on a call that sent a token means the token is expired or revoked.
-  // Without a token (for example a failed login) there is nothing to forget.
-  if (res.status === 401 && token) expireSession();
-  const body = res.status === 204 ? undefined : await res.json();
+  // Without a token (for example a failed login) there is nothing to forget, and a
+  // late 401 for a token that a new login has replaced must not end the new session.
+  if (res.status === 401 && token && getToken() === token) expireSession();
+  const body = res.status === 204 ? undefined : await readJson(res);
   if (!res.ok) {
     // Services answer errors as { error: { code, message } }.
     throw new Error(
@@ -22,4 +23,13 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     );
   }
   return body as T;
+}
+
+// A proxy in front of the gateway can answer with an HTML error page instead of JSON.
+async function readJson(res: Response) {
+  try {
+    return await res.json();
+  } catch {
+    return undefined;
+  }
 }

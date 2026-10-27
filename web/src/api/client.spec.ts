@@ -46,6 +46,29 @@ describe('api', () => {
     expect(expired).toHaveBeenCalledOnce();
   });
 
+  it('keeps a newer login when a late 401 arrives for the old token', async () => {
+    setToken('old');
+    const fetchMock = vi.fn(async () => {
+      setToken('new');
+      return Response.json({}, { status: 401 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(api('/identity/accounts/me')).rejects.toThrow();
+    expect(getToken()).toBe('new');
+  });
+
+  it('reports the status when the error body is not JSON', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () => new Response('<html>Bad Gateway</html>', { status: 502 }),
+      ),
+    );
+    await expect(api('/identity/accounts/me')).rejects.toThrow(
+      'Request failed with 502',
+    );
+  });
+
   it('does not report an expiry for a 401 without a token', async () => {
     const expired = vi.fn();
     const unsubscribe = onSessionExpired(expired);
