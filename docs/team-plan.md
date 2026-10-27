@@ -37,11 +37,11 @@ commits; Git contribution counts toward the progress grade.
 ### A: Platform and Identity
 
 **Core**
-- [ ] Identity: register and log in with email and password (hash passwords), issue the JWT, log out on the client.
-- [ ] Identity: internal eligibility and profile lookup for Listing and Booking (`canPublish`, `canBook`, payout profile).
-- [ ] Seed script with demo accounts: two verified students and one administrator.
-- [ ] Web shell: routing, login and register pages, token handling, mobile-width layout.
-- [ ] Gateway: keep routing and JWT checks working as services grow.
+- [x] Identity: register and log in with email and password (hash passwords), issue the JWT, log out on the client.
+- [x] Identity: internal eligibility and profile lookup for Listing and Booking (`canPublish`, `canBook`, payout profile).
+- [x] Seed script with demo accounts: two verified students and one administrator.
+- [x] Web shell: routing, login and register pages, token handling, mobile-width layout.
+- [x] Gateway: keep routing and JWT checks working as services grow.
 - [ ] Slides: service discovery (Compose DNS and environment configuration), C4 context and container views.
 
 **Should**
