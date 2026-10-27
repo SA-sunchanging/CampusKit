@@ -107,4 +107,20 @@ describe('token storage', () => {
     expect(getToken()).toBeNull();
     expect(listener).toHaveBeenCalledOnce();
   });
+
+  it('keeps the token in memory when storage is blocked', () => {
+    const blocked = () => {
+      throw new DOMException('The operation is insecure.', 'SecurityError');
+    };
+    vi.stubGlobal('localStorage', {
+      getItem: blocked,
+      setItem: blocked,
+      removeItem: blocked,
+    });
+    expect(getToken()).toBeNull();
+    setToken('abc');
+    expect(getToken()).toBe('abc');
+    setToken(null);
+    expect(getToken()).toBeNull();
+  });
 });

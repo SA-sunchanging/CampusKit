@@ -56,13 +56,26 @@ export function decodeToken(token: string, now = Date.now()): Session | null {
 const changeListeners = new Set<() => void>();
 const expiredListeners = new Set<() => void>();
 
+// Holds the token when the browser blocks localStorage (for example, site data turned off).
+// The login then lasts only until the page reloads, but the app keeps working.
+let memoryToken: string | null = null;
+
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return memoryToken;
+  }
 }
 
 export function setToken(token: string | null): void {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
+  memoryToken = token;
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    // Storage is blocked or full; memoryToken keeps the session for this page.
+  }
   changeListeners.forEach((listener) => listener());
 }
 
