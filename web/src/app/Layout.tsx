@@ -18,9 +18,11 @@ export default function Layout() {
     [navigate, location],
   );
 
-  function handleLogout() {
+  // Leave the page first: logging out on a guarded page would make its guard
+  // redirect to /login before the navigation to home commits.
+  async function handleLogout() {
+    await navigate('/', { replace: true });
     logout();
-    navigate('/', { replace: true });
   }
 
   return (
@@ -36,7 +38,7 @@ export default function Layout() {
             </NavLink>
           ))}
           {user && (
-            <button type="button" onClick={handleLogout}>
+            <button type="button" onClick={() => void handleLogout()}>
               Log out
             </button>
           )}
