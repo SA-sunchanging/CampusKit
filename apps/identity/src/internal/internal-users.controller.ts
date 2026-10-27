@@ -1,5 +1,5 @@
 import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AccountsService } from '../accounts/accounts.service.js';
 import { EligibilityResponse } from '../eligibility/eligibility.response.js';
 import { UserProfileResponse } from './user-profile.response.js';
@@ -14,6 +14,7 @@ export class InternalUsersController {
   constructor(private readonly accounts: AccountsService) {}
 
   @Get(':id/eligibility')
+  @ApiOkResponse({ type: EligibilityResponse })
   eligibility(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<EligibilityResponse> {
@@ -21,6 +22,7 @@ export class InternalUsersController {
   }
 
   @Get(':id/profile')
+  @ApiOkResponse({ type: UserProfileResponse })
   profile(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<UserProfileResponse> {

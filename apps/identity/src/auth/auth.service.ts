@@ -7,14 +7,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { AccountsService } from '../accounts/accounts.service.js';
 import { PasswordHasher } from '../passwords/password-hasher.js';
+import { AccessToken } from './access-token.js';
 import type { LoginDto } from './dto/login.dto.js';
-
-export interface AccessToken {
-  accessToken: string;
-  tokenType: 'Bearer';
-  /** Lifetime in seconds. */
-  expiresIn: number;
-}
 
 /** Token lifetime in seconds, from JWT_EXPIRES_IN. */
 export function tokenLifetime(env = process.env.JWT_EXPIRES_IN): number {
@@ -48,13 +42,13 @@ export class AuthService {
       throw new ForbiddenException('Account is suspended');
     }
     const claims: AuthUser = { sub: account.id, role: account.role };
-    return {
+    return Object.assign(new AccessToken(), {
       accessToken: await this.jwt.signAsync(claims, {
         expiresIn: this.expiresIn,
       }),
-      tokenType: 'Bearer',
+      tokenType: 'Bearer' as const,
       expiresIn: this.expiresIn,
-    };
+    });
   }
 
   private getDummyHash(): Promise<string> {

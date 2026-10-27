@@ -1,11 +1,16 @@
 import { type AuthUser, CurrentUser, JwtAuthGuard } from '@app/common';
 import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AccountsService } from './accounts.service.js';
 import { PayoutProfileDto } from './dto/payout-profile.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { PayoutProfile } from './payout-profile.js';
-import type { Profile } from './profile.js';
+import { Profile } from './profile.js';
 
 /**
  * REST endpoints of the identity service, reached through the gateway at /api/identity/accounts.
@@ -17,6 +22,7 @@ export class AccountsController {
   constructor(private readonly accounts: AccountsService) {}
 
   @Post()
+  @ApiCreatedResponse({ type: Profile })
   register(@Body() dto: RegisterDto): Promise<Profile> {
     return this.accounts.register(dto);
   }
@@ -24,6 +30,7 @@ export class AccountsController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({ type: Profile })
   me(@CurrentUser() user: AuthUser): Promise<Profile> {
     return this.accounts.getProfile(user.sub);
   }
