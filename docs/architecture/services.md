@@ -208,6 +208,8 @@ The gateway checks every request under `/api`, both the proxied REST services an
 3. **Identity headers.** Client headers that start with `x-user-`, `x-auth-`, or `x-role`, and `x-forwarded-user`, are removed. Services take the caller's identity only from the JWT.
 4. **Token.** Only these routes are public: `POST /api/identity/accounts` (register), `POST /api/identity/auth/login`, and `GET /api/<service>/health`. Public routes ignore the `Authorization` header. Every other route needs `Authorization: Bearer <JWT>`, signed with HS256 and carrying a UUID `sub`, a `role` of `student` or `admin`, and an `exp`. A missing token answers `401` with `Missing bearer token`; a wrong, expired, or forged token answers `401` with `Invalid token`.
 
+When a service is down or does not answer within 15 seconds, the gateway answers `502` with `The <service> service is unavailable`.
+
 The gateway forwards the `Authorization` header unchanged, and each service still checks the token and authorises the request (see `docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md`). The Booking routes do not yet send the token or the correlation ID to Booking as gRPC metadata.
 
 ## Service discovery and local deployment

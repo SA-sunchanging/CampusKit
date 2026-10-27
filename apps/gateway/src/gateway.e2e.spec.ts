@@ -50,7 +50,12 @@ beforeAll(async () => {
   app = await createHttpService(GatewayModule, 'gateway', {
     bodyParser: false,
   });
-  configureGateway(app, { identity: target, listing: target });
+  // Nothing listens on port 1, so payment stands in for a service that is down.
+  configureGateway(app, {
+    identity: target,
+    listing: target,
+    payment: 'http://127.0.0.1:1',
+  });
   await app.init();
 });
 
@@ -109,6 +114,21 @@ describe('gateway tokens', () => {
 
   it('protects the gateway-owned booking routes', async () => {
     await http().get('/api/booking/bookings/b1').expect(401);
+  });
+});
+
+describe('gateway proxy errors', () => {
+  it('answers 502 in the shared error shape when a service is down', async () => {
+    const res = await http()
+      .get('/api/payment/health')
+      .expect(502)
+      .expect('content-type', /json/);
+    expect(res.body).toEqual({
+      error: {
+        code: 'BAD_GATEWAY',
+        message: 'The payment service is unavailable',
+      },
+    });
   });
 });
 
