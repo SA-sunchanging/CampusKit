@@ -17,6 +17,37 @@ export interface AuthUser {
 
 export const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-only-secret';
 
+const ROLES: readonly string[] = ['student', 'admin'];
+
+/** The token in an `Authorization: Bearer <token>` header, or undefined when there is none. */
+export function bearerToken(header: string | undefined): string | undefined {
+  if (!header?.startsWith('Bearer ')) {
+    return undefined;
+  }
+  const token = header.slice('Bearer '.length).trim();
+  return token === '' ? undefined : token;
+}
+
+/**
+ * Verifies a CampusKit JWT and returns its claims. Accepts only HS256, so `alg: none` and
+ * tokens signed with another algorithm fail, and requires `sub` and a known `role`.
+ * Throws when the token is invalid, expired, or carries the wrong claims.
+ */
+export function verifyAccessToken(jwt: JwtService, token: string): AuthUser {
+  const claims = jwt.verify<Partial<AuthUser>>(token, {
+    algorithms: ['HS256'],
+  });
+  if (
+    typeof claims.sub !== 'string' ||
+    claims.sub === '' ||
+    typeof claims.role !== 'string' ||
+    !ROLES.includes(claims.role)
+  ) {
+    throw new Error('Token is missing required claims');
+  }
+  return { sub: claims.sub, role: claims.role };
+}
+
 /** Rejects requests without a valid JWT and puts the claims on request.user. */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -26,12 +57,12 @@ export class JwtAuthGuard implements CanActivate {
     const req = context
       .switchToHttp()
       .getRequest<Request & { user?: AuthUser }>();
-    const header = req.headers.authorization;
-    if (!header?.startsWith('Bearer ')) {
+    const token = bearerToken(req.headers.authorization);
+    if (!token) {
       throw new UnauthorizedException('Missing bearer token');
     }
     try {
-      req.user = this.jwt.verify<AuthUser>(header.slice('Bearer '.length));
+      req.user = verifyAccessToken(this.jwt, token);
     } catch {
       throw new UnauthorizedException('Invalid token');
     }
