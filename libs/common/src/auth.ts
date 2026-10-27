@@ -20,12 +20,12 @@ export const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-only-secret';
 
 const ROLES: readonly string[] = ['student', 'admin'];
 
-/** The token in an `Authorization: Bearer <token>` header, or undefined when there is none. */
+/**
+ * The token in an `Authorization: Bearer <token>` header, or undefined when there is none.
+ * The scheme name is case-insensitive (RFC 7235), so `bearer <token>` works too.
+ */
 export function bearerToken(header: string | undefined): string | undefined {
-  if (!header?.startsWith('Bearer ')) {
-    return undefined;
-  }
-  const token = header.slice('Bearer '.length).trim();
+  const token = /^bearer\s+(.*)$/is.exec(header ?? '')?.[1]?.trim();
   return token === '' ? undefined : token;
 }
 

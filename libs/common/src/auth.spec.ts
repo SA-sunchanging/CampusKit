@@ -20,6 +20,13 @@ describe('bearerToken', () => {
     expect(bearerToken('Bearer abc.def.ghi')).toBe('abc.def.ghi');
   });
 
+  it.each(['bearer abc.def.ghi', 'BEARER  abc.def.ghi '])(
+    'accepts the scheme in any case: %j',
+    (header) => {
+      expect(bearerToken(header)).toBe('abc.def.ghi');
+    },
+  );
+
   it.each([undefined, '', 'Basic dXNlcjpwYXNz', 'Bearer', 'Bearer ', 'abc'])(
     'returns undefined for %j',
     (header) => {
