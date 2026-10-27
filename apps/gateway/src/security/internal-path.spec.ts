@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import { isInternalPath, rejectInternalPath } from './proxy.js';
+import { isInternalPath, rejectInternalPath } from './internal-path.js';
 
 describe('isInternalPath', () => {
   it.each([
