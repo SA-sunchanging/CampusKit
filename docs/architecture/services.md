@@ -199,6 +199,17 @@ sequenceDiagram
 
 Identity, Listing, Booking, and Rental produce events. Duplicate delivery does not create a second inbox record. Malformed events go to a dead-letter queue; transient storage failures are requeued. Broker outages delay the inbox without reversing committed business state. Review and Payment publish no notification events in the current scope (see `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`).
 
+## Gateway rules
+
+The gateway checks every request under `/api`, both the proxied REST services and its own Booking routes, in this order:
+
+1. **Correlation ID.** The gateway keeps the caller's `x-correlation-id` when it is 1 to 128 characters of letters, digits, `.`, `_`, or `-`; otherwise it creates a UUID. It forwards the ID to the service and returns it in the response.
+2. **Internal paths.** Any path with an `internal` segment, in any case or percent-encoding, answers `404` and is never forwarded.
+3. **Identity headers.** Client headers that start with `x-user-`, `x-auth-`, or `x-role`, and `x-forwarded-user`, are removed. Services take the caller's identity only from the JWT.
+4. **Token.** Only these routes are public: `POST /api/identity/accounts` (register), `POST /api/identity/auth/login`, and `GET /api/<service>/health`. Public routes ignore the `Authorization` header. Every other route needs `Authorization: Bearer <JWT>`, signed with HS256 and carrying `sub` and a `role` of `student` or `admin`. A missing token answers `401` with `Missing bearer token`; a wrong, expired, or forged token answers `401` with `Invalid token`.
+
+The gateway forwards the `Authorization` header unchanged, and each service still checks the token and authorises the request (see `docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md`). The Booking routes do not yet send the token or the correlation ID to Booking as gRPC metadata.
+
 ## Service discovery and local deployment
 
 Docker Compose DNS resolves service names inside the Compose network. Services read endpoint addresses from environment configuration instead of hard-coding container IPs. The gateway translates client REST requests to Booking gRPC where needed; Listing and Rental also call Booking through gRPC.

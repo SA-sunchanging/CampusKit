@@ -41,6 +41,8 @@ docker compose up --build
 - Web app: http://localhost:8080
 - Gateway: http://localhost:3000 (Swagger at http://localhost:3000/docs)
 - Every service: `GET /api/<service>/health` through the gateway, for example `/api/listing/health`
+- Through the gateway only register, login, and health are public; every other `/api` route needs
+  `Authorization: Bearer <token>` (rules in `docs/architecture/services.md`)
 - RabbitMQ console: http://localhost:15672 (user `campuskit`, password `campuskit`)
 
 Unimplemented endpoints answer `501 Not Implemented`.
@@ -79,7 +81,7 @@ Other services default to `localhost` addresses, so start any service you call t
 terminal. For the web app: `cd web && npm install && npm run dev` (it forwards `/api` to the gateway on
 port 3000).
 
-To call a protected endpoint before login exists, make a token:
+To call a protected endpoint without logging in through the web app, make a token:
 
 ```sh
 node scripts/dev-token.mjs <userId> student
