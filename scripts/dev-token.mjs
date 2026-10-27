@@ -1,9 +1,10 @@
 // Mints a JWT for local testing before Identity's login works.
-// Usage: node scripts/dev-token.mjs <userId> [student|admin]
+// Usage: node scripts/dev-token.mjs [userId] [student|admin]
+// The user ID must be a UUID; it defaults to the first demo student from `npm run seed`.
 // The secret must match the services' JWT_SECRET (default: dev-only-secret).
 import { createHmac } from 'node:crypto';
 
-const [sub = 'dev-user', role = 'student'] = process.argv.slice(2);
+const [sub = '00000000-0000-4000-8000-000000000001', role = 'student'] = process.argv.slice(2);
 const secret = process.env.JWT_SECRET ?? 'dev-only-secret';
 
 const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');

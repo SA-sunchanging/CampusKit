@@ -14,15 +14,16 @@ interface Received {
 }
 
 const jwt = new JwtService({ secret: JWT_SECRET });
-const valid = jwt.sign({ sub: 'u1', role: 'student' });
+const userId = '00000000-0000-4000-8000-000000000001';
+const valid = jwt.sign({ sub: userId, role: 'student' }, { expiresIn: 60 });
 const encode = (value: object) =>
   Buffer.from(JSON.stringify(value)).toString('base64url');
 const fakes = {
   'another secret': new JwtService({ secret: 'not-the-secret' }).sign({
-    sub: 'u1',
+    sub: userId,
     role: 'admin',
   }),
-  'alg none': `${encode({ alg: 'none' })}.${encode({ sub: 'u1', role: 'admin' })}.`,
+  'alg none': `${encode({ alg: 'none' })}.${encode({ sub: userId, role: 'admin' })}.`,
   garbage: 'garbage',
 };
 

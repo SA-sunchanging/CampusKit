@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { isUUID } from 'class-validator';
 import type { Request } from 'express';
 
 /** Claims in a CampusKit JWT. Keep them minimal; ask the owning service for anything else. */
@@ -30,16 +31,18 @@ export function bearerToken(header: string | undefined): string | undefined {
 
 /**
  * Verifies a CampusKit JWT and returns its claims. Accepts only HS256, so `alg: none` and
- * tokens signed with another algorithm fail, and requires `sub` and a known `role`.
+ * tokens signed with another algorithm fail, and requires a UUID `sub`, a known `role`, and
+ * an `exp`, so a token cannot live forever and a bad user ID never reaches a database query.
  * Throws when the token is invalid, expired, or carries the wrong claims.
  */
 export function verifyAccessToken(jwt: JwtService, token: string): AuthUser {
-  const claims = jwt.verify<Partial<AuthUser>>(token, {
+  const claims = jwt.verify<Partial<AuthUser> & { exp?: unknown }>(token, {
     algorithms: ['HS256'],
   });
   if (
     typeof claims.sub !== 'string' ||
-    claims.sub === '' ||
+    !isUUID(claims.sub) ||
+    typeof claims.exp !== 'number' ||
     typeof claims.role !== 'string' ||
     !ROLES.includes(claims.role)
   ) {

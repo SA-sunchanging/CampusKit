@@ -8,7 +8,10 @@ import {
 } from './auth.js';
 
 const jwt = new JwtService({ secret: 'test-secret' });
-const student = { sub: 'u1', role: 'student' };
+const userId = '00000000-0000-4000-8000-000000000001';
+const student = { sub: userId, role: 'student' };
+const sign = (claims: object, service = jwt) =>
+  service.sign(claims, { expiresIn: 60 });
 const encode = (value: object) =>
   Buffer.from(JSON.stringify(value)).toString('base64url');
 
@@ -27,17 +30,17 @@ describe('bearerToken', () => {
 
 describe('verifyAccessToken', () => {
   it('returns only sub and role of a valid token', () => {
-    const token = jwt.sign({ ...student, extra: 'x' });
+    const token = sign({ ...student, extra: 'x' });
     expect(verifyAccessToken(jwt, token)).toEqual(student);
   });
 
   it('accepts an admin token', () => {
-    const token = jwt.sign({ sub: 'a1', role: 'admin' });
+    const token = sign({ sub: userId, role: 'admin' });
     expect(verifyAccessToken(jwt, token).role).toBe('admin');
   });
 
   it('rejects a token signed with another secret', () => {
-    const token = new JwtService({ secret: 'other' }).sign(student);
+    const token = sign(student, new JwtService({ secret: 'other' }));
     expect(() => verifyAccessToken(jwt, token)).toThrow();
   });
 
@@ -53,7 +56,7 @@ describe('verifyAccessToken', () => {
   });
 
   it('rejects a token signed with another algorithm', () => {
-    const token = jwt.sign(student, { algorithm: 'HS512' });
+    const token = jwt.sign(student, { algorithm: 'HS512', expiresIn: 60 });
     expect(() => verifyAccessToken(jwt, token)).toThrow();
   });
 
@@ -61,14 +64,20 @@ describe('verifyAccessToken', () => {
     expect(() => verifyAccessToken(jwt, 'not-a-token')).toThrow();
   });
 
+  it('rejects a token without exp, which would never expire', () => {
+    const token = jwt.sign(student);
+    expect(() => verifyAccessToken(jwt, token)).toThrow();
+  });
+
   it.each([
     { role: 'student' },
     { sub: '', role: 'student' },
     { sub: 42, role: 'student' },
-    { sub: 'u1' },
-    { sub: 'u1', role: 'owner' },
+    { sub: 'dev-user', role: 'student' },
+    { sub: userId },
+    { sub: userId, role: 'owner' },
   ])('rejects claims %j', (claims) => {
-    const token = jwt.sign(claims);
+    const token = sign(claims);
     expect(() => verifyAccessToken(jwt, token)).toThrow();
   });
 });
@@ -87,7 +96,7 @@ describe('JwtAuthGuard', () => {
   const guard = new JwtAuthGuard(jwt);
 
   it('puts the claims of a valid token on request.user', () => {
-    const { req, context } = contextWith(`Bearer ${jwt.sign(student)}`);
+    const { req, context } = contextWith(`Bearer ${sign(student)}`);
     expect(guard.canActivate(context)).toBe(true);
     expect(req.user).toEqual(student);
   });
@@ -103,7 +112,7 @@ describe('JwtAuthGuard', () => {
   );
 
   it('rejects a bad token as invalid', () => {
-    const forged = new JwtService({ secret: 'other' }).sign(student);
+    const forged = sign(student, new JwtService({ secret: 'other' }));
     const { context } = contextWith(`Bearer ${forged}`);
     expect(() => guard.canActivate(context)).toThrow(
       new UnauthorizedException('Invalid token'),

@@ -4,9 +4,10 @@ import type { NextFunction, Request, Response } from 'express';
 import { requireToken } from './require-token.js';
 
 const jwt = new JwtService({ secret: JWT_SECRET });
-const valid = jwt.sign({ sub: 'u1', role: 'student' });
+const userId = '00000000-0000-4000-8000-000000000001';
+const valid = jwt.sign({ sub: userId, role: 'student' }, { expiresIn: 60 });
 const forged = new JwtService({ secret: 'not-the-secret' }).sign({
-  sub: 'u1',
+  sub: userId,
   role: 'admin',
 });
 
@@ -73,7 +74,7 @@ describe('requireToken', () => {
 
   it('answers 401 Invalid token for an expired token', () => {
     const exp = Math.floor(Date.now() / 1000) - 10;
-    const expired = jwt.sign({ sub: 'u1', role: 'student', exp });
+    const expired = jwt.sign({ sub: userId, role: 'student', exp });
     expect401(
       run('GET', '/api/identity/accounts/me', `Bearer ${expired}`),
       'Invalid token',
