@@ -1,8 +1,10 @@
 import { type AuthUser, CurrentUser, JwtAuthGuard } from '@app/common';
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AccountsService } from './accounts.service.js';
+import { PayoutProfileDto } from './dto/payout-profile.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
+import { PayoutProfile } from './payout-profile.js';
 import type { Profile } from './profile.js';
 
 /**
@@ -24,5 +26,16 @@ export class AccountsController {
   @ApiBearerAuth()
   me(@CurrentUser() user: AuthUser): Promise<Profile> {
     return this.accounts.getProfile(user.sub);
+  }
+
+  @Put('me/payout-profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: PayoutProfile })
+  setPayoutProfile(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: PayoutProfileDto,
+  ): Promise<PayoutProfile> {
+    return this.accounts.setPayoutProfile(user.sub, dto);
   }
 }

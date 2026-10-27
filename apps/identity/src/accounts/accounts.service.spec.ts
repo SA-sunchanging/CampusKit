@@ -1,8 +1,13 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { QueryFailedError, type Repository } from 'typeorm';
 import type { PasswordHasher } from '../passwords/password-hasher.js';
 import type { Account } from './account.entity.js';
 import { AccountsService } from './accounts.service.js';
+import { checkEligibility } from '../eligibility/eligibility.js';
 
 const savedAccount = (fields: Partial<Account>): Account => ({
   id: 'a1',
@@ -191,6 +196,71 @@ describe('AccountsService.getUserProfile', () => {
   it('fails with 404 when the account does not exist', async () => {
     const { service } = setup();
     await expect(service.getUserProfile('gone')).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+});
+
+describe('AccountsService.setPayoutProfile', () => {
+  const dto = {
+    method: 'PROMPTPAY' as const,
+    promptPayId: '0812345678',
+    accountName: 'Somchai Jaidee',
+  };
+  const verified = {
+    emailVerifiedAt: new Date('2026-10-01T00:00:00Z'),
+    studentStatus: 'VERIFIED' as const,
+  };
+
+  it('saves the payout profile and returns it', async () => {
+    const { repo, service } = setup();
+    repo.findOneBy.mockResolvedValue(savedAccount({}));
+    await expect(service.setPayoutProfile('a1', dto)).resolves.toEqual(dto);
+    expect(repo.save).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'a1', payoutProfile: dto }),
+    );
+  });
+
+  it('makes a verified student eligible to publish', async () => {
+    const { repo, service } = setup();
+    repo.findOneBy.mockResolvedValue(savedAccount(verified));
+    expect(checkEligibility(savedAccount(verified)).canPublish).toBe(false);
+    await service.setPayoutProfile('a1', dto);
+    const [stored] = repo.save.mock.calls[0] as [Account];
+    expect(checkEligibility(stored)).toMatchObject({
+      canPublish: true,
+      reasons: [],
+    });
+  });
+
+  it('overwrites an existing profile, and the same body twice gives the same state', async () => {
+    const { repo, service } = setup();
+    const replacement = { ...dto, promptPayId: '1234567890123' };
+    repo.findOneBy.mockResolvedValue(savedAccount({ payoutProfile: dto }));
+    await service.setPayoutProfile('a1', replacement);
+    repo.findOneBy.mockResolvedValue(
+      savedAccount({ payoutProfile: replacement }),
+    );
+    await service.setPayoutProfile('a1', replacement);
+    const [first, second] = repo.save.mock.calls.map(
+      ([account]) => (account as Account).payoutProfile,
+    );
+    expect(first).toEqual(replacement);
+    expect(second).toEqual(first);
+  });
+
+  it('refuses an administrator with 403', async () => {
+    const { repo, service } = setup();
+    repo.findOneBy.mockResolvedValue(savedAccount({ role: 'admin' }));
+    await expect(service.setPayoutProfile('a1', dto)).rejects.toThrow(
+      ForbiddenException,
+    );
+    expect(repo.save).not.toHaveBeenCalled();
+  });
+
+  it('fails with 404 when the account does not exist', async () => {
+    const { service } = setup();
+    await expect(service.setPayoutProfile('gone', dto)).rejects.toThrow(
       NotFoundException,
     );
   });

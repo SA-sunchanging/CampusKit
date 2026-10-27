@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -7,11 +8,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { PasswordHasher } from '../passwords/password-hasher.js';
 import { Account } from './account.entity.js';
+import type { PayoutProfileDto } from './dto/payout-profile.dto.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import { checkEligibility } from '../eligibility/eligibility.js';
 import { EligibilityResponse } from '../eligibility/eligibility.response.js';
 import { UserProfileResponse } from '../internal/user-profile.response.js';
 import { normalizeEmail } from './email.js';
+import type { PayoutProfile } from './payout-profile.js';
 import { type Profile, toProfile } from './profile.js';
 
 const UNIQUE_VIOLATION = '23505';
@@ -80,5 +83,24 @@ export class AccountsService {
   /** Display name and payout destination for other services; asked by Listing. */
   async getUserProfile(id: string): Promise<UserProfileResponse> {
     return UserProfileResponse.of(await this.getAccount(id));
+  }
+
+  /** Replaces the payout profile; sending the same body again leaves the same state. Students only. */
+  async setPayoutProfile(
+    id: string,
+    dto: PayoutProfileDto,
+  ): Promise<PayoutProfile> {
+    const account = await this.getAccount(id);
+    if (account.role !== 'student') {
+      throw new ForbiddenException('Only students can set a payout profile');
+    }
+    const payoutProfile: PayoutProfile = {
+      method: dto.method,
+      promptPayId: dto.promptPayId,
+      accountName: dto.accountName,
+    };
+    account.payoutProfile = payoutProfile;
+    await this.accounts.save(account);
+    return payoutProfile;
   }
 }
