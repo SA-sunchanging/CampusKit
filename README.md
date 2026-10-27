@@ -45,6 +45,26 @@ docker compose up --build
 
 Unimplemented endpoints answer `501 Not Implemented`.
 
+### Demo accounts
+
+```sh
+npm run seed
+```
+
+This creates three accounts in Identity, all with the password `campuskit-demo`. The IDs are fixed,
+so they stay the same after `docker compose down -v`, and you can pass them to
+`scripts/dev-token.mjs`.
+
+| Email | Role | ID |
+| --- | --- | --- |
+| `somchai@student.chula.ac.th` | student, verified, with a payout profile | `00000000-0000-4000-8000-000000000001` |
+| `malee@student.chula.ac.th` | student, verified, with a payout profile | `00000000-0000-4000-8000-000000000002` |
+| `admin@campuskit.local` | admin | `00000000-0000-4000-8000-000000000003` |
+
+Both students can publish listings and request bookings. Running the seed again resets these
+accounts to this state. If one of these emails was registered by hand first, the seed stops and
+writes nothing; delete that account or run `docker compose down -v`, then seed again.
+
 ## Work on one service
 
 Run the databases and broker in Docker and your service on your machine, so it reloads on save:
