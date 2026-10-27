@@ -8,6 +8,21 @@ describe('returnTo', () => {
     );
   });
 
+  it('keeps the remembered hash', () => {
+    expect(returnTo({ from: { pathname: '/admin', hash: '#flags' } })).toBe(
+      '/admin#flags',
+    );
+  });
+
+  it.each([
+    '//evil.example/x',
+    '/\\evil.example',
+    'https://evil.example',
+    'bookings',
+  ])('goes home instead of leaving the app for %j', (pathname) => {
+    expect(returnTo({ from: { pathname } })).toBe('/');
+  });
+
   it('goes home when nothing was remembered', () => {
     expect(returnTo(null)).toBe('/');
     expect(returnTo({})).toBe('/');
