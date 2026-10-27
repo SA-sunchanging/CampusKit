@@ -133,3 +133,28 @@ describe('AccountsService.getProfile', () => {
     await expect(service.getProfile('gone')).rejects.toThrow(NotFoundException);
   });
 });
+
+describe('AccountsService.getEligibility', () => {
+  it('returns the eligibility of the stored account with its id', async () => {
+    const { repo, service } = setup();
+    repo.findOneBy.mockResolvedValue(savedAccount({}));
+    await expect(service.getEligibility('a1')).resolves.toEqual({
+      userId: 'a1',
+      canPublish: false,
+      canBook: false,
+      reasons: [
+        'EMAIL_NOT_VERIFIED',
+        'STUDENT_NOT_VERIFIED',
+        'PAYOUT_PROFILE_MISSING',
+      ],
+    });
+    expect(repo.findOneBy).toHaveBeenCalledWith({ id: 'a1' });
+  });
+
+  it('fails with 404 when the account does not exist', async () => {
+    const { service } = setup();
+    await expect(service.getEligibility('gone')).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+});

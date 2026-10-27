@@ -3,6 +3,7 @@ import { AccountsModule } from './accounts/accounts.module.js';
 import { HealthModule, postgresOptions } from '@app/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module.js';
+import { InternalUsersModule } from './internal/internal-users.module.js';
 import { migrations } from './migrations/index.js';
 
 @Module({
@@ -11,6 +12,7 @@ import { migrations } from './migrations/index.js';
     HealthModule.register('identity'),
     AccountsModule,
     AuthModule,
+    InternalUsersModule,
   ],
 })
 export class IdentityModule {}

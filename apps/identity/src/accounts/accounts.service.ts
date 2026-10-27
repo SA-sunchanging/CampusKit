@@ -8,6 +8,8 @@ import { QueryFailedError, Repository } from 'typeorm';
 import { PasswordHasher } from '../passwords/password-hasher.js';
 import { Account } from './account.entity.js';
 import type { RegisterDto } from './dto/register.dto.js';
+import { checkEligibility } from '../eligibility/eligibility.js';
+import { EligibilityResponse } from '../eligibility/eligibility.response.js';
 import { normalizeEmail } from './email.js';
 import { type Profile, toProfile } from './profile.js';
 
@@ -56,11 +58,21 @@ export class AccountsService {
     return this.accounts.findOneBy({ email: normalizeEmail(email) });
   }
 
-  async getProfile(id: string): Promise<Profile> {
+  async getAccount(id: string): Promise<Account> {
     const account = await this.accounts.findOneBy({ id });
     if (!account) {
       throw new NotFoundException('Account not found');
     }
-    return toProfile(account);
+    return account;
+  }
+
+  async getProfile(id: string): Promise<Profile> {
+    return toProfile(await this.getAccount(id));
+  }
+
+  /** Whether the account may publish a listing or request a booking; asked by Listing and Booking. */
+  async getEligibility(id: string): Promise<EligibilityResponse> {
+    const account = await this.getAccount(id);
+    return EligibilityResponse.of(account.id, checkEligibility(account));
   }
 }
