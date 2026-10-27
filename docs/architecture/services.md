@@ -228,4 +228,4 @@ These are a validation plan, not claimed test results.
 
 ## Open questions
 
-- **Internal service authentication is not specified.** `docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md` requires internal service credentials for service-to-service calls but does not choose a mechanism.
+- **Internal service authentication is not specified.** `docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md` requires internal service credentials for service-to-service calls but does not choose a mechanism. Until one is chosen, the gateway refuses every `/internal/` path from outside, but inside the Compose network internal endpoints accept calls without credentials.

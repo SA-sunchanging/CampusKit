@@ -133,6 +133,7 @@ wire their code. Names below are proposals; the owner finalizes them by the cont
 | Caller → owner | Interface | Kind |
 | --- | --- | --- |
 | Listing, Booking → Identity | `GET /internal/users/{id}/eligibility` | REST |
+| Listing → Identity | `GET /internal/users/{id}/profile` (display name and payout profile) | REST |
 | Listing → Booking | `SetupCalendar` | gRPC |
 | Listing → Review | `GET /internal/users/{id}/reputation` | REST |
 | Booking → Listing | `GET /internal/listings/{id}/quote?start=&end=` | REST |
@@ -161,7 +162,7 @@ Services find each other through environment variables such as `BOOKING_GRPC_URL
 | Money calls | Every Payment request carries an `operationId`; repeating it returns the first result. |
 | Events | The envelope in `libs/contracts/src/events.ts`; names are `<service>.<past-tense>`, for example `booking.confirmed`. |
 | Status values | The owning service defines them, for example Rental: `AWAITING_PICKUP`, `ACTIVE`, `SETTLEMENT_PENDING`, `CLOSED`. |
-| Web API types | No code generation for now: each member has few endpoints and setting up a pipeline costs more than it saves before the code freeze. Write each service's types and calls by hand in one file, `web/src/api/<service>.ts`, to match the service's Swagger page. Return response bodies as classes with `@ApiProperty`, not interfaces, so Swagger lists them; this keeps the option to generate types later with `openapi-typescript`. |
+| Web API types | No code generation for now: each member has few endpoints and setting up a pipeline costs more than it saves before the code freeze. Write each service's types and calls by hand in one file, `web/src/api/<service>.ts`, to match the service's Swagger page. Return response bodies as classes with `@ApiProperty`, not interfaces, and declare them on the handler with `@ApiOkResponse({ type })` (or `@ApiCreatedResponse`), so Swagger lists them. The `@nestjs/swagger` CLI plugin would infer these, but it does not run under the rspack builder; enabling it changes the shared build, so agree it as a team first. Classes also keep the option to generate types later with `openapi-typescript`. |
 
 ## Working without conflicts
 
