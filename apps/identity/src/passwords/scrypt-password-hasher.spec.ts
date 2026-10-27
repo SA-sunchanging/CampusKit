@@ -41,4 +41,15 @@ describe('ScryptPasswordHasher', () => {
   ])('returns false for an unreadable hash %j', async (stored) => {
     expect(await hasher.verify('pw', stored)).toBe(false);
   });
+
+  // A valid 64-byte key, so only the cost makes these unreadable.
+  const key = Buffer.alloc(64).toString('base64');
+  it.each([
+    ['N not a power of two', `scrypt$3$8$1$c2FsdA==$${key}`],
+    ['N too large for memory', `scrypt$${2 ** 30}$8$1$c2FsdA==$${key}`],
+    ['r of zero', `scrypt$1024$0$1$c2FsdA==$${key}`],
+    ['p too large', `scrypt$1024$8$99$c2FsdA==$${key}`],
+  ])('returns false instead of throwing for %s', async (_case, stored) => {
+    await expect(hasher.verify('pw', stored)).resolves.toBe(false);
+  });
 });

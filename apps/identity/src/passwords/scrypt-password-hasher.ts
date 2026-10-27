@@ -15,6 +15,25 @@ const PREFIX = 'scrypt';
 const KEY_LENGTH = 64;
 const SALT_LENGTH = 16;
 
+/**
+ * A cost read from a stored hash must be one scrypt accepts and one that cannot exhaust memory:
+ * N a power of two up to 2^20 (128 * N * r bytes stays under 1 GiB), r up to 8, p up to 16.
+ */
+function isUsableCost({ N, r, p }: ScryptCost): boolean {
+  return (
+    Number.isInteger(N) &&
+    N >= 2 &&
+    N <= 2 ** 20 &&
+    (N & (N - 1)) === 0 &&
+    Number.isInteger(r) &&
+    r >= 1 &&
+    r <= 8 &&
+    Number.isInteger(p) &&
+    p >= 1 &&
+    p <= 16
+  );
+}
+
 function derive(
   password: string,
   salt: Buffer,
@@ -58,7 +77,7 @@ export class ScryptPasswordHasher extends PasswordHasher {
     const [N, r, p] = parts.slice(1, 4).map(Number);
     const salt = Buffer.from(parts[4], 'base64');
     const expected = Buffer.from(parts[5], 'base64');
-    if (![N, r, p].every(Number.isInteger) || expected.length !== KEY_LENGTH) {
+    if (!isUsableCost({ N, r, p }) || expected.length !== KEY_LENGTH) {
       return false;
     }
     const actual = await derive(password, salt, { N, r, p });
