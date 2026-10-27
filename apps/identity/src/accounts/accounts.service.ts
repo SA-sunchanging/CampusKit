@@ -10,6 +10,7 @@ import { Account } from './account.entity.js';
 import type { RegisterDto } from './dto/register.dto.js';
 import { checkEligibility } from '../eligibility/eligibility.js';
 import { EligibilityResponse } from '../eligibility/eligibility.response.js';
+import { UserProfileResponse } from '../internal/user-profile.response.js';
 import { normalizeEmail } from './email.js';
 import { type Profile, toProfile } from './profile.js';
 
@@ -74,5 +75,10 @@ export class AccountsService {
   async getEligibility(id: string): Promise<EligibilityResponse> {
     const account = await this.getAccount(id);
     return EligibilityResponse.of(account.id, checkEligibility(account));
+  }
+
+  /** Display name and payout destination for other services; asked by Listing. */
+  async getUserProfile(id: string): Promise<UserProfileResponse> {
+    return UserProfileResponse.of(await this.getAccount(id));
   }
 }

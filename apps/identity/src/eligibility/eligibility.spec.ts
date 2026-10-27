@@ -6,7 +6,11 @@ const eligible = {
   suspendedAt: null,
   emailVerifiedAt: new Date('2026-10-01T00:00:00Z'),
   studentStatus: 'VERIFIED' as StudentStatus,
-  payoutProfile: { method: 'PROMPTPAY' },
+  payoutProfile: {
+    method: 'PROMPTPAY' as const,
+    promptPayId: '0812345678',
+    accountName: 'Somchai Jaidee',
+  },
 };
 
 describe('checkEligibility', () => {

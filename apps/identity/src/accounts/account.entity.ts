@@ -5,6 +5,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import type { PayoutProfile } from './payout-profile.js';
 
 export type Role = AuthUser['role'];
 
@@ -35,7 +36,7 @@ export class Account {
   studentStatus: StudentStatus;
 
   @Column('jsonb', { name: 'payout_profile', nullable: true })
-  payoutProfile: Record<string, unknown> | null;
+  payoutProfile: PayoutProfile | null;
 
   @Column('timestamptz', { name: 'suspended_at', nullable: true })
   suspendedAt: Date | null;

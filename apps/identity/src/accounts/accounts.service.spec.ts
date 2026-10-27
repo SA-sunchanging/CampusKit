@@ -158,3 +158,40 @@ describe('AccountsService.getEligibility', () => {
     );
   });
 });
+
+describe('AccountsService.getUserProfile', () => {
+  const payoutProfile = {
+    method: 'PROMPTPAY' as const,
+    promptPayId: '0812345678',
+    accountName: 'Somchai Jaidee',
+  };
+
+  it('returns only the id, display name, and payout profile', async () => {
+    const { repo, service } = setup();
+    repo.findOneBy.mockResolvedValue(savedAccount({ payoutProfile }));
+    const profile = await service.getUserProfile('a1');
+    expect(profile).toEqual({
+      id: 'a1',
+      displayName: 'Somchai',
+      payoutProfile,
+    });
+    const json = JSON.stringify(profile);
+    expect(json).not.toContain('somchai@student.chula.ac.th');
+    expect(json).not.toContain('hash');
+  });
+
+  it('returns a null payout profile when none is set', async () => {
+    const { repo, service } = setup();
+    repo.findOneBy.mockResolvedValue(savedAccount({}));
+    await expect(service.getUserProfile('a1')).resolves.toMatchObject({
+      payoutProfile: null,
+    });
+  });
+
+  it('fails with 404 when the account does not exist', async () => {
+    const { service } = setup();
+    await expect(service.getUserProfile('gone')).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+});
