@@ -13,7 +13,8 @@ FROM node:24-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
-RUN npm install --omit=dev --no-audit --no-fund
+# --ignore-scripts: the prepare script runs husky, a devDependency that --omit=dev leaves out.
+RUN npm install --omit=dev --ignore-scripts --no-audit --no-fund
 ARG APP
 ENV APP=${APP}
 COPY --from=build /app/dist/apps/${APP} ./dist/apps/${APP}
