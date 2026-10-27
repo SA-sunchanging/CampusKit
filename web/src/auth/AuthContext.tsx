@@ -7,6 +7,7 @@ import {
 import { AuthContext, type AuthValue } from './context.ts';
 import {
   decodeToken,
+  expireSession,
   getToken,
   setToken,
   storeToken,
@@ -31,6 +32,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (token && !session) setToken(null);
   }, [token, session]);
+
+  // End the session when the token expires, even if no request sees the 401.
+  useEffect(() => {
+    if (!session) return;
+    const timer = setTimeout(expireSession, session.expiresAt - Date.now());
+    return () => clearTimeout(timer);
+  }, [session]);
 
   const value = useMemo<AuthValue>(
     () => ({
