@@ -3,6 +3,7 @@ import { json } from 'express';
 import { registerProxies, serviceTargets } from './proxy.js';
 import { rejectInternalPath } from './security/internal-path.js';
 import { requireToken } from './security/require-token.js';
+import { stripIdentityHeaders } from './security/strip-identity-headers.js';
 
 /**
  * Wires the gateway's security chain and routes. The chain covers all of /api, both the
@@ -13,7 +14,7 @@ export function configureGateway(
   app: INestApplication,
   targets: Record<string, string> = serviceTargets(),
 ): void {
-  app.use('/api', rejectInternalPath, requireToken);
+  app.use('/api', rejectInternalPath, stripIdentityHeaders, requireToken);
   // The proxy forwards raw request bodies, so only the gRPC-backed booking routes parse JSON.
   app.use('/api/booking', json());
   registerProxies(app, targets);
