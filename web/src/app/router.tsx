@@ -6,6 +6,7 @@ import { inboxRoutes } from '../features/inbox/routes.tsx';
 import { listingRoutes } from '../features/listing/routes.tsx';
 import { rentalRoutes } from '../features/rental/routes.tsx';
 import { reviewRoutes } from '../features/review/routes.tsx';
+import { uiPreviewRoutes } from '../features/ui-preview/routes.tsx';
 import Layout from './Layout.tsx';
 
 // Each feature owns its routes in features/<name>/routes.tsx; this file only combines them.
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
       ...inboxRoutes,
       ...reviewRoutes,
       ...adminRoutes,
+      ...uiPreviewRoutes,
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
