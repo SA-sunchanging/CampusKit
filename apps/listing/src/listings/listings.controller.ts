@@ -2,13 +2,17 @@ import { type AuthUser, CurrentUser, JwtAuthGuard } from '@app/common';
 import {
   Body,
   Controller,
+  Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -17,8 +21,12 @@ import {
 } from '@nestjs/swagger';
 import { Call, type CallContext } from '../clients/call-context.js';
 import { CreateListingDto } from './dto/create-listing.dto.js';
+import { SearchListingsQuery } from './dto/search-listings.query.js';
+import { ListingQueriesService } from './listing-queries.service.js';
+import { SearchResultResponse } from './listing-summary.response.js';
 import { ListingResponse } from './listing.response.js';
 import { ListingsService } from './listings.service.js';
+import { optionalViewer } from './optional-viewer.js';
 
 /**
  * REST endpoints of the listing service, reached through the gateway at /api/listing/listings.
@@ -27,7 +35,28 @@ import { ListingsService } from './listings.service.js';
 @ApiTags('listings')
 @Controller('listings')
 export class ListingsController {
-  constructor(private readonly listings: ListingsService) {}
+  constructor(
+    private readonly listings: ListingsService,
+    private readonly queries: ListingQueriesService,
+    private readonly jwt: JwtService,
+  ) {}
+
+  /** Public: guests can browse before they register. */
+  @Get()
+  @ApiOkResponse({ type: SearchResultResponse })
+  search(@Query() query: SearchListingsQuery): Promise<SearchResultResponse> {
+    return this.queries.search(query);
+  }
+
+  /** Public. A DRAFT is shown only when the caller's token belongs to its owner. */
+  @Get(':id')
+  @ApiOkResponse({ type: ListingResponse })
+  detail(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers('authorization') authorization?: string,
+  ): Promise<ListingResponse> {
+    return this.queries.detail(id, optionalViewer(authorization, this.jwt));
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard)

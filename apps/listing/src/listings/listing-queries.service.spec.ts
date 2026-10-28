@@ -1,0 +1,152 @@
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import type { Repository } from 'typeorm';
+import {
+  likePattern,
+  ListingQueriesService,
+} from './listing-queries.service.js';
+import type { Listing } from './listing.entity.js';
+import type { ListingsService } from './listings.service.js';
+
+const owner = {
+  sub: '00000000-0000-4000-8000-000000000001',
+  role: 'student' as const,
+};
+const other = {
+  sub: '00000000-0000-4000-8000-000000000002',
+  role: 'student' as const,
+};
+const id = '11111111-1111-4111-8111-111111111111';
+
+const listing = (fields: Partial<Listing> = {}) =>
+  ({
+    id,
+    ownerId: owner.sub,
+    status: 'PUBLISHED',
+    title: 'Badminton racket',
+    dailyRate: 3500,
+    deposit: 50000,
+    lateFeePerDay: 5000,
+    maxRentalDays: 5,
+    publishedAt: new Date('2026-10-28T00:00:00Z'),
+    ...fields,
+  }) as Listing;
+
+function setup() {
+  const builder = {
+    where: vi.fn().mockReturnThis(),
+    andWhere: vi.fn().mockReturnThis(),
+    orderBy: vi.fn().mockReturnThis(),
+    addOrderBy: vi.fn().mockReturnThis(),
+    skip: vi.fn().mockReturnThis(),
+    take: vi.fn().mockReturnThis(),
+    getManyAndCount: vi.fn().mockResolvedValue([[listing()], 41]),
+  };
+  const repo = {
+    createQueryBuilder: vi.fn().mockReturnValue(builder),
+    findOneBy: vi.fn(),
+  };
+  const listingsService = {
+    photoUrls: vi.fn().mockResolvedValue(['data:image/jpeg;base64,AAAA']),
+  };
+  const service = new ListingQueriesService(
+    repo as unknown as Repository<Listing>,
+    listingsService as unknown as ListingsService,
+  );
+  return { service, repo, builder };
+}
+
+describe('likePattern', () => {
+  it('escapes LIKE wildcards', () => {
+    expect(likePattern('100%_off\\')).toBe('%100\\%\\_off\\\\%');
+  });
+});
+
+describe('ListingQueriesService.search', () => {
+  it('returns one page of PUBLISHED listings with the total', async () => {
+    const { service, builder } = setup();
+    const result = await service.search({ page: 3, pageSize: 20 });
+    expect(builder.where).toHaveBeenCalledWith('listing.status = :status', {
+      status: 'PUBLISHED',
+    });
+    expect(builder.andWhere).not.toHaveBeenCalled();
+    expect(builder.skip).toHaveBeenCalledWith(40);
+    expect(builder.take).toHaveBeenCalledWith(20);
+    expect(result).toMatchObject({ total: 41, page: 3, pageSize: 20 });
+    expect(result.items[0]).toMatchObject({ id, title: 'Badminton racket' });
+  });
+
+  it('filters by category and keyword', async () => {
+    const { service, builder } = setup();
+    await service.search({
+      q: 'racket',
+      category: 'SPORTS',
+      page: 1,
+      pageSize: 20,
+    });
+    expect(builder.andWhere).toHaveBeenCalledWith(
+      'listing.category = :category',
+      {
+        category: 'SPORTS',
+      },
+    );
+    expect(builder.andWhere).toHaveBeenCalledWith(
+      expect.stringContaining('ILIKE'),
+      { pattern: '%racket%' },
+    );
+  });
+});
+
+describe('ListingQueriesService.detail', () => {
+  it('shows a PUBLISHED listing to a guest, with photos', async () => {
+    const { service, repo } = setup();
+    repo.findOneBy.mockResolvedValue(listing());
+    const result = await service.detail(id, null);
+    expect(result.photos).toHaveLength(1);
+  });
+
+  it('shows a DRAFT only to its owner', async () => {
+    const { service, repo } = setup();
+    repo.findOneBy.mockResolvedValue(
+      listing({ status: 'DRAFT', publishedAt: null }),
+    );
+    await expect(service.detail(id, owner)).resolves.toMatchObject({
+      status: 'DRAFT',
+    });
+    await expect(service.detail(id, other)).rejects.toThrow(NotFoundException);
+    await expect(service.detail(id, null)).rejects.toThrow(NotFoundException);
+  });
+
+  it('answers 404 for an unknown listing', async () => {
+    const { service, repo } = setup();
+    repo.findOneBy.mockResolvedValue(null);
+    await expect(service.detail(id, owner)).rejects.toThrow(NotFoundException);
+  });
+});
+
+describe('ListingQueriesService.quote', () => {
+  const period = { start: '2026-11-01T17:00:00Z', end: '2026-11-03T17:00:00Z' };
+
+  it('prices a PUBLISHED listing', async () => {
+    const { service, repo } = setup();
+    repo.findOneBy.mockResolvedValue(listing());
+    await expect(service.quote(id, period)).resolves.toMatchObject({
+      ownerId: owner.sub,
+      days: 2,
+      rentalFee: 7000,
+      deposit: 50000,
+      lateFeePerDay: 5000,
+    });
+  });
+
+  it('refuses to quote a DRAFT', async () => {
+    const { service, repo } = setup();
+    repo.findOneBy.mockResolvedValue(listing({ status: 'DRAFT' }));
+    await expect(service.quote(id, period)).rejects.toThrow(ConflictException);
+  });
+
+  it('answers 404 for an unknown listing', async () => {
+    const { service, repo } = setup();
+    repo.findOneBy.mockResolvedValue(null);
+    await expect(service.quote(id, period)).rejects.toThrow(NotFoundException);
+  });
+});
