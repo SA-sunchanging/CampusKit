@@ -44,7 +44,7 @@ describe('requireToken', () => {
   it('forwards a protected request with a valid token', () => {
     const { res, next } = run(
       'GET',
-      '/api/listing/listings',
+      '/api/identity/accounts/me',
       `Bearer ${valid}`,
     );
     expect(next).toHaveBeenCalledOnce();
@@ -55,7 +55,7 @@ describe('requireToken', () => {
     'answers 401 Missing bearer token for header %j',
     (header) => {
       expect401(
-        run('GET', '/api/listing/listings', header),
+        run('GET', '/api/identity/accounts/me', header),
         'Missing bearer token',
       );
     },
@@ -67,7 +67,7 @@ describe('requireToken', () => {
     ['a tampered token', `${valid.slice(0, -2)}xx`],
   ])('answers 401 Invalid token for %s', (_name, token) => {
     expect401(
-      run('GET', '/api/listing/listings', `Bearer ${token}`),
+      run('GET', '/api/identity/accounts/me', `Bearer ${token}`),
       'Invalid token',
     );
   });

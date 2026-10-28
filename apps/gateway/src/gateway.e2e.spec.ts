@@ -72,7 +72,7 @@ const http = () => request(app.getHttpServer());
 
 describe('gateway tokens', () => {
   it('rejects a protected route without a token and does not forward it', async () => {
-    const res = await http().get('/api/listing/listings').expect(401);
+    const res = await http().get('/api/identity/accounts/me').expect(401);
     expect(res.body).toEqual({
       error: { code: 'UNAUTHORIZED', message: 'Missing bearer token' },
     });
@@ -164,7 +164,7 @@ describe('gateway headers', () => {
   });
 
   it('creates a correlation ID even for a rejected request', async () => {
-    const res = await http().get('/api/listing/listings').expect(401);
+    const res = await http().get('/api/identity/accounts/me').expect(401);
     expect(res.headers['x-correlation-id']).toBeTruthy();
   });
 });
