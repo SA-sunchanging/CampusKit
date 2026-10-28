@@ -1,0 +1,121 @@
+/* Element defaults (role A). Mobile first: everything fits a 360px viewport. */
+:root {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-bg);
+  color-scheme: light;
+  font-synthesis: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+h1 {
+  font-size: clamp(30px, 4.3vw, 52px);
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  margin: 12px 0 20px;
+}
+
+h2 {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin: 0 0 12px;
+}
+
+h3 {
+  font-size: var(--text-lg);
+  line-height: 1.45;
+  margin: 10px 0;
+}
+
+p {
+  line-height: 1.65;
+  color: var(--color-text-soft);
+  font-size: var(--text-sm);
+}
+
+a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--tap);
+  padding: 10px 11px;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-input);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-sm);
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  margin: 0;
+}
+
+dt {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-label);
+}
+
+dd {
+  margin: 0 0 10px;
+}
+
+@media (min-width: 600px) {
+  dl {
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 10px 20px;
+  }
+
+  dd {
+    margin: 0;
+  }
+}

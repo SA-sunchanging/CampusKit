@@ -1,0 +1,143 @@
+/* Page patterns (role A): hero, list rows, and one-time codes. */
+
+/* Hero */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 22px;
+  padding: 27px;
+  border-radius: var(--radius-xl);
+  background: var(--color-hero);
+  overflow: hidden;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--color-eyebrow);
+}
+
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.hero-tags span {
+  padding: 6px 11px;
+  border: 1px solid var(--color-tag-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-tag-bg);
+  font-size: 10px;
+}
+
+.hero-art {
+  display: none;
+  position: relative;
+  min-height: 250px;
+}
+
+.bubble {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-primary);
+  box-shadow: var(--shadow-soft);
+}
+
+.bubble-1 {
+  width: 155px;
+  height: 155px;
+  left: 12%;
+  top: 8%;
+  background: var(--color-peach);
+  transform: rotate(-12deg);
+}
+
+.bubble-2 {
+  width: 113px;
+  height: 113px;
+  right: 2%;
+  top: 0;
+  background: var(--color-sage);
+  transform: rotate(15deg);
+}
+
+.bubble-3 {
+  width: 125px;
+  height: 125px;
+  right: 6%;
+  bottom: 0;
+  background: var(--color-rose);
+}
+
+/* List rows (inbox notices, admin queues, bookings) */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.row-main h3,
+.row-main p {
+  margin: 0 0 4px;
+}
+
+.row-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--color-tint);
+  color: var(--color-primary);
+}
+
+/* One-time code (pickup and return) */
+.code {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  font-family: ui-monospace, monospace;
+  font-size: var(--text-xl);
+  letter-spacing: 4px;
+}
+
+@media (min-width: 600px) {
+  .hero {
+    padding: 44px 48px;
+  }
+
+  .hero-tags {
+    gap: 10px;
+  }
+}
+
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: 1.3fr 1fr;
+    min-height: 340px;
+  }
+
+  .hero-art {
+    display: block;
+  }
+}

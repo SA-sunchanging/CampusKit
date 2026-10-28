@@ -1,0 +1,71 @@
+/* Design tokens (role A). Colors, radii, and type sizes for the whole web app.
+   Use these variables instead of raw values so every page shares one look. */
+:root {
+  --font-body: 'Noto Sans Thai', system-ui, sans-serif;
+
+  /* Text */
+  --color-text: #263e34;
+  --color-text-soft: #657466;
+  --color-text-muted: #879083;
+  --color-label: #657966;
+
+  /* Surfaces */
+  --color-bg: #f6f7f2;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f4f6ef;
+  --color-input: #fbfcf8;
+  --color-hero: #e8eee0;
+
+  /* Lines */
+  --color-border: #e0e5da;
+  --color-border-strong: #d5ded6;
+  --color-border-input: #dce3d6;
+  --color-divider: #eef0e9;
+
+  /* Brand */
+  --color-primary: #244d40;
+  --color-primary-hover: #38644e;
+  --color-on-primary: #ffffff;
+  --color-tint: #e8eee4;
+  --color-tint-hover: #edf1e9;
+  --color-focus: #d786ae;
+
+  /* Accents for illustrations and image placeholders */
+  --color-peach: #f9ead9;
+  --color-sage: #dae6d0;
+  --color-rose: #eccddd;
+  --color-sand: #eee9df;
+  --color-eyebrow: #6a7d58;
+  --color-tag-bg: #f5f7ed;
+  --color-tag-border: #d5deca;
+
+  /* Status tones */
+  --color-neutral-bg: #edf0e6;
+  --color-neutral-fg: #4f5f52;
+  --color-success-bg: #e3eedc;
+  --color-success-fg: #315633;
+  --color-warning-bg: #f8e7ce;
+  --color-warning-fg: #956b1e;
+  --color-danger-bg: #f9e6e5;
+  --color-danger-fg: #9a3835;
+
+  /* Shape */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+  --shadow-soft: 0 9px 20px rgb(81 102 80 / 8%);
+
+  /* Type scale */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-md: 15px;
+  --text-lg: 17px;
+  --text-xl: 23px;
+
+  /* Layout */
+  --page-max: 1270px;
+  --gutter: 16px;
+  --tap: 44px;
+}

@@ -1,0 +1,168 @@
+/* App frame (role A): header, nav pills, page width, footer, and page grids. */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px var(--gutter);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.brand-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.brand-caption {
+  display: none;
+  margin-left: 4px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  color: var(--color-text-muted);
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--text-sm);
+}
+
+.account small {
+  display: block;
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 14px 0;
+}
+
+.main-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.main-nav a:hover {
+  background: var(--color-tint-hover);
+}
+
+.main-nav a.active {
+  background: var(--color-tint);
+  color: var(--color-primary);
+}
+
+main {
+  padding-bottom: 24px;
+}
+
+.app-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 40px;
+  padding: 28px 0 26px;
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 21px;
+}
+
+.stack {
+  display: grid;
+  gap: 14px;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  padding: 12px 0;
+}
+
+@media (min-width: 600px) {
+  .app-header {
+    padding: 18px 5%;
+  }
+
+  .brand {
+    font-size: 25px;
+  }
+
+  .page {
+    padding: 0 34px;
+  }
+
+  .main-nav {
+    gap: 10px;
+    padding: 22px 0;
+  }
+
+  .app-footer {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .split {
+    grid-template-columns: 1.2fr 1fr;
+    gap: 40px;
+    padding: 30px 0;
+  }
+}
+
+@media (min-width: 900px) {
+  .brand-caption {
+    display: inline;
+  }
+
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .split {
+    gap: 70px;
+  }
+}
