@@ -1,8 +1,14 @@
 import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
-import { onSessionExpired } from '../auth/token.ts';
+import { onSessionExpired, type Role } from '../auth/token.ts';
 import { useAuth } from '../auth/useAuth.ts';
+import { BagIcon, Button } from '../ui/index.ts';
 import { navFor } from './nav.ts';
+
+const ROLE_LABEL: Record<Role, string> = {
+  student: 'Student',
+  admin: 'Administrator',
+};
 
 export default function Layout() {
   const { user, logout } = useAuth();
@@ -29,24 +35,44 @@ export default function Layout() {
     <>
       <header className="app-header">
         <NavLink to="/" className="brand">
+          <span className="brand-icon">
+            <BagIcon size={22} />
+          </span>
           CampusKit
+          <span className="brand-caption">BORROW A LITTLE, DO A LOT</span>
         </NavLink>
-        <nav aria-label="Main">
+        {user && (
+          <div className="account">
+            <span>
+              Logged in
+              <small>{ROLE_LABEL[user.role]}</small>
+            </span>
+            <Button
+              variant="ghost"
+              size="small"
+              onClick={() => void handleLogout()}
+            >
+              Log out
+            </Button>
+          </div>
+        )}
+      </header>
+      <div className="page">
+        <nav className="main-nav" aria-label="Main">
           {navFor(user?.role ?? 'guest').map((item) => (
             <NavLink key={item.to} to={item.to} end>
               {item.label}
             </NavLink>
           ))}
-          {user && (
-            <button type="button" onClick={() => void handleLogout()}>
-              Log out
-            </button>
-          )}
         </nav>
-      </header>
-      <main>
-        <Outlet />
-      </main>
+        <main>
+          <Outlet />
+        </main>
+        <footer className="app-footer">
+          <span>CampusKit - peer-to-peer rentals for Chula students</span>
+          <span>2110521 Software Architecture, 2026</span>
+        </footer>
+      </div>
     </>
   );
 }

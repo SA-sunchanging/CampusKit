@@ -1,5 +1,13 @@
 import { useEffect, useState } from 'react';
 import { getMe, type Profile } from '../../api/identity.ts';
+import { Alert, Badge, PageHeader, Panel, type Tone } from '../../ui/index.ts';
+
+const STATUS_TONE: Record<Profile['studentStatus'], Tone> = {
+  UNSUBMITTED: 'neutral',
+  PENDING: 'warning',
+  VERIFIED: 'success',
+  REJECTED: 'danger',
+};
 
 // The caller's profile (role A). Email verification comes later.
 export default function AccountPage() {
@@ -18,26 +26,32 @@ export default function AccountPage() {
 
   return (
     <section>
-      <h2>Account</h2>
-      {error && (
-        <p className="error" role="alert">
-          {error}
-        </p>
-      )}
+      <PageHeader title="Account" />
+      {error && <Alert tone="danger">{error}</Alert>}
       {!profile && !error && <p>Loading...</p>}
       {profile && (
-        <dl>
-          <dt>Display name</dt>
-          <dd>{profile.displayName}</dd>
-          <dt>Email</dt>
-          <dd>{profile.email}</dd>
-          <dt>Role</dt>
-          <dd>{profile.role}</dd>
-          <dt>Email verified</dt>
-          <dd>{profile.emailVerified ? 'Yes' : 'No'}</dd>
-          <dt>Student status</dt>
-          <dd>{profile.studentStatus}</dd>
-        </dl>
+        <Panel>
+          <dl>
+            <dt>Display name</dt>
+            <dd>{profile.displayName}</dd>
+            <dt>Email</dt>
+            <dd>{profile.email}</dd>
+            <dt>Role</dt>
+            <dd>{profile.role}</dd>
+            <dt>Email verified</dt>
+            <dd>
+              <Badge tone={profile.emailVerified ? 'success' : 'warning'}>
+                {profile.emailVerified ? 'Yes' : 'No'}
+              </Badge>
+            </dd>
+            <dt>Student status</dt>
+            <dd>
+              <Badge tone={STATUS_TONE[profile.studentStatus]}>
+                {profile.studentStatus}
+              </Badge>
+            </dd>
+          </dl>
+        </Panel>
       )}
     </section>
   );

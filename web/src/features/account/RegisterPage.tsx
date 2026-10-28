@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router';
 import { registerAndLogin } from '../../api/identity.ts';
 import { useAuth } from '../../auth/useAuth.ts';
+import { Alert, Button, Field, Panel } from '../../ui/index.ts';
+import AuthIntro from './AuthIntro.tsx';
 import { returnTo } from './returnTo.ts';
 
 // The length limits mirror the identity DTO for quick feedback; the server stays authoritative.
@@ -35,48 +37,45 @@ export default function RegisterPage() {
   }
 
   return (
-    <section>
-      <h2>Register</h2>
-      <form onSubmit={(event) => void handleSubmit(event)}>
-        <label>
-          Email
-          <input name="email" type="email" autoComplete="email" required />
-        </label>
-        <label>
-          Display name
-          <input
-            name="displayName"
-            autoComplete="nickname"
-            maxLength={50}
-            required
-          />
-        </label>
-        <label>
-          Password (8 to 72 characters)
-          <input
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            minLength={8}
-            maxLength={72}
-            required
-          />
-        </label>
-        {error && (
-          <p className="error" role="alert">
-            {error}
-          </p>
-        )}
-        <button type="submit" disabled={pending}>
-          {pending ? 'Registering...' : 'Register'}
-        </button>
-      </form>
-      <p>
-        Already registered?{' '}
-        <Link to="/login" state={location.state}>
-          Log in
-        </Link>
-      </p>
-    </section>
+    <div className="split">
+      <AuthIntro />
+      <Panel title="Register">
+        <form className="form" onSubmit={(event) => void handleSubmit(event)}>
+          <Field label="Email">
+            <input name="email" type="email" autoComplete="email" required />
+          </Field>
+          <Field label="Display name">
+            <input
+              name="displayName"
+              autoComplete="nickname"
+              maxLength={50}
+              required
+            />
+          </Field>
+          <Field label="Password" hint="8 to 72 characters">
+            <input
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              minLength={8}
+              maxLength={72}
+              required
+            />
+          </Field>
+          {error && <Alert tone="danger">{error}</Alert>}
+          <div className="actions">
+            <Button type="submit" disabled={pending}>
+              {pending ? 'Registering...' : 'Register'}
+            </Button>
+          </div>
+        </form>
+        <p>
+          Already registered?{' '}
+          <Link to="/login" state={location.state}>
+            Log in
+          </Link>
+        </p>
+      </Panel>
+    </div>
   );
 }
