@@ -76,7 +76,7 @@ commits; Git contribution counts toward the progress grade.
 
 **Core**
 - [x] Finish `libs/contracts/proto/booking.proto` first: calendar setup, availability, request, approve, decline, get, list, and release calendar.
-- [ ] Calendar with the PostgreSQL exclusion constraint (raw SQL migration; `btree_gist` is already installed).
+- [ ] Calendar with the PostgreSQL exclusion constraint (raw SQL migration; `btree_gist` is already installed). (taken by B)
 - [ ] Request a booking (eligibility from Identity, quote from Listing, atomic reservation), owner approves or declines.
 - [ ] On approval: authorize with Payment, create the rental with Rental, mark CONFIRMED, write `booking.*` events.
 - [ ] Gateway REST routes for booking in `apps/gateway/src/booking`.
