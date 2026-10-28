@@ -49,6 +49,7 @@ commits; Git contribution counts toward the progress grade.
 - [ ] Identity writes `identity.verified` events through the outbox.
 - [ ] Internal service authentication between services (still an open question in `docs/architecture/services.md`).
 - [x] GitHub Actions that run typecheck, lint, test, and build on each push.
+- [ ] Shared web theme and UI components in `web/src/ui` (demo style), with sample screens at `/ui-preview`.
 
 **Other**
 - University identity provider, account restriction and erasure, TLS between services.
@@ -162,6 +163,7 @@ Services find each other through environment variables such as `BOOKING_GRPC_URL
 | Money calls | Every Payment request carries an `operationId`; repeating it returns the first result. |
 | Events | The envelope in `libs/contracts/src/events.ts`; names are `<service>.<past-tense>`, for example `booking.confirmed`. |
 | Status values | The owning service defines them, for example Rental: `AWAITING_PICKUP`, `ACTIVE`, `SETTLEMENT_PENDING`, `CLOSED`. |
+| Web UI | Build pages from the components and styles in `web/src/ui`; use the CSS variables in `web/src/ui/styles/tokens.css` instead of raw colors. Format money with `formatBaht` and dates with `formatDate` or `formatDateRange` (Asia/Bangkok; a range shows its end as the return day). Copy the patterns at `/ui-preview`. Add new shared parts to `web/src/ui` with role A; keep page-specific parts in your own feature folder. |
 | Web API types | No code generation for now: each member has few endpoints and setting up a pipeline costs more than it saves before the code freeze. Write each service's types and calls by hand in one file, `web/src/api/<service>.ts`, to match the service's Swagger page. Return response bodies as classes with `@ApiProperty`, not interfaces, and declare them on the handler with `@ApiOkResponse({ type })` (or `@ApiCreatedResponse`), so Swagger lists them. The `@nestjs/swagger` CLI plugin would infer these, but it does not run under the rspack builder; enabling it changes the shared build, so agree it as a team first. Classes also keep the option to generate types later with `openapi-typescript`. |
 
 ## Working without conflicts
