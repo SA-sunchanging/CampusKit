@@ -1,9 +1,13 @@
+import { EmptyState, PageHeader, StarIcon } from '../../ui/index.ts';
+
 // Placeholder. Review the other participant (role E).
 export default function ReviewsPage() {
   return (
     <section>
-      <h2>Reviews</h2>
-      <p>Review the other participant (role E).</p>
+      <PageHeader title="Reviews" />
+      <EmptyState title="Reviews are coming soon" icon={<StarIcon size={32} />}>
+        Review the other participant (role E).
+      </EmptyState>
     </section>
   );
 }
