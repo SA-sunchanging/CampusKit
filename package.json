@@ -16,6 +16,7 @@
     "infra": "docker compose up -d postgres mongo rabbitmq",
     "stack": "docker compose up --build",
     "seed": "docker compose run --rm --build identity node dist/apps/identity/main.js seed",
+    "seed:listing": "docker compose run --rm --build listing node dist/apps/listing/main.js seed",
     "lint": "oxlint --type-aware apps/ libs/",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\" \"web/src/**/*.{ts,tsx}\"",
     "test": "vitest run --passWithNoTests",
