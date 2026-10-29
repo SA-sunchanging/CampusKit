@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { getListing, publishListing, type Listing } from '../../api/listing.ts';
 import { useAuth } from '../../auth/useAuth.ts';
+import BookingRequestPanel from '../booking/BookingRequestPanel.tsx';
 import {
   Alert,
   Badge,
@@ -135,12 +136,8 @@ function ListingView({
         />
         <div>
           <PriceBox listing={listing} />
-          {/* Booking request form (role C) goes here. */}
-          {!isOwner && (
-            <Panel title="Booking requests open soon">
-              <p>You will be able to request dates for this item here.</p>
-            </Panel>
-          )}
+          {/* Booking request form (role C). */}
+          {!isOwner && <BookingRequestPanel listing={listing} />}
         </div>
       </div>
       <ItemDetails listing={listing} />

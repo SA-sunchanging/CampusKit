@@ -1,0 +1,37 @@
+/* Booking pages (role C). Page-specific layout only; colors come from tokens.css. */
+
+/* Request form on the listing detail page */
+.booking-form {
+  display: grid;
+  gap: 14px;
+}
+
+.booking-days {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.booking-error {
+  margin: 4px 0 0;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-danger-fg);
+}
+
+.booking-note {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.booking-estimate {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+}
+
+.booking-estimate h3 {
+  margin: 0 0 8px;
+  font-size: var(--text-md);
+}
