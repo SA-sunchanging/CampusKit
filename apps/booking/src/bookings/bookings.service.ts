@@ -1,4 +1,5 @@
 import type { AuthUser } from '@app/common';
+import { BOOKING_EVENTS } from '@app/contracts';
 import { status } from '@grpc/grpc-js';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -25,6 +26,7 @@ import {
   parseRole,
   parseStatusFilter,
 } from './booking-rules.js';
+import { announce } from './booking-events.js';
 import { BOOKING_COLUMNS, type BookingRow } from './booking.row.js';
 import {
   bookingsOf,
@@ -41,6 +43,7 @@ interface Reservation {
   listingId: string;
   period: Period;
   quote: Quote;
+  correlationId: string;
   now: Date;
 }
 
@@ -55,8 +58,8 @@ export class BookingsService {
 
   /**
    * The caller asks for a period of a listing. Checks eligibility with Identity and gets the
-   * terms from Listing, then reserves the dates atomically and returns the PENDING booking.
-   * Overlapping dates answer ALREADY_EXISTS.
+   * terms from Listing, then reserves the dates atomically, tells the owner through the outbox,
+   * and returns the PENDING booking. Overlapping dates answer ALREADY_EXISTS.
    */
   async request(
     caller: AuthUser,
@@ -76,7 +79,14 @@ export class BookingsService {
         'You cannot book your own listing',
       );
     }
-    const reservation = { renterId: caller.sub, listingId, period, quote, now };
+    const reservation = {
+      renterId: caller.sub,
+      listingId,
+      period,
+      quote,
+      correlationId: call.correlationId,
+      now,
+    };
     try {
       return await this.db.transaction((tx) => this.reserve(tx, reservation));
     } catch (err) {
@@ -172,6 +182,13 @@ export class BookingsService {
       `INSERT INTO calendar_blocks (listing_id, period, kind, booking_id)
        VALUES ($1, tstzrange($2, $3, '[)'), 'RESERVATION', $4)`,
       [r.listingId, r.period.start, r.period.end, booking.id],
+    );
+    await announce(
+      tx,
+      BOOKING_EVENTS.requested,
+      booking,
+      [booking.owner_id],
+      r.correlationId,
     );
     return booking;
   }

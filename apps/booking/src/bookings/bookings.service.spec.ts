@@ -45,7 +45,15 @@ function setup({ open = 0, calendar = true, blockError }: Options = {}) {
       }
       if (sql.includes('INSERT INTO bookings')) {
         return Promise.resolve([
-          { id: params[0], status: 'PENDING' } as BookingRow,
+          {
+            id: params[0],
+            listing_id: params[1],
+            renter_id: params[2],
+            owner_id: params[3],
+            status: 'PENDING',
+            period_start: params[4],
+            period_end: params[5],
+          } as BookingRow,
         ]);
       }
       if (sql.includes('INSERT INTO calendar_blocks') && blockError) {
@@ -114,6 +122,49 @@ describe('BookingsService.request', () => {
       booking.id,
     ]);
     expect(statements()[0]).toContain('pg_advisory_xact_lock');
+  });
+
+  it('tells the owner about the request in the same transaction', async () => {
+    const { tx, service, statements } = setup();
+    const booking = await service.request(renter, listingId, period, call, now);
+    const index = statements().findIndex((sql) =>
+      sql.includes('INSERT INTO outbox_events'),
+    );
+    expect(index).toBeGreaterThan(
+      statements().findIndex((sql) =>
+        sql.includes('INSERT INTO calendar_blocks'),
+      ),
+    );
+    const envelope = JSON.parse(tx.query.mock.calls[index][1]?.[2] as string);
+    expect(envelope).toMatchObject({
+      type: 'booking.requested',
+      producer: 'booking',
+      correlationId: 'corr-1',
+      recipients: [owner.sub],
+      data: {
+        bookingId: booking.id,
+        listingId,
+        ownerId: owner.sub,
+        renterId: renter.sub,
+        period: {
+          start: '2026-11-01T17:00:00.000Z',
+          end: '2026-11-04T17:00:00.000Z',
+        },
+        status: 'PENDING',
+      },
+    });
+  });
+
+  it('writes no event when the dates are taken', async () => {
+    const { service, statements } = setup({
+      blockError: new QueryFailedError('INSERT', [], {
+        code: '23P01',
+      } as unknown as Error),
+    });
+    await codeOf(service.request(renter, listingId, period, call, now));
+    expect(statements().some((sql) => sql.includes('outbox_events'))).toBe(
+      false,
+    );
   });
 
   it('releases stale PENDING requests of the listing and renter before reserving', async () => {
