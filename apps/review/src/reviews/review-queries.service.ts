@@ -2,6 +2,7 @@ import type { AuthUser } from '@app/common';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
+import { ReputationService } from '../reputation/reputation.service.js';
 import type { ReceivedReviewsQuery } from './dto/received-reviews.query.js';
 import {
   ReceivedReviewsResponse,
@@ -15,26 +16,27 @@ import { Review, type ReviewRecord } from './review.schema.js';
 export class ReviewQueriesService {
   constructor(
     @InjectModel(Review.name) private readonly reviews: Model<Review>,
+    private readonly reputation: ReputationService,
   ) {}
 
-  /** The reviews a user received, newest first. */
+  /** The reviews a user received, newest first, with the count and mean of all of them. */
   async received(
     query: ReceivedReviewsQuery,
   ): Promise<ReceivedReviewsResponse> {
-    const filter = { revieweeId: query.userId.toLowerCase() };
-    const [rows, total] = await Promise.all([
+    const [rows, summary] = await Promise.all([
       this.reviews
-        .find(filter)
+        .find({ revieweeId: query.userId.toLowerCase() })
         .sort({ createdAt: -1, _id: -1 })
         .skip((query.page - 1) * query.pageSize)
         .limit(query.pageSize)
         .lean<ReviewRecord[]>()
         .exec(),
-      this.reviews.countDocuments(filter).exec(),
+      this.reputation.summary(query.userId),
     ]);
     return Object.assign(new ReceivedReviewsResponse(), {
       items: rows.map((row) => ReviewResponse.of(row)),
-      total,
+      total: summary.reviewCount,
+      averageRating: summary.averageRating,
       page: query.page,
       pageSize: query.pageSize,
     });

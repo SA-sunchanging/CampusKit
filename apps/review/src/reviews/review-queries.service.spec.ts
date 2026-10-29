@@ -1,5 +1,7 @@
 import type { AuthUser } from '@app/common';
 import { Types, type Model } from 'mongoose';
+import { ReputationResponse } from '../reputation/reputation.response.js';
+import type { ReputationService } from '../reputation/reputation.service.js';
 import { ReviewQueriesService } from './review-queries.service.js';
 import type { Review, ReviewRecord } from './review.schema.js';
 
@@ -33,33 +35,39 @@ function query(result: unknown) {
   return chain;
 }
 
-function setup(rows: ReviewRecord[] = [record()], count = 1) {
+function setup(rows: ReviewRecord[] = [record()], ratingSum = 4, count = 1) {
   const finds = query(rows);
-  const model = {
-    find: vi.fn((_filter: unknown) => finds),
-    countDocuments: vi.fn((_filter: unknown) => query(count)),
-  };
-  const service = new ReviewQueriesService(model as unknown as Model<Review>);
-  return { service, model, finds };
+  const model = { find: vi.fn((_filter: unknown) => finds) };
+  const summary = vi.fn((userId: string) =>
+    Promise.resolve(ReputationResponse.of(userId, ratingSum, count)),
+  );
+  const service = new ReviewQueriesService(
+    model as unknown as Model<Review>,
+    { summary } as unknown as ReputationService,
+  );
+  return { service, model, finds, summary };
 }
 
 describe('ReviewQueriesService', () => {
   describe('received', () => {
     it("pages the user's received reviews, newest first", async () => {
-      const { service, model, finds } = setup([record()], 21);
+      const { service, model, finds, summary } = setup([record()], 90, 21);
       const result = await service.received({
         userId: OWNER_ID.toUpperCase(),
         page: 2,
         pageSize: 10,
       });
       expect(model.find).toHaveBeenCalledWith({ revieweeId: OWNER_ID });
-      expect(model.countDocuments).toHaveBeenCalledWith({
-        revieweeId: OWNER_ID,
-      });
+      expect(summary).toHaveBeenCalledWith(OWNER_ID.toUpperCase());
       expect(finds.sort).toHaveBeenCalledWith({ createdAt: -1, _id: -1 });
       expect(finds.skip).toHaveBeenCalledWith(10);
       expect(finds.limit).toHaveBeenCalledWith(10);
-      expect(result).toMatchObject({ total: 21, page: 2, pageSize: 10 });
+      expect(result).toMatchObject({
+        total: 21,
+        averageRating: 4.3,
+        page: 2,
+        pageSize: 10,
+      });
       expect(result.items[0]).toMatchObject({ rating: 4, comment: '' });
     });
   });

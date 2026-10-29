@@ -57,6 +57,15 @@ export class ReceivedReviewsResponse {
   @ApiProperty({ description: 'Reviews the user received on all pages.' })
   total: number;
 
+  @ApiProperty({
+    type: Number,
+    nullable: true,
+    example: 4.5,
+    description:
+      'Mean of all received ratings, rounded to one decimal; null without reviews.',
+  })
+  averageRating: number | null;
+
   @ApiProperty()
   page: number;
 
