@@ -12,6 +12,8 @@ services:
       RABBITMQ_URL: amqp://campuskit:campuskit@rabbitmq:5672
       BOOKING_GRPC_URL: booking:50051
       PAYMENT_URL: http://payment:3004
+      RENTAL_SWEEP_INTERVAL_MS: ${RENTAL_SWEEP_INTERVAL_MS:-60000}
+      RENTAL_REMINDER_LEAD_MS: ${RENTAL_REMINDER_LEAD_MS:-86400000}
     depends_on:
       postgres:
         condition: service_healthy

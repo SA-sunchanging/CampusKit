@@ -75,6 +75,8 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
         late_fee: 0,
         last_error: null,
         pickup_claimed_at: null,
+        reminder_sent_at: null,
+        overdue_at: null,
       });
       expect(row?.created_at).toBeInstanceOf(Date);
     });
@@ -146,6 +148,21 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
       );
       expect(byName.get('rentals_owner_idx')).toContain(
         '(owner_id, created_at DESC)',
+      );
+    });
+
+    it('indexes the ACTIVE rentals the sweeper still has to remind or flag', async () => {
+      const indexes = (await test.db.query(
+        `SELECT indexname, indexdef FROM pg_indexes
+         WHERE schemaname = $1 AND tablename = 'rentals'`,
+        [test.schema],
+      )) as { indexname: string; indexdef: string }[];
+      const byName = new Map(indexes.map((i) => [i.indexname, i.indexdef]));
+      expect(byName.get('rentals_reminder_due_idx')).toMatch(
+        /\(period_end\) WHERE .*'ACTIVE'.* AND \(reminder_sent_at IS NULL\)/,
+      );
+      expect(byName.get('rentals_overdue_due_idx')).toMatch(
+        /\(period_end\) WHERE .*'ACTIVE'.* AND \(overdue_at IS NULL\)/,
       );
     });
   },

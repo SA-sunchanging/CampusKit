@@ -8,6 +8,7 @@ import { PickupService } from './pickup.service.js';
 import { RentalCancellationService } from './rental-cancellation.service.js';
 import { RentalCreationService } from './rental-creation.service.js';
 import { RentalQueriesService } from './rental-queries.service.js';
+import { RentalSweeper } from './rental-sweeper.js';
 import { RentalsController } from './rentals.controller.js';
 import { ReturnService } from './return.service.js';
 
@@ -22,6 +23,7 @@ import { ReturnService } from './return.service.js';
     PaymentClient,
     PickupService,
     ReturnService,
+    RentalSweeper,
   ],
 })
 export class RentalsModule {}

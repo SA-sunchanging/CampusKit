@@ -109,6 +109,17 @@ export class Rental {
   @Column('timestamptz', { name: 'pickup_claimed_at', nullable: true })
   pickupClaimedAt: Date | null;
 
+  /** When the sweeper reminded the renter that the period ends soon; null until then. */
+  @Column('timestamptz', { name: 'reminder_sent_at', nullable: true })
+  reminderSentAt: Date | null;
+
+  /**
+   * When the sweeper flagged the ACTIVE rental overdue because its period ended before the
+   * return; null until then. Overdue is a flag, not a status.
+   */
+  @Column('timestamptz', { name: 'overdue_at', nullable: true })
+  overdueAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

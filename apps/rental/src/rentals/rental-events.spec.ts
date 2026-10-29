@@ -48,4 +48,20 @@ describe('announce', () => {
       data: { rentalId: RENTAL_ID, status: 'ACTIVE', lateFee: 0 },
     });
   });
+
+  it('writes the event only for the given recipients', async () => {
+    const query = vi.fn().mockResolvedValue([]);
+    await announce(
+      { query } as unknown as EntityManager,
+      'rental.reminded',
+      rentalRow({ status: 'ACTIVE' }),
+      'corr-1',
+      [RENTER_ID],
+    );
+    const [, params] = query.mock.calls[0] as [string, unknown[]];
+    expect(JSON.parse(params[2] as string)).toMatchObject({
+      type: 'rental.reminded',
+      recipients: [RENTER_ID],
+    });
+  });
 });

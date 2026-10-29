@@ -24,19 +24,20 @@ export function rentalEventData(row: RentalRow): RentalEventData {
 }
 
 /**
- * Writes a Rental event for both the owner and the renter to the outbox, inside the transaction
- * that changed the rental.
+ * Writes a Rental event to the outbox, inside the transaction that changed the rental. It goes
+ * to both the owner and the renter unless recipients says otherwise.
  */
 export async function announce(
   tx: EntityManager,
   type: RentalEventType,
   row: RentalRow,
   correlationId: string,
+  recipients: string[] = [row.owner_id, row.renter_id],
 ): Promise<void> {
   await writeOutbox(tx, {
     producer: PRODUCER,
     type,
-    recipients: [row.owner_id, row.renter_id],
+    recipients,
     correlationId,
     data: rentalEventData(row),
   });
