@@ -181,6 +181,18 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
       expect(await compensation.unvoided()).not.toContain(id);
     });
 
+    it('indexes every booking the void retry looks for', async () => {
+      const [index] = (await test.db.query(
+        `SELECT indexdef FROM pg_indexes
+         WHERE schemaname = $1 AND indexname = 'bookings_unvoided_idx'`,
+        [test.schema],
+      )) as { indexdef: string }[];
+      expect(index.indexdef).toContain("'FAILED'");
+      expect(index.indexdef).toContain("'CANCELLED'");
+      expect(index.indexdef).toContain('rental_id IS NOT NULL');
+      expect(index.indexdef).toContain('holds_voided_at IS NULL');
+    });
+
     it('never retries a void for a booking cancelled while PENDING', async () => {
       const id = await booking('CANCELLED');
       expect(await compensation.unvoided()).not.toContain(id);
