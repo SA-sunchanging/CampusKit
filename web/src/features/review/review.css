@@ -1,0 +1,25 @@
+/* Review pages (role E). Page-specific layout only; colors come from tokens.css. */
+
+.review-list {
+  display: grid;
+  gap: 16px;
+}
+
+.review-item {
+  display: grid;
+  gap: 4px;
+}
+
+.review-item p {
+  margin: 0;
+}
+
+.review-item small {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.review-stars {
+  color: var(--color-primary);
+  letter-spacing: 2px;
+}

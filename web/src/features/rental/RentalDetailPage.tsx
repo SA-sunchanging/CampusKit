@@ -4,6 +4,7 @@ import { getRental, type Rental } from '../../api/rental.ts';
 import { useAuth } from '../../auth/useAuth.ts';
 import { Alert, Badge, EmptyState, PageHeader } from '../../ui/index.ts';
 import { useListingTitles } from '../booking/useListingTitles.ts';
+import ReviewPanel from '../review/ReviewPanel.tsx';
 import NextStep from './NextStep.tsx';
 import PaymentStatusPanel from './PaymentStatusPanel.tsx';
 import RentalFacts from './RentalFacts.tsx';
@@ -106,6 +107,7 @@ function RentalView({
             onChange={change}
           />
           <RentalFacts rental={rental} />
+          <ReviewPanel rental={rental} viewerId={user?.id ?? ''} />
         </div>
         <PaymentStatusPanel loaded={payments} />
       </div>
