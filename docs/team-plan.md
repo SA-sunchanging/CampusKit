@@ -112,15 +112,15 @@ commits; Git contribution counts toward the progress grade.
 ### E: Events and Reviews
 
 **Core**
-- [ ] Outbox in `libs/messaging`: an outbox table that producers write in the same transaction, and a relay that publishes with confirmation and marks entries sent. Help Identity, Listing, Booking, and Rental plug it in.
-- [ ] Notification: store each event once per recipient in the MongoDB inbox; list the caller's inbox; mark as read.
-- [ ] Event names and payloads agreed with every producer in `libs/contracts/src/events.ts`.
-- [ ] Web: inbox page with an unread count.
-- [ ] Quality attribute: resilience. Stop RabbitMQ during bookings and measure that no booking fails and every event arrives after recovery.
+- [x] Outbox in `libs/messaging`: an outbox table that producers write in the same transaction, and a relay that publishes with confirmation and marks entries sent. Help Identity, Listing, Booking, and Rental plug it in.
+- [x] Notification: store each event once per recipient in the MongoDB inbox; list the caller's inbox; mark as read.
+- [x] Event names and payloads agreed with every producer in `libs/contracts/src/events.ts`.
+- [x] Web: inbox page with an unread count.
+- [x] Quality attribute: resilience. Stop RabbitMQ during bookings and measure that no booking fails and every event arrives after recovery.
 
 **Should**
 - [ ] Reviews: submit after a CLOSED rental (participants only, one review each), reputation summary for Listing; web review form.
-- [ ] Automatic reconnect to RabbitMQ (`amqplib` has a recovery option); a way to inspect dead-lettered events.
+- [ ] Automatic reconnect to RabbitMQ (`amqplib` has a recovery option); a way to inspect dead-lettered events. Reconnect is done in Notification; inspecting dead-lettered events is left.
 - [ ] Correlation IDs in every log line, across services and events.
 
 **Other**

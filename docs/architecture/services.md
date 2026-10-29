@@ -21,8 +21,8 @@ Operation labels describe responsibilities, not exact endpoint names.
 
 | Service | Responsibility | Current operations | Collaborators and delivery | Protocol | Database |
 |---|---|---|---|---|---|
-| **Student Identity** | Authentication, verification, eligibility | Register and log in; verify email; administrator student verification; check eligibility and profile | Gateway validates and propagates the JWT. Other services query eligibility and profile. Writes notification outbox events. | REST | PostgreSQL `identity_db` |
-| **Listing** | Items, pricing, screening | Create a DRAFT and publish it; search, detail, quote. Planned: moderation, unpublish | Identity: eligibility and profile. Booking: calendar setup (gRPC). Planned: Review reputation summary, outbox events. | REST; gRPC client | PostgreSQL `listing_db` |
+| **Student Identity** | Authentication, verification, eligibility | Register and log in; verify email; administrator student verification; check eligibility and profile | Gateway validates and propagates the JWT. Other services query eligibility and profile. Planned: outbox events (the shared outbox is ready). | REST | PostgreSQL `identity_db` |
+| **Listing** | Items, pricing, screening | Create a DRAFT and publish it; search, detail, quote. Planned: moderation, unpublish | Identity: eligibility and profile. Booking: calendar setup (gRPC). Planned: Review reputation summary. Outbox events. | REST; gRPC client | PostgreSQL `listing_db` |
 | **Booking** | Authoritative calendar and agreed terms | Set calendar; check availability; request, approve, decline booking; release calendar; fail approvals that cannot complete and void their holds. Planned: cancel booking, scheduled request expiry | Identity: eligibility. Listing: quote. Payment: authorize and void. Rental: create. Outbox events. | gRPC server; REST client | PostgreSQL `booking_db` |
 | **Rental** | Custody and settlement workflow | Pickup and return evidence and codes; confirm pickup and return; settlement and retry; scheduled overdue checks and reminders | Booking: status, calendar release, affected bookings (gRPC). Payment: capture and settle. Outbox events. Closes after successful settlement. | REST; gRPC client | PostgreSQL `rental_db` |
 | **Payment** | Demo ledger and payment adapter | Payment method; fee and deposit authorization; capture; void and refund; late-fee settlement; payout | Local ledger adapter; no real provider calls. Stable financial operation IDs prevent duplicates. Booking and Rental publish the related notifications. | REST | PostgreSQL `payment_db` |
@@ -95,7 +95,7 @@ flowchart LR
   rental -- "REST" --> payment
   review -- "REST" --> rental
 
-  identity -. "outbox event" .-> mq
+  identity -. "outbox event (planned)" .-> mq
   listing -. "outbox event" .-> mq
   booking -. "outbox event" .-> mq
   rental -. "outbox event" .-> mq
@@ -129,10 +129,10 @@ sequenceDiagram
   L->>B: Set up calendar
   B-->>L: Calendar setup succeeds
   L->>L: Publish (moderation planned)
-  L--)E: Outbox event (planned)
+  L--)E: listing.published (outbox)
 ```
 
-Invalid input is rejected before anything is saved. Calendar failure keeps the listing a DRAFT that the owner can publish again. Moderation and Listing's outbox events are planned, not built.
+Invalid input is rejected before anything is saved. Calendar failure keeps the listing a DRAFT that the owner can publish again. Publishing writes `listing.published` to the owner in the same transaction. Moderation is planned, not built.
 
 ### Book and pay for a rental
 
@@ -178,7 +178,7 @@ sequenceDiagram
   Rv->>R: Check CLOSED + participant
 ```
 
-Rental commits also write outbox events. Settlement failure keeps custody and `SETTLEMENT_PENDING` for explicit retry.
+The commit to `ACTIVE` writes `rental.started` and the commit to `CLOSED` writes `rental.closed`, both to the owner and the renter. Settlement failure keeps custody and `SETTLEMENT_PENDING` for explicit retry.
 
 ### Asynchronous notification delivery
 
@@ -197,7 +197,7 @@ sequenceDiagram
   N--)MQ: Acknowledge
 ```
 
-Identity, Listing, Booking, and Rental produce events. Duplicate delivery does not create a second inbox record. Malformed events go to a dead-letter queue; transient storage failures are requeued. Broker outages delay the inbox without reversing committed business state. Review and Payment publish no notification events in the current scope (see `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`).
+Listing, Booking, and Rental produce events through the shared outbox in `libs/messaging`; Identity will use it for its verification event. Duplicate delivery does not create a second inbox record. Malformed events go to a dead-letter queue; transient storage failures are requeued. Broker outages delay the inbox without reversing committed business state. Review and Payment publish no notification events in the current scope (see `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`).
 
 ## Listing rules and endpoints
 
@@ -250,7 +250,7 @@ Booking implements the request and approval steps of the booking sequence above 
 - A request needs whole Bangkok days that start after now and end within 366 days, an eligible renter (Identity), a published listing (Listing quote), and a renter who is not the owner. A renter holds at most five `PENDING` or `AUTHORIZING` requests at once.
 - Expiry is lazy for now: a stale `PENDING` booking becomes `EXPIRED` and frees its dates when a request, approval, decline, get or list touches it.
 - Only the renter and the owner can read a booking; anyone else gets `NOT_FOUND`. Only the owner approves or declines.
-- `booking.requested` goes to the owner, `booking.declined` to the renter, and `booking.confirmed` and `booking.failed` to both. Booking writes them to its own outbox table in the same transaction and a relay publishes them (see `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`); the data shape is in `libs/contracts/src/events.ts`.
+- `booking.requested` goes to the owner, `booking.declined` to the renter, and `booking.confirmed` and `booking.failed` to both. Booking writes them to its own outbox table in the same transaction and the shared relay in `libs/messaging` publishes them (see `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`); the data shape is in `libs/contracts/src/events.ts`.
 
 ### Approval calls
 
@@ -330,7 +330,7 @@ Only the payer and the payee can read a booking's payments; anyone else gets `40
 
 ## Rental rules
 
-Rental runs the handover in `apps/rental`. Booking opens one rental per confirmed booking (see Approval calls above); the rental keeps the booking's listing, people, period and terms. Amounts are integer satang and times are ISO-8601 UTC. Rental writes no outbox events yet; the rental events wait for the shared outbox.
+Rental runs the handover in `apps/rental`. Booking opens one rental per confirmed booking (see Approval calls above); the rental keeps the booking's listing, people, period and terms. Amounts are integer satang and times are ISO-8601 UTC. Rental writes `rental.started` and `rental.closed` through the shared outbox (see Notification rules below).
 
 ### Rental status
 
@@ -389,6 +389,45 @@ A rental in a response has `id`, `bookingId`, `listingId`, `ownerId`, `renterId`
 
 `apps/rental/e2e/rental-flow.mjs` runs the whole flow through the gateway of a running stack, from a new listing to the payout.
 
+## Notification rules and endpoints
+
+Events follow `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`; the envelope and data shapes are in `libs/contracts/src/events.ts`.
+
+### Outbox and relay
+
+`libs/messaging` holds the shared outbox. A producer calls `writeOutbox` inside the transaction that changes its state, so the row in its own `outbox_events` table exists exactly when the change commits; the row ID is the event ID. `OutboxModule` runs a relay in each producer that polls every second, takes up to 50 unsent rows oldest first with `FOR UPDATE SKIP LOCKED`, publishes each as a persistent message to the topic exchange `campuskit.events` (routing key = event type), and sets `sent_at` only after the broker confirms. It stops at the first failed publish and tries again on the next poll, so a broker outage only delays events.
+
+### Events
+
+| Event | Producer | Recipients | When |
+|---|---|---|---|
+| `listing.published` | Listing | Owner | The listing becomes `PUBLISHED` |
+| `booking.requested` | Booking | Owner | A renter requests dates |
+| `booking.declined` | Booking | Renter | The owner declines |
+| `booking.confirmed` | Booking | Owner and renter | The approval completes |
+| `booking.failed` | Booking | Owner and renter | An approval cannot complete |
+| `rental.started` | Rental | Owner and renter | The pickup makes the rental `ACTIVE` |
+| `rental.closed` | Rental | Owner and renter | Settlement makes the rental `CLOSED`; carries the late fee |
+
+### Consumer
+
+Notification consumes the durable queue `notification.inbox`, bound to every event. A body that is not JSON or not a valid envelope goes to the dead-letter queue `notification.inbox.dead`. A valid event is stored as one inbox entry per recipient with an upsert on (`eventId`, `recipient`), so a redelivery changes nothing; the message is acknowledged after the write and requeued if MongoDB fails. When the broker is down at startup or the connection drops, the consumer reconnects in the background after 1, 2, 4, ... seconds, at most 30.
+
+### Inbox endpoints
+
+Every route needs a token and works only on the caller's own entries; the service serves them at `/inbox`.
+
+| Route | Answer |
+|---|---|
+| `GET /api/notification/inbox` | `200` with `{ entries, unread }`: the newest 50 entries by event time, and the count of all unread entries |
+| `GET /api/notification/inbox/unread-count` | `200` with `{ unread }` |
+| `POST /api/notification/inbox/{eventId}/read` | `200` with the entry; repeating it keeps the first `readAt`; `404` when the caller has no such entry |
+| `POST /api/notification/inbox/read-all` | `200` with `{ unread: 0 }` |
+
+An entry has `eventId`, `type`, `occurredAt`, `data` (the event data), `read`, and `readAt` (an empty string while unread). The web app turns the type and data into the text it shows and polls the unread count every 30 seconds for the badge in the navigation.
+
+`apps/notification/e2e/broker-outage.mjs` measures delivery through a broker outage (see `docs/architecture/quality-resilience.md`).
+
 ## Gateway rules
 
 The gateway checks every request under `/api`, both the proxied REST services and its own Booking routes, in this order:
@@ -442,7 +481,7 @@ These are a validation plan, not claimed test results.
 - Booking: prevent overlapping committed reservations; retry authorization within its window and compensate for a failed confirmation.
 - Handover and settlement: keep the deposit after fee capture; accept evidence and code at return, release the calendar, settle, then close.
 - Review requires a CLOSED rental and participant authorization.
-- Verify broker outage and recovery and duplicate event delivery separately from payment-workflow recovery.
+- Verify broker outage and recovery and duplicate event delivery separately from payment-workflow recovery (measured in `docs/architecture/quality-resilience.md`).
 
 ## Open questions
 
