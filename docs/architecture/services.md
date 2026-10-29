@@ -244,7 +244,22 @@ The gateway checks every request under `/api`, both the proxied REST services an
 
 When a service is down or does not answer within 15 seconds, the gateway answers `502` with `The <service> service is unavailable`.
 
-The gateway forwards the `Authorization` header unchanged, and each service still checks the token and authorises the request (see `docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md`). The Booking routes do not yet send the token or the correlation ID to Booking as gRPC metadata.
+The gateway forwards the `Authorization` header unchanged, and each service still checks the token and authorises the request (see `docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md`).
+
+The gateway serves the Booking routes itself and calls Booking over gRPC (`libs/contracts/proto/booking.proto`). Every Booking route needs a token. On each call the gateway sends the caller's `Authorization` header and the correlation ID as the gRPC metadata `authorization` and `x-correlation-id`; Booking reads the caller from the token. `SetupCalendar` and `ReleaseCalendar` have no REST route; Listing and Rental call them over gRPC.
+
+| Route | Booking method | Answer |
+|---|---|---|
+| `POST /api/booking/bookings` with `{ listingId, period: { start, end } }` | `RequestBooking` | `201` with the booking |
+| `GET /api/booking/bookings?role=&status=` (`role` is `renter` or `owner`; `status` is optional) | `ListBookings` | `200` with `{ bookings }`, newest first |
+| `GET /api/booking/bookings/{id}` | `GetBooking` | `200` with the booking |
+| `POST /api/booking/bookings/{id}/approve` | `ApproveBooking` | `200` with the booking |
+| `POST /api/booking/bookings/{id}/decline` with an optional `{ reason }` of at most 500 characters | `DeclineBooking` | `200` with the booking |
+| `GET /api/booking/listings/{listingId}/availability?start=&end=` | `CheckAvailability` | `200` with `{ available }` |
+
+A booking in a response has `id`, `listingId`, `renterId`, `ownerId`, `status`, `period` `{ start, end }`, `terms` `{ rentalFee, deposit, lateFeePerDay }` in satang, `declineReason` (empty unless `DECLINED`), `expiresAt`, `createdAt`, and `updatedAt`; every field is present, with an empty string or zero when Booking left it unset.
+
+The gateway validates IDs as UUIDs and times as ISO-8601 before it calls Booking, and answers `400` otherwise; Booking checks the rules. Booking's gRPC status codes become HTTP statuses as `apps/gateway/src/booking/grpc-error.ts` lists them. When Booking does not answer within 10 seconds, or reports `DEADLINE_EXCEEDED`, the gateway answers `504` with `The booking service did not answer in time`.
 
 ## Service discovery and local deployment
 
