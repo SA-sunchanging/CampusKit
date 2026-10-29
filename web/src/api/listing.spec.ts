@@ -6,6 +6,7 @@ import {
   rejectListing,
   reviewQueueQuery,
   searchQuery,
+  unpublishListing,
 } from './listing.ts';
 
 const id = '11111111-1111-4111-8111-111111111111';
@@ -66,7 +67,7 @@ describe('reviewQueueQuery', () => {
   });
 });
 
-describe('moderation calls', () => {
+describe('owner and moderation calls', () => {
   beforeEach(() => {
     vi.stubGlobal('localStorage', new MemoryStorage());
   });
@@ -92,6 +93,18 @@ describe('moderation calls', () => {
     });
     expect(requestOf(fetchMock)).toEqual({
       url: `/api/listing/admin/listings/${id}/approve`,
+      method: 'POST',
+      body: undefined,
+    });
+  });
+
+  it('unpublishes with an empty POST', async () => {
+    const fetchMock = mockFetch({ id, status: 'UNPUBLISHED' });
+    await expect(unpublishListing(id)).resolves.toMatchObject({
+      status: 'UNPUBLISHED',
+    });
+    expect(requestOf(fetchMock)).toEqual({
+      url: `/api/listing/listings/${id}/unpublish`,
       method: 'POST',
       body: undefined,
     });

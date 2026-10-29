@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { getListing, publishListing, type Listing } from '../../api/listing.ts';
+import { getListing, type Listing } from '../../api/listing.ts';
 import { useAuth } from '../../auth/useAuth.ts';
 import BookingRequestPanel from '../booking/BookingRequestPanel.tsx';
-import {
-  Alert,
-  Badge,
-  Button,
-  EmptyState,
-  PageHeader,
-  Panel,
-} from '../../ui/index.ts';
+import { Alert, Badge, EmptyState, PageHeader } from '../../ui/index.ts';
 import Gallery from './Gallery.tsx';
 import { ItemDetails, PriceBox } from './ListingFacts.tsx';
 import {
@@ -19,6 +12,7 @@ import {
   STATUS_LABELS,
   STATUS_TONE,
 } from './options.ts';
+import OwnerStatus from './OwnerStatus.tsx';
 import './listing.css';
 
 // The service rejects ids that are not UUIDs, so such a link is simply not found.
@@ -31,7 +25,7 @@ interface Loaded {
   error?: string;
 }
 
-// One listing (role B). Public; the owner also sees their DRAFT.
+// One listing (role B). Public; the owner also sees it in any other status.
 export default function ListingDetailPage() {
   const { id = '' } = useParams();
   const { user } = useAuth();
@@ -39,7 +33,7 @@ export default function ListingDetailPage() {
   const key = `${id}|${viewerId}`;
   const [loaded, setLoaded] = useState<Loaded | null>(null);
 
-  // Load again when the viewer changes: only the owner may see a DRAFT.
+  // Load again when the viewer changes: only the owner may see an unpublished one.
   useEffect(() => {
     if (!UUID.test(id)) return;
     let active = true;
@@ -120,9 +114,7 @@ function ListingView({
           {STATUS_LABELS[listing.status]}
         </Badge>
       </div>
-      {isOwner && listing.status === 'DRAFT' && (
-        <DraftNotice listing={listing} onChange={handleChange} />
-      )}
+      {isOwner && <OwnerStatus listing={listing} onChange={handleChange} />}
       {published && (
         <Alert tone="success">
           Your listing is published and now shows in search.
@@ -136,52 +128,13 @@ function ListingView({
         />
         <div>
           <PriceBox listing={listing} />
-          {/* Booking request form (role C). */}
-          {!isOwner && <BookingRequestPanel listing={listing} />}
+          {/* Booking request form (role C). Only a PUBLISHED listing can be booked. */}
+          {!isOwner && listing.status === 'PUBLISHED' && (
+            <BookingRequestPanel listing={listing} />
+          )}
         </div>
       </div>
       <ItemDetails listing={listing} />
     </section>
-  );
-}
-
-// Shown to the owner while Booking has not set up the calendar yet.
-function DraftNotice({
-  listing,
-  onChange,
-}: {
-  listing: Listing;
-  onChange: (listing: Listing) => void;
-}) {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handlePublish() {
-    setPending(true);
-    setError(null);
-    try {
-      onChange(await publishListing(listing.id));
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setPending(false);
-    }
-  }
-
-  return (
-    <Panel title="Not published yet">
-      <div className="stack">
-        <Alert tone="danger">
-          This listing is a draft, so it does not show in search.{' '}
-          {listing.publishError ?? 'Publishing has not finished.'}
-        </Alert>
-        {error && <Alert tone="danger">{error}</Alert>}
-        <div className="actions">
-          <Button disabled={pending} onClick={() => void handlePublish()}>
-            {pending ? 'Publishing...' : 'Publish again'}
-          </Button>
-        </div>
-      </div>
-    </Panel>
   );
 }

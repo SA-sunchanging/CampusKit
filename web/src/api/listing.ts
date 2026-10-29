@@ -189,6 +189,16 @@ export function publishListing(id: string): Promise<Listing> {
   });
 }
 
+/**
+ * Takes a PUBLISHED listing out of search and booking. Owner only; an
+ * UNPUBLISHED listing is returned unchanged, any other status answers 409.
+ */
+export function unpublishListing(id: string): Promise<Listing> {
+  return api(`/listing/listings/${encodeURIComponent(id)}/unpublish`, {
+    method: 'POST',
+  });
+}
+
 /** Builds "?status=...&page=..." for the review queue, leaving out page 1. */
 export function reviewQueueQuery(status: ListingStatus, page = 1): string {
   const query = new URLSearchParams({ status });
