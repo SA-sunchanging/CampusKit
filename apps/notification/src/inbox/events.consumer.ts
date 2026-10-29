@@ -1,70 +1,60 @@
-import { EVENTS_EXCHANGE, type EventEnvelope } from '@app/contracts';
 import {
   Injectable,
   Logger,
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
-import { connect, type ChannelModel, type ConsumeMessage } from 'amqplib';
-
-const QUEUE = 'notification.inbox';
-const DEAD_LETTER_EXCHANGE = `${EVENTS_EXCHANGE}.dlx`;
-const DEAD_LETTER_QUEUE = `${QUEUE}.dead`;
+import type { Channel, ConsumeMessage } from 'amqplib';
+import { BrokerConnection } from './broker-connection.js';
+import { handleDelivery, settle } from './delivery.js';
+import { InboxStoreService } from './inbox-store.service.js';
+import { declareInboxTopology, INBOX_QUEUE } from './topology.js';
 
 /**
  * Consumes every event from the durable exchange (ADR-008).
  * Acknowledge only after the inbox write; malformed events go to the dead-letter queue.
+ * The broker connection retries in the background, so the service starts while RabbitMQ is down.
  */
 @Injectable()
 export class EventsConsumer implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(EventsConsumer.name);
-  private connection?: ChannelModel;
-
-  async onModuleInit(): Promise<void> {
-    // TODO(Notification): reconnect when the broker restarts instead of only connecting at startup.
-    this.connection = await connect(
+  private readonly broker = new BrokerConnection({
+    url:
       process.env.RABBITMQ_URL ?? 'amqp://campuskit:campuskit@localhost:5672',
-    );
-    const channel = await this.connection.createChannel();
-    await channel.assertExchange(EVENTS_EXCHANGE, 'topic', { durable: true });
-    await channel.assertExchange(DEAD_LETTER_EXCHANGE, 'fanout', {
-      durable: true,
-    });
-    await channel.assertQueue(DEAD_LETTER_QUEUE, { durable: true });
-    await channel.bindQueue(DEAD_LETTER_QUEUE, DEAD_LETTER_EXCHANGE, '');
-    await channel.assertQueue(QUEUE, {
-      durable: true,
-      deadLetterExchange: DEAD_LETTER_EXCHANGE,
-    });
-    await channel.bindQueue(QUEUE, EVENTS_EXCHANGE, '#');
-    await channel.consume(QUEUE, async (message: ConsumeMessage | null) => {
-      if (!message) {
-        return;
-      }
-      let event: EventEnvelope;
-      try {
-        event = JSON.parse(message.content.toString()) as EventEnvelope;
-      } catch {
-        channel.nack(message, false, false);
-        return;
-      }
-      try {
-        await this.handle(event);
-        channel.ack(message);
-      } catch (error) {
-        this.logger.error(error);
-        channel.nack(message, false, true);
-      }
-    });
-    this.logger.log(`Consuming ${QUEUE}`);
+    setup: (channel) => this.consume(channel),
+  });
+
+  constructor(private readonly inbox: InboxStoreService) {}
+
+  onModuleInit(): void {
+    this.broker.start();
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.connection?.close().catch(() => undefined);
+    await this.broker.stop();
   }
 
-  private async handle(event: EventEnvelope): Promise<void> {
-    // TODO(Notification): validate the envelope and upsert one InboxEntry per recipient.
-    this.logger.log(`Received ${event.type} (${event.eventId})`);
+  private async consume(channel: Channel): Promise<void> {
+    await declareInboxTopology(channel);
+    await channel.consume(INBOX_QUEUE, (message: ConsumeMessage | null) => {
+      if (!message) {
+        // The broker cancelled the consumer; closing the channel triggers a reconnect.
+        this.logger.warn(`Consumer of ${INBOX_QUEUE} was cancelled`);
+        void channel.close().catch(() => undefined);
+        return;
+      }
+      void this.deliver(channel, message);
+    });
+    this.logger.log(`Consuming ${INBOX_QUEUE}`);
+  }
+
+  private async deliver(
+    channel: Channel,
+    message: ConsumeMessage,
+  ): Promise<void> {
+    const decision = await handleDelivery(message.content, (envelope) =>
+      this.inbox.store(envelope),
+    );
+    settle(channel, message, decision);
   }
 }
