@@ -1,3 +1,4 @@
+import type { AuthorizationStatus } from '../../api/payment.ts';
 import type { Rental, RentalStatus } from '../../api/rental.ts';
 import type { Tone } from '../../ui/index.ts';
 import { formatDateTime } from '../booking/dates.ts';
@@ -29,6 +30,36 @@ export function statusLabel(status: string): string {
 
 export function statusTone(status: string): Tone {
   return isKnown(status) ? STATUS_TONES[status] : 'neutral';
+}
+
+/** Payment's hold statuses, as the renter and the owner read them. */
+export const PAYMENT_LABELS: Record<AuthorizationStatus, string> = {
+  AUTHORIZED: 'Held',
+  CAPTURED: 'Paid',
+  SETTLED: 'Settled',
+  VOIDED: 'Released',
+  EXPIRED: 'Hold expired',
+};
+
+export const PAYMENT_TONES: Record<AuthorizationStatus, Tone> = {
+  AUTHORIZED: 'warning',
+  CAPTURED: 'success',
+  SETTLED: 'success',
+  VOIDED: 'neutral',
+  EXPIRED: 'danger',
+};
+
+/** The label, or the code itself for a status this page does not know yet. */
+export function paymentLabel(status: string): string {
+  return Object.hasOwn(PAYMENT_LABELS, status)
+    ? PAYMENT_LABELS[status as AuthorizationStatus]
+    : status;
+}
+
+export function paymentTone(status: string): Tone {
+  return Object.hasOwn(PAYMENT_TONES, status)
+    ? PAYMENT_TONES[status as AuthorizationStatus]
+    : 'neutral';
 }
 
 /** The renter can pick up from this long before the period starts until it ends. */

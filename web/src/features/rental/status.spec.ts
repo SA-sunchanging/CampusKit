@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
+import { AUTHORIZATION_STATUSES } from '../../api/payment.ts';
 import { RENTAL_STATUSES, type RentalStatus } from '../../api/rental.ts';
 import {
   nextAction,
   nextStepNote,
+  PAYMENT_LABELS,
+  PAYMENT_TONES,
+  paymentLabel,
+  paymentTone,
   STATUS_LABELS,
   STATUS_TONES,
   statusLabel,
@@ -44,6 +49,26 @@ describe('status labels', () => {
     expect(statusLabel('DISPUTED')).toBe('DISPUTED');
     expect(statusTone('DISPUTED')).toBe('neutral');
     expect(statusLabel('toString')).toBe('toString');
+  });
+});
+
+describe('payment labels', () => {
+  it('has a label and a tone for every hold status', () => {
+    for (const status of AUTHORIZATION_STATUSES) {
+      expect(PAYMENT_LABELS[status]).toBeTruthy();
+      expect(PAYMENT_TONES[status]).toBeTruthy();
+    }
+  });
+
+  it('shows a captured fee as paid and an expired hold as danger', () => {
+    expect(paymentLabel('CAPTURED')).toBe('Paid');
+    expect(paymentTone('EXPIRED')).toBe('danger');
+  });
+
+  it('shows an unknown status as its code in neutral', () => {
+    expect(paymentLabel('REFUNDED')).toBe('REFUNDED');
+    expect(paymentTone('REFUNDED')).toBe('neutral');
+    expect(paymentLabel('toString')).toBe('toString');
   });
 });
 
