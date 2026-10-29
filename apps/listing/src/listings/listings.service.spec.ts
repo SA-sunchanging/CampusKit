@@ -45,12 +45,26 @@ const dto = {
 } satisfies CreateListingDto;
 
 function setup() {
+  /** The one listing row the fake repository holds. */
+  let stored: Partial<Listing> | undefined;
+  const store = (listing: Partial<Listing> | undefined) => {
+    stored = listing;
+  };
   const listingRepo = {
     create: vi.fn((fields: Partial<Listing>) => fields),
-    save: vi.fn((listing: Partial<Listing>) =>
-      Promise.resolve({ id: listingId, createdAt: now, ...listing } as Listing),
-    ),
-    findOneBy: vi.fn(),
+    save: vi.fn((listing: Partial<Listing>) => {
+      store({ id: listingId, createdAt: now, ...listing });
+      return Promise.resolve({ ...stored } as Listing);
+    }),
+    findOneBy: vi.fn(() => Promise.resolve(stored ? { ...stored } : null)),
+    findOneByOrFail: vi.fn(() => Promise.resolve({ ...stored } as Listing)),
+    update: vi.fn((where: Partial<Listing>, fields: Partial<Listing>) => {
+      const match = stored !== undefined && stored.status === where.status;
+      if (stored && match) {
+        Object.assign(stored, fields);
+      }
+      return Promise.resolve({ affected: match ? 1 : 0 });
+    }),
   };
   const photoRepo = {
     insert: vi.fn(),
@@ -60,6 +74,7 @@ function setup() {
     getRepository: vi.fn((entity: { name: string }) =>
       entity.name === 'Listing' ? listingRepo : photoRepo,
     ),
+    query: vi.fn().mockResolvedValue([]),
   };
   const db = {
     transaction: vi.fn((work: (manager: typeof tx) => unknown) => work(tx)),
@@ -75,7 +90,21 @@ function setup() {
     identity as unknown as IdentityClient,
     calendar as unknown as CalendarClient,
   );
-  return { service, listingRepo, photoRepo, identity, calendar, db };
+  /** The envelopes written to the outbox, in order. */
+  const events = () =>
+    tx.query.mock.calls
+      .filter(([sql]) => String(sql).includes('INSERT INTO outbox_events'))
+      .map(([, params]) => JSON.parse((params as string[])[2]) as unknown);
+  return {
+    service,
+    listingRepo,
+    photoRepo,
+    identity,
+    calendar,
+    db,
+    events,
+    store,
+  };
 }
 
 describe('ListingsService.create', () => {
@@ -102,6 +131,26 @@ describe('ListingsService.create', () => {
     expect(result.publishedAt).toBeInstanceOf(Date);
     expect(result.publishError).toBeNull();
     expect(result.photos).toEqual([photo]);
+  });
+
+  it('announces the published listing to its owner in the same transaction', async () => {
+    const { service, db, events } = setup();
+    await service.create(owner, dto, call, now);
+    expect(db.transaction).toHaveBeenCalledTimes(2);
+    expect(events()).toEqual([
+      expect.objectContaining({
+        type: 'listing.published',
+        producer: 'listing',
+        recipients: [owner.sub],
+        correlationId: 'corr-1',
+        data: {
+          listingId,
+          ownerId: owner.sub,
+          title: 'Calculus I textbook',
+          status: 'PUBLISHED',
+        },
+      }),
+    ]);
   });
 
   it('checks eligibility before saving anything', async () => {
@@ -137,30 +186,55 @@ describe('ListingsService.create', () => {
     expect(result.publishedAt).toBeNull();
     expect(result.publishError).toBe('The booking service is unavailable');
   });
+
+  it('announces nothing when calendar setup fails', async () => {
+    const { service, calendar, listingRepo, events } = setup();
+    calendar.setupCalendar.mockRejectedValue(
+      new CalendarSetupError('The booking service is unavailable'),
+    );
+    await service.create(owner, dto, call, now);
+    expect(events()).toEqual([]);
+    expect(listingRepo.update).toHaveBeenCalledWith(
+      { id: listingId, status: 'DRAFT' },
+      { publishError: 'The booking service is unavailable' },
+    );
+  });
 });
 
 describe('ListingsService.publish', () => {
   const draft = () => ({
     id: listingId,
     ownerId: owner.sub,
-    status: 'DRAFT',
+    status: 'DRAFT' as const,
     blackouts: [],
     publishError: 'down',
     publishedAt: null,
   });
 
   it('publishes a DRAFT on retry', async () => {
-    const { service, listingRepo, identity } = setup();
-    listingRepo.findOneBy.mockResolvedValue(draft());
+    const { service, identity, store } = setup();
+    store(draft());
     const result = await service.publish(owner, listingId, call);
     expect(identity.requirePublisher).toHaveBeenCalled();
     expect(result.status).toBe('PUBLISHED');
     expect(result.publishError).toBeNull();
   });
 
-  it('returns a PUBLISHED listing unchanged', async () => {
-    const { service, listingRepo, calendar } = setup();
-    listingRepo.findOneBy.mockResolvedValue({
+  it('announces a DRAFT published on retry', async () => {
+    const { service, events, store } = setup();
+    store(draft());
+    await service.publish(owner, listingId, call);
+    expect(events()).toEqual([
+      expect.objectContaining({
+        type: 'listing.published',
+        recipients: [owner.sub],
+      }),
+    ]);
+  });
+
+  it('returns a PUBLISHED listing unchanged and announces nothing', async () => {
+    const { service, listingRepo, calendar, events, store } = setup();
+    store({
       ...draft(),
       status: 'PUBLISHED',
       publishedAt: now,
@@ -169,19 +243,46 @@ describe('ListingsService.publish', () => {
     expect(result.status).toBe('PUBLISHED');
     expect(calendar.setupCalendar).not.toHaveBeenCalled();
     expect(listingRepo.save).not.toHaveBeenCalled();
+    expect(listingRepo.update).not.toHaveBeenCalled();
+    expect(events()).toEqual([]);
+  });
+
+  it('announces nothing when a concurrent publish won the race', async () => {
+    const { service, calendar, events, store } = setup();
+    store(draft());
+    calendar.setupCalendar.mockImplementation(() => {
+      store({ ...draft(), status: 'PUBLISHED', publishedAt: now });
+      return Promise.resolve();
+    });
+    const result = await service.publish(owner, listingId, call);
+    expect(result.status).toBe('PUBLISHED');
+    expect(result.publishedAt).toBe(now);
+    expect(events()).toEqual([]);
+  });
+
+  it('keeps a listing a concurrent publish made PUBLISHED when its own setup fails', async () => {
+    const { service, calendar, events, store } = setup();
+    store(draft());
+    calendar.setupCalendar.mockImplementation(() => {
+      store({ ...draft(), status: 'PUBLISHED', publishError: null });
+      return Promise.reject(new CalendarSetupError('down'));
+    });
+    const result = await service.publish(owner, listingId, call);
+    expect(result.status).toBe('PUBLISHED');
+    expect(result.publishError).toBeNull();
+    expect(events()).toEqual([]);
   });
 
   it('refuses anyone but the owner', async () => {
-    const { service, listingRepo } = setup();
-    listingRepo.findOneBy.mockResolvedValue(draft());
+    const { service, store } = setup();
+    store(draft());
     await expect(service.publish(other, listingId, call)).rejects.toThrow(
       ForbiddenException,
     );
   });
 
   it('answers 404 for an unknown listing', async () => {
-    const { service, listingRepo } = setup();
-    listingRepo.findOneBy.mockResolvedValue(null);
+    const { service } = setup();
     await expect(service.publish(owner, listingId, call)).rejects.toThrow(
       NotFoundException,
     );

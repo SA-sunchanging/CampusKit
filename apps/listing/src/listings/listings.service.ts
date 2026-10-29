@@ -13,6 +13,7 @@ import {
 } from '../clients/calendar.client.js';
 import { IdentityClient } from '../clients/identity.client.js';
 import { checkBlackouts } from './blackouts.js';
+import { announcePublished } from './listing-events.js';
 import type { CreateListingDto } from './dto/create-listing.dto.js';
 import { ListingPhoto } from './listing-photo.entity.js';
 import { Listing } from './listing.entity.js';
@@ -113,23 +114,64 @@ export class ListingsService {
     return rows.map((row) => row.dataUrl);
   }
 
+  /**
+   * Publishes when Booking sets up the calendar; otherwise the DRAFT keeps publishError saying
+   * why and nothing is announced.
+   */
   private async tryPublish(
     listing: Listing,
     photos: string[],
     call: CallContext,
   ): Promise<ListingResponse> {
+    const ready = await this.setUpCalendar(listing, call);
+    const saved = ready
+      ? await this.markPublished(listing.id, call)
+      : await this.recordPublishError(listing);
+    return ListingResponse.of(saved, photos);
+  }
+
+  /**
+   * DRAFT becomes PUBLISHED once, even when two publishes race; only the publish that made the
+   * change writes listing.published, in the same transaction.
+   */
+  private markPublished(id: string, call: CallContext): Promise<Listing> {
+    return this.db.transaction(async (tx) => {
+      const repo = tx.getRepository(Listing);
+      const { affected } = await repo.update(
+        { id, status: 'DRAFT' },
+        { status: 'PUBLISHED', publishedAt: new Date(), publishError: null },
+      );
+      const row = await repo.findOneByOrFail({ id });
+      if (affected === 1) {
+        await announcePublished(tx, row, call.correlationId);
+      }
+      return row;
+    });
+  }
+
+  /** Keeps why publishing failed, unless a concurrent publish has succeeded meanwhile. */
+  private async recordPublishError(listing: Listing): Promise<Listing> {
+    await this.listings.update(
+      { id: listing.id, status: 'DRAFT' },
+      { publishError: listing.publishError },
+    );
+    return this.listings.findOneByOrFail({ id: listing.id });
+  }
+
+  /** True when the calendar exists; otherwise records why on the listing (not yet saved). */
+  private async setUpCalendar(
+    listing: Listing,
+    call: CallContext,
+  ): Promise<boolean> {
     try {
       await this.calendar.setupCalendar(listing.id, listing.blackouts, call);
-      listing.status = 'PUBLISHED';
-      listing.publishedAt = new Date();
-      listing.publishError = null;
+      return true;
     } catch (error) {
       if (!(error instanceof CalendarSetupError)) {
         throw error;
       }
       listing.publishError = error.message;
+      return false;
     }
-    const saved = await this.listings.save(listing);
-    return ListingResponse.of(saved, photos);
   }
 }
