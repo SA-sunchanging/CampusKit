@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module.js';
 import { InternalUsersModule } from './internal/internal-users.module.js';
 import { migrations } from './migrations/index.js';
+import { EmailVerificationModule } from './verification/email-verification.module.js';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { migrations } from './migrations/index.js';
     AccountsModule,
     AuthModule,
     InternalUsersModule,
+    EmailVerificationModule,
   ],
 })
 export class IdentityModule {}
