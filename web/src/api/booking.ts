@@ -97,6 +97,18 @@ export function declineBooking(id: string, reason?: string): Promise<Booking> {
   });
 }
 
+/**
+ * The renter or the owner, PENDING or CONFIRMED, before pickup. The reason is optional and
+ * shown to the other person. The answer is CANCELLED; 409 once the item is picked up.
+ */
+export function cancelBooking(id: string, reason?: string): Promise<Booking> {
+  const trimmed = reason?.trim();
+  return api(`/booking/bookings/${encodeURIComponent(id)}/cancel`, {
+    method: 'POST',
+    body: JSON.stringify(trimmed ? { reason: trimmed } : {}),
+  });
+}
+
 /** Advisory: the request rechecks the dates when it reserves them. */
 export async function checkAvailability(
   listingId: string,

@@ -9,6 +9,7 @@ export const RENTAL_STATUSES = [
   'ACTIVE',
   'SETTLEMENT_PENDING',
   'CLOSED',
+  'CANCELLED',
 ] as const;
 export type RentalStatus = (typeof RENTAL_STATUSES)[number];
 

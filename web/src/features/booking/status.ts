@@ -55,3 +55,17 @@ export function ownerAction(
   }
   return null;
 }
+
+/**
+ * Whether the renter or the owner can cancel: a PENDING request that has not expired, or a
+ * CONFIRMED booking. Booking refuses once the item is picked up.
+ */
+export function canCancel(
+  booking: Pick<Booking, 'status' | 'expiresAt'>,
+  now = new Date(),
+): boolean {
+  if (booking.status === 'PENDING') {
+    return Date.parse(booking.expiresAt) > now.getTime();
+  }
+  return booking.status === 'CONFIRMED';
+}

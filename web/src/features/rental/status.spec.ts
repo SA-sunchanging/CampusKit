@@ -78,6 +78,7 @@ describe('nextAction for the owner', () => {
     ['ACTIVE', 'enter-return-code'],
     ['SETTLEMENT_PENDING', 'retry-settlement'],
     ['CLOSED', 'none'],
+    ['CANCELLED', 'none'],
   ] as const)('on %s is %s', (status, action) => {
     expect(nextAction(rental(status), OWNER, INSIDE)).toBe(action);
   });
@@ -114,6 +115,7 @@ describe('nextAction for the renter', () => {
     ['ACTIVE', 'show-return-code'],
     ['SETTLEMENT_PENDING', 'none'],
     ['CLOSED', 'none'],
+    ['CANCELLED', 'none'],
   ] as const)('on %s is %s', (status, action) => {
     expect(nextAction(rental(status), RENTER, INSIDE)).toBe(action);
   });

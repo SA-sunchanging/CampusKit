@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BOOKING_STATUSES, type BookingStatus } from '../../api/booking.ts';
 import {
+  canCancel,
   ownerAction,
   STATUS_LABELS,
   STATUS_TONES,
@@ -67,5 +68,32 @@ describe('ownerAction', () => {
 
   it('offers the renter nothing', () => {
     expect(ownerAction(booking('PENDING'), 'renter', NOW)).toBeNull();
+  });
+});
+
+describe('canCancel', () => {
+  const later = '2026-10-30T05:00:00.000Z';
+
+  it('allows a pending request until it expires', () => {
+    expect(canCancel({ status: 'PENDING', expiresAt: later }, NOW)).toBe(true);
+    expect(
+      canCancel({ status: 'PENDING', expiresAt: NOW.toISOString() }, NOW),
+    ).toBe(false);
+  });
+
+  it('allows a confirmed booking', () => {
+    expect(canCancel({ status: 'CONFIRMED', expiresAt: later }, NOW)).toBe(
+      true,
+    );
+  });
+
+  it.each([
+    'AUTHORIZING',
+    'DECLINED',
+    'EXPIRED',
+    'CANCELLED',
+    'FAILED',
+  ] as const)('refuses %s', (status) => {
+    expect(canCancel({ status, expiresAt: later }, NOW)).toBe(false);
   });
 });

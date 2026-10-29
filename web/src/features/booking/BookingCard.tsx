@@ -3,8 +3,9 @@ import type { Booking, BookingRole } from '../../api/booking.ts';
 import { Badge, formatBaht, formatDateRange } from '../../ui/index.ts';
 import { rentalDays } from './bookingForm.ts';
 import { formatDateTime } from './dates.ts';
+import CancelAction from './CancelAction.tsx';
 import OwnerActions from './OwnerActions.tsx';
-import { ownerAction, statusLabel, statusTone } from './status.ts';
+import { canCancel, ownerAction, statusLabel, statusTone } from './status.ts';
 
 // One booking on the bookings page (role C), seen as its renter or its owner.
 export default function BookingCard({
@@ -49,6 +50,9 @@ export default function BookingCard({
       <StatusNote booking={booking} role={role} />
       {action && (
         <OwnerActions booking={booking} action={action} onChange={onChange} />
+      )}
+      {canCancel(booking) && (
+        <CancelAction booking={booking} onChange={onChange} />
       )}
     </article>
   );

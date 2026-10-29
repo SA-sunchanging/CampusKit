@@ -10,6 +10,7 @@ export const STATUS_LABELS: Record<RentalStatus, string> = {
   ACTIVE: 'With the renter',
   SETTLEMENT_PENDING: 'Settling payment',
   CLOSED: 'Closed',
+  CANCELLED: 'Cancelled',
 };
 
 export const STATUS_TONES: Record<RentalStatus, Tone> = {
@@ -17,6 +18,7 @@ export const STATUS_TONES: Record<RentalStatus, Tone> = {
   ACTIVE: 'success',
   SETTLEMENT_PENDING: 'warning',
   CLOSED: 'neutral',
+  CANCELLED: 'neutral',
 };
 
 function isKnown(status: string): status is RentalStatus {
