@@ -57,10 +57,10 @@ commits; Git contribution counts toward the progress grade.
 ### B: Listing
 
 **Core**
-- [ ] Create a listing: validate, save a DRAFT, check eligibility with Identity, set up the calendar with Booking (gRPC), then publish.
-- [ ] Search by keyword and category; listing detail; internal quote endpoint for Booking (fee, deposit, late-fee rule, owner).
-- [ ] Photos as compressed inline data URLs.
-- [ ] Web: search, listing detail, and create-listing pages.
+- [x] Create a listing: validate, save a DRAFT, check eligibility with Identity, set up the calendar with Booking (gRPC), then publish.
+- [x] Search by keyword and category; listing detail; internal quote endpoint for Booking (fee, deposit, late-fee rule, owner).
+- [x] Photos as compressed inline data URLs.
+- [x] Web: search, listing detail, and create-listing pages.
 - [ ] Load test with k6, two types (for example load and stress) on search and detail, with 1,500 seeded listings; explain the results.
 
 **Should**
@@ -76,17 +76,17 @@ commits; Git contribution counts toward the progress grade.
 
 **Core**
 - [x] Finish `libs/contracts/proto/booking.proto` first: calendar setup, availability, request, approve, decline, get, list, and release calendar.
-- [ ] Calendar with the PostgreSQL exclusion constraint (raw SQL migration; `btree_gist` is already installed). (taken by B)
-- [ ] Request a booking (eligibility from Identity, quote from Listing, atomic reservation), owner approves or declines.
-- [ ] On approval: authorize with Payment, create the rental with Rental, mark CONFIRMED, write `booking.*` events.
-- [ ] Gateway REST routes for booking in `apps/gateway/src/booking`.
-- [ ] Web: request form on the listing page, my bookings, owner approve or decline.
+- [x] Calendar with the PostgreSQL exclusion constraint (raw SQL migration; `btree_gist` is already installed). (taken by B)
+- [x] Request a booking (eligibility from Identity, quote from Listing, atomic reservation), owner approves or declines.
+- [x] On approval: authorize with Payment, create the rental with Rental, mark CONFIRMED, write `booking.*` events.
+- [x] Gateway REST routes for booking in `apps/gateway/src/booking`.
+- [x] Web: request form on the listing page, my bookings, owner approve or decline.
 - [ ] Slides: sequence diagrams; assemble the final slide deck and the live-demo script.
 
 **Should**
 - [ ] Expiry worker for requests the owner does not answer; cancellation before pickup.
-- [ ] Compensation: void authorizations and release dates when confirmation fails; authorization retry window.
-- [ ] Concurrency test: many overlapping requests at once, exactly one succeeds.
+- [x] Compensation: void authorizations and release dates when confirmation fails; authorization retry window.
+- [x] Concurrency test: many overlapping requests at once, exactly one succeeds.
 
 **Other**
 - Calendar reconciliation, rescheduling bookings affected by a late return.
