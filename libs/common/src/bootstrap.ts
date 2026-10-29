@@ -2,6 +2,8 @@ import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { correlationId } from './correlation-id.middleware.js';
+import { CorrelationInterceptor } from './correlation.interceptor.js';
+import { CorrelationLogger } from './correlation-logger.js';
 import { ErrorFilter } from './error.filter.js';
 
 export interface HttpServiceOptions {
@@ -9,7 +11,10 @@ export interface HttpServiceOptions {
   bodyParser?: boolean;
 }
 
-/** Creates a Nest HTTP app with the shared conventions: correlation IDs, validation, error shape, and Swagger at /docs. */
+/**
+ * Creates a Nest HTTP app with the shared conventions: correlation IDs in every log line,
+ * validation, error shape, and Swagger at /docs.
+ */
 export async function createHttpService(
   module: Parameters<typeof NestFactory.create>[0],
   service: string,
@@ -17,8 +22,10 @@ export async function createHttpService(
 ): Promise<INestApplication> {
   const app = await NestFactory.create(module, {
     bodyParser: options.bodyParser ?? true,
+    logger: new CorrelationLogger(),
   });
   app.use(correlationId);
+  app.useGlobalInterceptors(new CorrelationInterceptor());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new ErrorFilter());
   app.enableShutdownHooks();

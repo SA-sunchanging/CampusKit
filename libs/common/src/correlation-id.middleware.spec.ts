@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import { currentCorrelationId } from './correlation-context.js';
 import {
   CORRELATION_HEADER,
   correlationId,
@@ -17,7 +18,7 @@ function run(given?: string) {
     header: (name: string) => headers[name],
   };
   const res = { setHeader: vi.fn() };
-  const next = vi.fn();
+  const next = vi.fn(() => currentCorrelationId());
   correlationId(
     req as unknown as Request,
     res as unknown as Response,
@@ -60,5 +61,12 @@ describe('correlationId', () => {
   it('accepts an ID of exactly 128 characters', () => {
     const given = 'a'.repeat(128);
     expect(run(given).id).toBe(given);
+  });
+
+  it('runs the rest of the request under the ID', () => {
+    const { id, next } = run('corr-1');
+    expect(id).toBe('corr-1');
+    expect(next).toHaveReturnedWith('corr-1');
+    expect(currentCorrelationId()).toBeUndefined();
   });
 });

@@ -6,7 +6,9 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
+import { runWithCorrelationId } from './correlation-context.js';
+import { CORRELATION_HEADER } from './correlation-id.middleware.js';
 
 /**
  * Shapes every HTTP error as { error: { code, message } } with a string message. Validation
@@ -17,7 +19,8 @@ export class ErrorFilter implements ExceptionFilter {
   private readonly logger = new Logger(ErrorFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost): void {
-    const res = host.switchToHttp().getResponse<Response>();
+    const http = host.switchToHttp();
+    const res = http.getResponse<Response>();
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
@@ -26,11 +29,21 @@ export class ErrorFilter implements ExceptionFilter {
       exception instanceof HttpException ? exception.getResponse() : undefined;
     const message = errorMessage(body);
     if (status >= 500 && status !== HttpStatus.NOT_IMPLEMENTED) {
-      this.logger.error(exception);
+      this.logUnexpected(exception, http.getRequest<Request>());
     }
     res
       .status(status)
       .json({ error: { code: HttpStatus[status] ?? 'ERROR', message } });
+  }
+
+  /** Logs under the request's correlation ID, so the line matches the caller's trace. */
+  private logUnexpected(exception: unknown, req: Request): void {
+    const id = req.headers[CORRELATION_HEADER];
+    if (typeof id === 'string') {
+      runWithCorrelationId(id, () => this.logger.error(exception));
+    } else {
+      this.logger.error(exception);
+    }
   }
 }
 
