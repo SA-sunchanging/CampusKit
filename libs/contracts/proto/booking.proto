@@ -45,6 +45,16 @@ service BookingService {
   // Rental calls this after the item is returned, so the dates are free again.
   // Repeating it for the same booking returns ok without changing anything.
   rpc ReleaseCalendar (ReleaseCalendarRequest) returns (ReleaseCalendarReply);
+
+  // The renter or the listing owner cancels a PENDING or CONFIRMED booking before pickup.
+  // A CONFIRMED booking also cancels its rental with Rental, which refuses once the item is
+  // picked up (FAILED_PRECONDITION). The dates are released and the holds voided.
+  // Returns status CANCELLED; repeating it on a CANCELLED booking returns it unchanged.
+  rpc CancelBooking (CancelBookingRequest) returns (Booking);
+
+  // Listing calls this when a search names dates: of the given listings (at most 200), returns
+  // those whose calendar is free for the whole period. Advisory, like CheckAvailability.
+  rpc FilterAvailable (FilterAvailableRequest) returns (FilterAvailableReply);
 }
 
 // Half-open interval [start, end), ISO-8601 UTC.
@@ -134,4 +144,20 @@ message ReleaseCalendarRequest {
 
 message ReleaseCalendarReply {
   bool ok = 1;
+}
+
+message CancelBookingRequest {
+  string id = 1;
+  // Optional message shown to the other participant.
+  string reason = 2;
+}
+
+message FilterAvailableRequest {
+  repeated string listing_ids = 1;
+  DateRange period = 2;
+}
+
+message FilterAvailableReply {
+  // The available listing IDs, in the order they were given.
+  repeated string listing_ids = 1;
 }
