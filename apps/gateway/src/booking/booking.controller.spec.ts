@@ -33,6 +33,7 @@ const grpc = {
   requestBooking: vi.fn(),
   approveBooking: vi.fn(),
   declineBooking: vi.fn(),
+  cancelBooking: vi.fn(),
   getBooking: vi.fn(),
   listBookings: vi.fn(),
   checkAvailability: vi.fn(),
@@ -184,6 +185,47 @@ describe('POST /api/booking/bookings/:id/approve and /decline', () => {
       .send({ reason: 'x'.repeat(501) })
       .expect(400);
     expect(grpc.declineBooking).not.toHaveBeenCalled();
+  });
+});
+
+describe('POST /api/booking/bookings/:id/cancel', () => {
+  it('cancels with a trimmed reason as the caller and answers 200', async () => {
+    grpc.cancelBooking.mockReturnValue(of({ ...reply, status: 'CANCELLED' }));
+    const res = await http()
+      .post(`/api/booking/bookings/${id}/cancel`)
+      .set('Authorization', 'Bearer token')
+      .send({ reason: '  Plans changed ' })
+      .expect(200);
+    expect(res.body.status).toBe('CANCELLED');
+    const [message, metadata] = sent('cancelBooking');
+    expect(message).toEqual({ id, reason: 'Plans changed' });
+    expect(metadata.get('authorization')).toEqual(['Bearer token']);
+  });
+
+  it('cancels without a body', async () => {
+    await http().post(`/api/booking/bookings/${id}/cancel`).expect(200);
+    expect(sent('cancelBooking')[0]).toEqual({ id, reason: '' });
+  });
+
+  it('answers 400 for a reason over 200 characters', async () => {
+    await http()
+      .post(`/api/booking/bookings/${id}/cancel`)
+      .send({ reason: 'x'.repeat(201) })
+      .expect(400);
+    expect(grpc.cancelBooking).not.toHaveBeenCalled();
+  });
+
+  it('answers 409 when the item is already picked up', async () => {
+    grpc.cancelBooking.mockReturnValue(
+      throwError(() => ({
+        code: status.FAILED_PRECONDITION,
+        details: 'The item was already picked up',
+      })),
+    );
+    const res = await http()
+      .post(`/api/booking/bookings/${id}/cancel`)
+      .expect(409);
+    expect(res.body.error.message).toBe('The item was already picked up');
   });
 });
 

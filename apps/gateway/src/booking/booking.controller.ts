@@ -23,6 +23,7 @@ import {
   BookingResponse,
 } from './booking.response.js';
 import { AvailabilityQuery } from './dto/availability.query.js';
+import { CancelBookingDto } from './dto/cancel-booking.dto.js';
 import { DeclineBookingDto } from './dto/decline-booking.dto.js';
 import { ListBookingsQuery } from './dto/list-bookings.query.js';
 import { RequestBookingDto } from './dto/request-booking.dto.js';
@@ -87,6 +88,22 @@ export class BookingController {
     @CallMetadata() metadata: Metadata,
   ): Promise<BookingResponse> {
     return this.booking.declineBooking(id, dto?.reason, metadata);
+  }
+
+  @Post('bookings/:id/cancel')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: BookingResponse,
+    description:
+      'CANCELLED. 403 for anyone but the renter and the owner; 409 unless the booking is ' +
+      'PENDING or CONFIRMED, or once the item is picked up.',
+  })
+  cancelBooking(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CancelBookingDto,
+    @CallMetadata() metadata: Metadata,
+  ): Promise<BookingResponse> {
+    return this.booking.cancelBooking(id, dto?.reason, metadata);
   }
 
   @Get('listings/:listingId/availability')

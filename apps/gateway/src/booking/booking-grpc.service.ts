@@ -47,6 +47,10 @@ interface BookingService {
     request: { id: string; reason: string },
     metadata: Metadata,
   ): Observable<BookingReply>;
+  cancelBooking(
+    request: { id: string; reason: string },
+    metadata: Metadata,
+  ): Observable<BookingReply>;
   getBooking(
     request: { id: string },
     metadata: Metadata,
@@ -98,6 +102,16 @@ export class BookingGrpcService implements OnModuleInit {
   ): Promise<BookingResponse> {
     const request = { id, reason: reason ?? '' };
     const reply = await call(this.booking.declineBooking(request, metadata));
+    return toBookingResponse(reply);
+  }
+
+  async cancelBooking(
+    id: string,
+    reason: string | undefined,
+    metadata: Metadata,
+  ): Promise<BookingResponse> {
+    const request = { id, reason: reason ?? '' };
+    const reply = await call(this.booking.cancelBooking(request, metadata));
     return toBookingResponse(reply);
   }
 
