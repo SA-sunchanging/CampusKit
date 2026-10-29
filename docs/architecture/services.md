@@ -22,8 +22,8 @@ Operation labels describe responsibilities, not exact endpoint names.
 | Service | Responsibility | Current operations | Collaborators and delivery | Protocol | Database |
 |---|---|---|---|---|---|
 | **Student Identity** | Authentication, verification, eligibility | Register and log in; verify email; administrator student verification; check eligibility and profile | Gateway validates and propagates the JWT. Other services query eligibility and profile. Writes notification outbox events. | REST | PostgreSQL `identity_db` |
-| **Listing** | Items, pricing, screening | Create a safe DRAFT; search, detail, quote; moderation; publish and unpublish | Identity: eligibility and payout profile. Booking: calendar setup and availability (gRPC). Review: reputation summary. Outbox events. | REST; gRPC client | PostgreSQL `listing_db` |
-| **Booking** | Authoritative calendar and agreed terms | Set calendar; check availability; request, approve, decline, cancel booking; release calendar; scheduled expiry and compensation | Identity: eligibility. Listing: detail and quote. Payment: authorize and void. Rental: create and cancel. Outbox events. | gRPC server; REST client | PostgreSQL `booking_db` |
+| **Listing** | Items, pricing, screening | Create a DRAFT and publish it; search, detail, quote. Planned: moderation, unpublish | Identity: eligibility and profile. Booking: calendar setup (gRPC). Planned: Review reputation summary, outbox events. | REST; gRPC client | PostgreSQL `listing_db` |
+| **Booking** | Authoritative calendar and agreed terms | Set calendar; check availability; request, approve, decline booking; release calendar; fail approvals that cannot complete and void their holds. Planned: cancel booking, scheduled request expiry | Identity: eligibility. Listing: quote. Payment: authorize and void. Rental: create. Outbox events. | gRPC server; REST client | PostgreSQL `booking_db` |
 | **Rental** | Custody and settlement workflow | Pickup and return evidence and codes; confirm pickup and return; settlement and retry; scheduled overdue checks and reminders | Booking: status, calendar release, affected bookings (gRPC). Payment: capture and settle. Outbox events. Closes after successful settlement. | REST; gRPC client | PostgreSQL `rental_db` |
 | **Payment** | Demo ledger and payment adapter | Payment method; fee and deposit authorization; capture; void and refund; late-fee settlement; payout | Local ledger adapter; no real provider calls. Stable financial operation IDs prevent duplicates. Booking and Rental publish the related notifications. | REST | PostgreSQL `payment_db` |
 | **Review and Reputation** | Participant reviews | Submit review; read reputation summary | Rental: verify CLOSED status and participation before accepting a review. No review notification event in the current scope. | REST | MongoDB `review_db` |
@@ -32,7 +32,7 @@ Operation labels describe responsibilities, not exact endpoint names.
 ### Deferred capabilities
 
 - Student Identity: account-restriction management, erasure, identity-document purge, and pseudonymisation remain proposed operations.
-- Booking: calendar reconciliation is separate from the implemented request-expiry and compensation worker, and is deferred.
+- Booking: cancellation, a scheduled request-expiry worker (request expiry is lazy for now), and calendar reconciliation are deferred. The approval sweeper that fails started approvals and retries voids is implemented.
 - Rental: settlement holds and dispute workflows are deferred.
 - Payment: real-provider reconciliation is deferred.
 - Notification: external contacts and delivery retry are deferred.
@@ -128,11 +128,11 @@ sequenceDiagram
   L->>L: Validate; save DRAFT
   L->>B: Set up calendar
   B-->>L: Calendar setup succeeds
-  L->>L: Publish, or pending review
-  L--)E: Domain state + outbox; publish after commit
+  L->>L: Publish (moderation planned)
+  L--)E: Outbox event (planned)
 ```
 
-Moderated listings publish after approval; invalid input is rejected. Calendar failure keeps the listing unpublished. Broker failure delays the inbox.
+Invalid input is rejected before anything is saved. Calendar failure keeps the listing a DRAFT that the owner can publish again. Moderation and Listing's outbox events are planned, not built.
 
 ### Book and pay for a rental
 
@@ -154,7 +154,7 @@ sequenceDiagram
   B--)E: CONFIRMED + outbox → notification
 ```
 
-Failed authorization: retry within the window; expiry releases the dates and voids holds. Failed confirmation: compensate payment and reservation; track unresolved recovery.
+Unavailable Payment or Rental: the booking stays `AUTHORIZING` and the owner retries until the period starts. A refusal, or a period that starts first, makes the booking `FAILED`: the dates are released and Payment voids the holds (see Booking rules below).
 
 ### Handover, return, and settlement
 
@@ -199,6 +199,38 @@ sequenceDiagram
 
 Identity, Listing, Booking, and Rental produce events. Duplicate delivery does not create a second inbox record. Malformed events go to a dead-letter queue; transient storage failures are requeued. Broker outages delay the inbox without reversing committed business state. Review and Payment publish no notification events in the current scope (see `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`).
 
+## Listing rules and endpoints
+
+Listing runs the publication step of the publish sequence above in `apps/listing`. Money is integer satang, times are ISO-8601 UTC, and date ranges are half-open whole Bangkok days.
+
+### Listing status
+
+| Status | Meaning |
+|---|---|
+| `DRAFT` | Saved, but Booking has not set up the calendar yet. `publishError` says why. Only the owner sees it. |
+| `PUBLISHED` | The calendar exists; the listing shows in search and can be quoted. |
+
+### Create and publish
+
+1. Identity checks that the caller may publish (`canPublish`) and gives the owner's display name. Not eligible answers `403`; Identity down answers `503`.
+2. Listing checks the body: title, category, condition, accessories, replacement value, daily rate (at most 100,000 THB), deposit, late fee, at most 30 rental days, pickup points, at most 10 unavailable periods within 366 days, and one to five photos.
+3. The DRAFT and its photos are saved in one transaction.
+4. Listing calls `SetupCalendar` on Booking over gRPC with the owner's token and the unavailable periods. On success the listing becomes `PUBLISHED`; on failure it stays a DRAFT with `publishError`, and `POST /listings/{id}/publish` tries again (owner only, rechecks eligibility, and changes nothing for a published listing).
+
+Photos are inline data URLs (JPEG, PNG or WebP), at most 400 KB each and 60 KB for the thumbnail. The web app resizes and compresses them before upload; search returns only the thumbnail.
+
+### Endpoints
+
+| Route | Caller | Answer |
+|---|---|---|
+| `GET /listings?q=&category=&page=&pageSize=` | Public | `200` with `{ items, total, page, pageSize }`; only `PUBLISHED` listings; `q` matches title and description; `pageSize` at most 50 |
+| `GET /listings/{id}` | Public | `200` with the listing and its photos; a DRAFT only for its owner, otherwise `404` |
+| `POST /listings` | Student | `201` with the listing, `PUBLISHED` or DRAFT with `publishError` |
+| `POST /listings/{id}/publish` | Owner | `200` with the listing; `403` for anyone else |
+| `GET /internal/listings/{id}/quote?start=&end=` | Booking | `200` with `{ listingId, ownerId, days, rentalFee, deposit, lateFeePerDay }`; `rentalFee` is the daily rate times the days, with no platform fee |
+
+The quote answers `400` when `start` or `end` is not midnight in Bangkok, the period is shorter than one day, or it is longer than the listing's maximum rental days; `404` for an unknown listing; and `409` for a listing that is not published. Whether the dates are free is Booking's check.
+
 ## Booking rules and calls to Payment and Rental
 
 Booking implements the request and approval steps of the booking sequence above in `apps/booking`. Payment and Rental implement the calls below, as described under Payment rules and Rental rules; their owner has confirmed this contract.
@@ -208,16 +240,17 @@ Booking implements the request and approval steps of the booking sequence above 
 | Status | Meaning |
 |---|---|
 | `PENDING` | The renter asked; the dates are reserved. The request expires at the earlier of 24 hours after it was made and the start of the period. |
-| `AUTHORIZING` | The owner approved; Booking is authorizing the payments and creating the rental. The dates stay reserved and the booking never expires on its own. |
+| `AUTHORIZING` | The owner approved; Booking is authorizing the payments and creating the rental. The dates stay reserved until it is `CONFIRMED` or `FAILED`. |
 | `CONFIRMED` | The fee and deposit are authorized and the rental exists. Rental releases the dates after the return. |
 | `DECLINED` | The owner refused, with an optional reason of at most 500 characters. The dates are released. |
 | `EXPIRED` | The owner did not answer in time. The dates are released. |
 | `CANCELLED` | Reserved for cancellation, which is not built yet. |
+| `FAILED` | Payment or Rental refused the approval, or the period started while it was still `AUTHORIZING`. The dates are released and Payment voids the holds; the reason is kept in `last_error`. |
 
 - A request needs whole Bangkok days that start after now and end within 366 days, an eligible renter (Identity), a published listing (Listing quote), and a renter who is not the owner. A renter holds at most five `PENDING` or `AUTHORIZING` requests at once.
 - Expiry is lazy for now: a stale `PENDING` booking becomes `EXPIRED` and frees its dates when a request, approval, decline, get or list touches it.
 - Only the renter and the owner can read a booking; anyone else gets `NOT_FOUND`. Only the owner approves or declines.
-- `booking.requested` goes to the owner, `booking.declined` to the renter and `booking.confirmed` to both. Booking writes them to its own outbox table in the same transaction and a relay publishes them (see `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`); the data shape is in `libs/contracts/src/events.ts`.
+- `booking.requested` goes to the owner, `booking.declined` to the renter, and `booking.confirmed` and `booking.failed` to both. Booking writes them to its own outbox table in the same transaction and a relay publishes them (see `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`); the data shape is in `libs/contracts/src/events.ts`.
 
 ### Approval calls
 
@@ -231,7 +264,13 @@ When the owner approves, Booking makes these calls in order. Each carries the `x
 
 `payerId` is the renter and `payeeId` the owner; amounts are integer satang, and times are ISO-8601 UTC. A refusal is a 4xx with the shared error body `{ error: { code, message } }`.
 
-If a call fails, the booking stays `AUTHORIZING` and the reason is stored with it: a 4xx other than 404 counts as a decline, while 404, 501, 5xx, a timeout or no connection counts as unavailable. The approval still answers successfully with status `AUTHORIZING`. The owner approves again to retry the same calls with the same operation IDs, until the period starts. When all three succeed, the booking becomes `CONFIRMED` and stores the rental ID. Voiding the authorizations of a booking that never confirms is deferred with the expiry worker.
+A 4xx other than 404 counts as a refusal, while 404, 501, 5xx, a timeout or no connection counts as unavailable. When all three calls succeed, the booking becomes `CONFIRMED` and stores the rental ID.
+
+- **Unavailable:** the booking stays `AUTHORIZING` with the reason stored, and the approval answers successfully with that status. The owner approves again to retry the same calls with the same operation IDs, until the period starts.
+- **Refused, or the period has started:** the booking becomes `FAILED` in one transaction that releases the dates and writes `booking.failed`, and the approval answers with that status. Booking then calls `POST /internal/payments/void` on Payment with `{ operationId: "booking:<booking id>:void", bookingId }`, which releases every open hold once.
+- **Sweeper:** every minute Booking fails the `AUTHORIZING` bookings whose period has started, and calls void again for `FAILED` bookings whose void has not succeeded (`holds_voided_at` is empty).
+
+A hold that an approval still in flight authorizes after the void has run is not voided; it lapses when Payment's authorization expires.
 
 ## Payment rules
 
@@ -357,7 +396,7 @@ The gateway checks every request under `/api`, both the proxied REST services an
 1. **Correlation ID.** The gateway keeps the caller's `x-correlation-id` when it is 1 to 128 characters of letters, digits, `.`, `_`, or `-`; otherwise it creates a UUID. It forwards the ID to the service and returns it in the response.
 2. **Internal paths.** Any path with an `internal` segment, in any case or percent-encoding, answers `404` and is never forwarded.
 3. **Identity headers.** Client headers that start with `x-user-`, `x-auth-`, or `x-role`, and `x-forwarded-user`, are removed. Services take the caller's identity only from the JWT.
-4. **Token.** Only these routes are public: `POST /api/identity/accounts` (register), `POST /api/identity/auth/login`, `GET /api/listing/listings` (search) and `GET /api/listing/listings/{id}` (detail, lowercase UUID only), so guests can browse before they register, and `GET /api/<service>/health`. Public routes ignore the `Authorization` header but still forward it; listing detail uses a valid token to show the owner their own DRAFT. Every other route needs `Authorization: Bearer <JWT>`, signed with HS256 and carrying a UUID `sub`, a `role` of `student` or `admin`, and an `exp`. A missing token answers `401` with `Missing bearer token`; a wrong, expired, or forged token answers `401` with `Invalid token`.
+4. **Token.** Only these routes are public: `POST /api/identity/accounts` (register), `POST /api/identity/auth/login`, `GET /api/listing/listings` (search) and `GET /api/listing/listings/{id}` (detail, lowercase UUID only), so guests can browse before they register, and `GET /api/<service>/health` for the proxied REST services (Booking has no route here; its health is on `booking:3007` inside the network). Public routes ignore the `Authorization` header but still forward it; listing detail uses a valid token to show the owner their own DRAFT. Every other route needs `Authorization: Bearer <JWT>`, signed with HS256 and carrying a UUID `sub`, a `role` of `student` or `admin`, and an `exp`. A missing token answers `401` with `Missing bearer token`; a wrong, expired, or forged token answers `401` with `Invalid token`.
 
 When a service is down or does not answer within 15 seconds, the gateway answers `502` with `The <service> service is unavailable`.
 
@@ -376,7 +415,7 @@ The gateway serves the Booking routes itself and calls Booking over gRPC (`libs/
 
 A booking in a response has `id`, `listingId`, `renterId`, `ownerId`, `status`, `period` `{ start, end }`, `terms` `{ rentalFee, deposit, lateFeePerDay }` in satang, `declineReason` (empty unless `DECLINED`), `expiresAt`, `createdAt`, and `updatedAt`; every field is present, with an empty string or zero when Booking left it unset.
 
-The gateway validates IDs as UUIDs and times as ISO-8601 before it calls Booking, and answers `400` otherwise; Booking checks the rules. Booking's gRPC status codes become HTTP statuses as `apps/gateway/src/booking/grpc-error.ts` lists them. When Booking does not answer within 10 seconds, or reports `DEADLINE_EXCEEDED`, the gateway answers `504` with `The booking service did not answer in time`.
+The gateway validates IDs as UUIDs and times as ISO-8601 before it calls Booking, and answers `400` otherwise; Booking checks the rules. Booking's gRPC status codes become HTTP statuses as `apps/gateway/src/booking/grpc-error.ts` lists them. When Booking does not answer within 25 seconds (an approval can make four 5-second calls), or reports `DEADLINE_EXCEEDED`, the gateway answers `504` with `The booking service did not answer in time`.
 
 ## Service discovery and local deployment
 
