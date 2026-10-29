@@ -23,7 +23,7 @@ Operation labels describe responsibilities, not exact endpoint names.
 |---|---|---|---|---|---|
 | **Student Identity** | Authentication, verification, eligibility | Register and log in; verify email; administrator student verification; check eligibility and profile | Gateway validates and propagates the JWT. Other services query eligibility and profile. Writes notification outbox events. | REST | PostgreSQL `identity_db` |
 | **Listing** | Items, pricing, screening | Create a safe DRAFT; search, detail, quote; moderation; publish and unpublish | Identity: eligibility and payout profile. Booking: calendar setup and availability (gRPC). Review: reputation summary. Outbox events. | REST; gRPC client | PostgreSQL `listing_db` |
-| **Booking** | Authoritative calendar and agreed terms | Set calendar; check availability; request, approve, cancel booking; scheduled expiry and compensation | Identity: eligibility. Listing: detail and quote. Payment: authorize and void. Rental: create and cancel. Outbox events. | gRPC server; REST client | PostgreSQL `booking_db` |
+| **Booking** | Authoritative calendar and agreed terms | Set calendar; check availability; request, approve, decline, cancel booking; release calendar; scheduled expiry and compensation | Identity: eligibility. Listing: detail and quote. Payment: authorize and void. Rental: create and cancel. Outbox events. | gRPC server; REST client | PostgreSQL `booking_db` |
 | **Rental** | Custody and settlement workflow | Pickup and return evidence and codes; confirm pickup and return; settlement and retry; scheduled overdue checks and reminders | Booking: status, calendar release, affected bookings (gRPC). Payment: capture and settle. Outbox events. Closes after successful settlement. | REST; gRPC client | PostgreSQL `rental_db` |
 | **Payment** | Demo ledger and payment adapter | Payment method; fee and deposit authorization; capture; void and refund; late-fee settlement; payout | Local ledger adapter; no real provider calls. Stable financial operation IDs prevent duplicates. Booking and Rental publish the related notifications. | REST | PostgreSQL `payment_db` |
 | **Review and Reputation** | Participant reviews | Submit review; read reputation summary | Rental: verify CLOSED status and participation before accepting a review. No review notification event in the current scope. | REST | MongoDB `review_db` |
@@ -198,6 +198,40 @@ sequenceDiagram
 ```
 
 Identity, Listing, Booking, and Rental produce events. Duplicate delivery does not create a second inbox record. Malformed events go to a dead-letter queue; transient storage failures are requeued. Broker outages delay the inbox without reversing committed business state. Review and Payment publish no notification events in the current scope (see `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`).
+
+## Booking rules and calls to Payment and Rental
+
+Booking implements the request and approval steps of the booking sequence above in `apps/booking`. The Payment and Rental endpoints below are a contract that Booking proposes; their owners still have to confirm it, and both services answer with stubs today.
+
+### Booking status
+
+| Status | Meaning |
+|---|---|
+| `PENDING` | The renter asked; the dates are reserved. The request expires at the earlier of 24 hours after it was made and the start of the period. |
+| `AUTHORIZING` | The owner approved; Booking is authorizing the payments and creating the rental. The dates stay reserved and the booking never expires on its own. |
+| `CONFIRMED` | The fee and deposit are authorized and the rental exists. Rental releases the dates after the return. |
+| `DECLINED` | The owner refused, with an optional reason of at most 500 characters. The dates are released. |
+| `EXPIRED` | The owner did not answer in time. The dates are released. |
+| `CANCELLED` | Reserved for cancellation, which is not built yet. |
+
+- A request needs whole Bangkok days that start after now and end within 366 days, an eligible renter (Identity), a published listing (Listing quote), and a renter who is not the owner. A renter holds at most five `PENDING` or `AUTHORIZING` requests at once.
+- Expiry is lazy for now: a stale `PENDING` booking becomes `EXPIRED` and frees its dates when a request, approval, decline, get or list touches it.
+- Only the renter and the owner can read a booking; anyone else gets `NOT_FOUND`. Only the owner approves or declines.
+- `booking.requested` goes to the owner, `booking.declined` to the renter and `booking.confirmed` to both. Booking writes them to its own outbox table in the same transaction and a relay publishes them (see `docs/adr/adr-008-rabbitmq-events-with-transactional-outbox.md`); the data shape is in `libs/contracts/src/events.ts`.
+
+### Approval calls
+
+When the owner approves, Booking makes these calls in order. Each carries the `x-correlation-id` header and counts as failed after 5 seconds. A zero amount is not authorized.
+
+| Order | Call | Body | Success reply | Repeating it |
+|---|---|---|---|---|
+| 1 | `POST /internal/payments/authorize` on Payment | `{ operationId, bookingId, payerId, payeeId, kind: "FEE", amount }` | 2xx `{ id, status }` | Same `operationId`, `booking:<booking id>:authorize-fee`, so Payment authorizes once |
+| 2 | `POST /internal/payments/authorize` on Payment | Same, with `kind: "DEPOSIT"` | 2xx `{ id, status }` | `operationId` is `booking:<booking id>:authorize-deposit` |
+| 3 | `POST /internal/rentals` on Rental | `{ bookingId, listingId, ownerId, renterId, period: { start, end }, terms: { rentalFee, deposit, lateFeePerDay } }` | 2xx `{ id }` | Rental keeps one rental per `bookingId` and returns it again |
+
+`payerId` is the renter and `payeeId` the owner; amounts are integer satang, and times are ISO-8601 UTC. A refusal is a 4xx with the shared error body `{ error: { code, message } }`.
+
+If a call fails, the booking stays `AUTHORIZING` and the reason is stored with it: a 4xx other than 404 counts as a decline, while 404, 501, 5xx, a timeout or no connection counts as unavailable. The approval still answers successfully with status `AUTHORIZING`. The owner approves again to retry the same calls with the same operation IDs, until the period starts. When all three succeed, the booking becomes `CONFIRMED` and stores the rental ID. Voiding the authorizations of a booking that never confirms is deferred with the expiry worker.
 
 ## Gateway rules
 
