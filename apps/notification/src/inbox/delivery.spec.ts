@@ -1,5 +1,11 @@
+import { currentCorrelationId } from '@app/common';
 import type { ConsumeMessage } from 'amqplib';
-import { handleDelivery, settle } from './delivery.js';
+import {
+  correlationIdOf,
+  deliver,
+  handleDelivery,
+  settle,
+} from './delivery.js';
 
 const VALID = {
   eventId: '11111111-1111-4111-8111-111111111111',
@@ -74,5 +80,60 @@ describe('settle', () => {
       throw new Error('Channel closed');
     });
     expect(() => settle(channel, message, 'ack')).not.toThrow();
+  });
+});
+
+const UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+describe('correlationIdOf', () => {
+  it("reads the envelope's correlation ID", () => {
+    expect(correlationIdOf(body(VALID))).toBe('corr-1');
+  });
+
+  it.each([
+    ['not JSON', Buffer.from('{not json')],
+    ['JSON null', body(null)],
+    ['no correlation ID', body({ ...VALID, correlationId: undefined })],
+    ['a malformed ID', body({ ...VALID, correlationId: 'bad id' })],
+  ])('makes a new ID for %s', (_case, content) => {
+    expect(correlationIdOf(content)).toMatch(UUID);
+  });
+});
+
+describe('deliver', () => {
+  it("stores and acks under the event's correlation ID", async () => {
+    const message = { content: body(VALID) } as ConsumeMessage;
+    const ids: (string | undefined)[] = [];
+    const channel = {
+      ack: vi.fn(() => ids.push(currentCorrelationId())),
+      nack: vi.fn(),
+    };
+    const store = vi.fn(() => {
+      ids.push(currentCorrelationId());
+      return Promise.resolve();
+    });
+    await deliver(channel, message, store);
+    expect(ids).toEqual(['corr-1', 'corr-1']);
+    expect(currentCorrelationId()).toBeUndefined();
+  });
+
+  it('keeps concurrent messages under their own IDs', async () => {
+    const seen: string[] = [];
+    const store = vi.fn(async (envelope: { correlationId: string }) => {
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      seen.push(`${envelope.correlationId}:${currentCorrelationId()}`);
+    });
+    const channel = { ack: vi.fn(), nack: vi.fn() };
+    const other = {
+      ...VALID,
+      eventId: '33333333-3333-4333-8333-333333333333',
+      correlationId: 'corr-2',
+    };
+    await Promise.all([
+      deliver(channel, { content: body(VALID) } as ConsumeMessage, store),
+      deliver(channel, { content: body(other) } as ConsumeMessage, store),
+    ]);
+    expect(seen.sort()).toEqual(['corr-1:corr-1', 'corr-2:corr-2']);
   });
 });

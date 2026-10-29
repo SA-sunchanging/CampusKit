@@ -1,3 +1,4 @@
+import { correlationIdFrom, runWithCorrelationId } from '@app/common';
 import { Logger } from '@nestjs/common';
 import type { Channel, ConsumeMessage } from 'amqplib';
 import { parseEnvelope, type InboxEnvelope } from './envelope.js';
@@ -60,4 +61,30 @@ export function settle(
   } catch (error) {
     logger.warn(`Could not ${decision} a message: ${reason(error)}`);
   }
+}
+
+/** The correlation ID in a message body; a new one when the body has none or is not JSON. */
+export function correlationIdOf(content: Buffer): string {
+  try {
+    const raw = JSON.parse(content.toString('utf8')) as unknown;
+    return correlationIdFrom(
+      (raw as { correlationId?: unknown } | null)?.correlationId,
+    );
+  } catch {
+    return correlationIdFrom(undefined);
+  }
+}
+
+/**
+ * Handles and settles one message under its event's correlation ID, so every log line about
+ * it, here and in store, joins the request that caused the event.
+ */
+export function deliver(
+  channel: Pick<Channel, 'ack' | 'nack'>,
+  message: ConsumeMessage,
+  store: (envelope: InboxEnvelope) => Promise<void>,
+): Promise<void> {
+  return runWithCorrelationId(correlationIdOf(message.content), async () => {
+    settle(channel, message, await handleDelivery(message.content, store));
+  });
 }

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import type { Channel, ConsumeMessage } from 'amqplib';
 import { BrokerConnection } from './broker-connection.js';
-import { handleDelivery, settle } from './delivery.js';
+import { deliver } from './delivery.js';
 import { InboxStoreService } from './inbox-store.service.js';
 import { declareInboxTopology, INBOX_QUEUE } from './topology.js';
 
@@ -43,18 +43,8 @@ export class EventsConsumer implements OnModuleInit, OnModuleDestroy {
         void channel.close().catch(() => undefined);
         return;
       }
-      void this.deliver(channel, message);
+      void deliver(channel, message, (envelope) => this.inbox.store(envelope));
     });
     this.logger.log(`Consuming ${INBOX_QUEUE}`);
-  }
-
-  private async deliver(
-    channel: Channel,
-    message: ConsumeMessage,
-  ): Promise<void> {
-    const decision = await handleDelivery(message.content, (envelope) =>
-      this.inbox.store(envelope),
-    );
-    settle(channel, message, decision);
   }
 }
