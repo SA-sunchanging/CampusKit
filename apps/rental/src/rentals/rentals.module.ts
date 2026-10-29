@@ -8,6 +8,7 @@ import { PickupService } from './pickup.service.js';
 import { RentalCreationService } from './rental-creation.service.js';
 import { RentalQueriesService } from './rental-queries.service.js';
 import { RentalsController } from './rentals.controller.js';
+import { ReturnService } from './return.service.js';
 
 @Module({
   imports: [AuthModule, BookingClientModule],
@@ -18,6 +19,7 @@ import { RentalsController } from './rentals.controller.js';
     BookingClient,
     PaymentClient,
     PickupService,
+    ReturnService,
   ],
 })
 export class RentalsModule {}

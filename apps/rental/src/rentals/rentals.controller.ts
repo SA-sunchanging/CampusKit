@@ -13,11 +13,12 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Call, type CallContext } from '../clients/call-context.js';
-import { CodeDto } from './dto/code.dto.js';
+import { CodeDto, ReturnDto } from './dto/code.dto.js';
 import { ListRentalsQuery } from './dto/list-rentals.query.js';
 import { PickupService } from './pickup.service.js';
 import { RentalQueriesService } from './rental-queries.service.js';
 import { RentalListResponse, RentalResponse } from './rental.response.js';
+import { ReturnService } from './return.service.js';
 
 /**
  * REST endpoints of the rental service, reached through the gateway at /api/rental/rentals.
@@ -32,6 +33,7 @@ export class RentalsController {
   constructor(
     private readonly queries: RentalQueriesService,
     private readonly pickups: PickupService,
+    private readonly returns: ReturnService,
   ) {}
 
   @Get()
@@ -63,5 +65,22 @@ export class RentalsController {
     @Call() call: CallContext,
   ): Promise<RentalResponse> {
     return this.pickups.pickup(user, id, dto.code, call);
+  }
+
+  /**
+   * The owner enters the renter's return code; the dates are released, Payment settles, and the
+   * rental is CLOSED. A failed settlement answers 200 with SETTLEMENT_PENDING and lastError;
+   * calling it again (without a code) retries.
+   */
+  @Post(':id/return')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: RentalResponse })
+  confirmReturn(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReturnDto,
+    @Call() call: CallContext,
+  ): Promise<RentalResponse> {
+    return this.returns.confirmReturn(user, id, dto.code, call);
   }
 }
