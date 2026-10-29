@@ -68,6 +68,9 @@ describe('RentalResponse', () => {
       closedAt: '',
       lateDays: 0,
       lateFee: 0,
+      overdue: false,
+      overdueAt: '',
+      lateFeeSoFar: 0,
       lastError: '',
       createdAt: '2026-10-29T04:00:00.000Z',
       updatedAt: '2026-10-29T04:00:00.000Z',
@@ -97,6 +100,44 @@ describe('RentalResponse', () => {
     });
     expect(Object.keys(response)).not.toContain('pickupAttempts');
     expect(JSON.stringify(response)).not.toContain('attempts');
+  });
+
+  it('shows an overdue ACTIVE rental with its late fee so far', () => {
+    const overdueAt = new Date('2026-11-04T17:00:30Z');
+    const row = rentalRow({ status: 'ACTIVE', overdue_at: overdueAt });
+    const now = new Date('2026-11-05T18:00:00Z');
+    expect(RentalResponse.of(row, OWNER_ID, now)).toMatchObject({
+      overdue: true,
+      overdueAt: '2026-11-04T17:00:30.000Z',
+      lateFeeSoFar: 8000,
+      lateFee: 0,
+    });
+  });
+
+  it('keeps when it was overdue after the return, without a fee so far', () => {
+    const row = rentalRow({
+      status: 'CLOSED',
+      overdue_at: new Date('2026-11-04T17:00:30Z'),
+      late_fee: 8000,
+    });
+    expect(
+      RentalResponse.of(row, RENTER_ID, new Date('2026-11-09T00:00:00Z')),
+    ).toMatchObject({
+      overdue: false,
+      overdueAt: '2026-11-04T17:00:30.000Z',
+      lateFeeSoFar: 0,
+      lateFee: 8000,
+    });
+  });
+
+  it('works out the late fee so far at the same time for every listed rental', () => {
+    const overdue = { status: 'ACTIVE' as const, overdue_at: new Date() };
+    const list = RentalListResponse.of(
+      [rentalRow({ id: 'a', ...overdue }), rentalRow({ id: 'b', ...overdue })],
+      RENTER_ID,
+      new Date('2026-11-04T17:00:00.001Z'),
+    );
+    expect(list.rentals.map((r) => r.lateFeeSoFar)).toEqual([4000, 4000]);
   });
 
   it('lists rentals for one viewer', () => {

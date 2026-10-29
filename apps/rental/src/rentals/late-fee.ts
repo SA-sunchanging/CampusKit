@@ -24,3 +24,24 @@ export function lateCharge(
     lateFee: Math.min(days * row.late_fee_per_day, MAX_SATANG),
   };
 }
+
+/** An ACTIVE rental the sweeper has flagged overdue: its period ended before the return. */
+export function isOverdue(
+  row: Pick<RentalRow, 'status' | 'overdue_at'>,
+): boolean {
+  return row.status === 'ACTIVE' && row.overdue_at !== null;
+}
+
+/**
+ * The late fee an overdue rental would be charged if it were returned at now; 0 when the rental
+ * is not overdue. Once returned, the stored late_fee is what counts.
+ */
+export function lateFeeSoFar(
+  row: Pick<
+    RentalRow,
+    'status' | 'overdue_at' | 'period_end' | 'late_fee_per_day'
+  >,
+  now: Date,
+): number {
+  return isOverdue(row) ? lateCharge(row, now).lateFee : 0;
+}

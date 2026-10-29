@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { isOverdue, lateFeeSoFar } from './late-fee.js';
 import { RENTAL_STATUSES, type RentalStatus } from './rental.entity.js';
 import type { RentalRow } from './rental.row.js';
 
@@ -104,6 +105,25 @@ export class RentalResponse {
   lateFee: number;
 
   @ApiProperty({
+    description:
+      'True while the rental is ACTIVE and has been flagged overdue: its period ended before the return.',
+  })
+  overdue: boolean;
+
+  @ApiProperty({
+    description:
+      'ISO-8601 UTC; when the rental was flagged overdue. Empty until then; kept after the return.',
+  })
+  overdueAt: string;
+
+  @ApiProperty({
+    description:
+      'Satang; the late fee if the item were returned now. 0 unless overdue.',
+    example: 4000,
+  })
+  lateFeeSoFar: number;
+
+  @ApiProperty({
     description: 'Why the last settlement attempt failed; empty otherwise.',
   })
   lastError: string;
@@ -114,7 +134,12 @@ export class RentalResponse {
   @ApiProperty({ description: 'ISO-8601 UTC.' })
   updatedAt: string;
 
-  static of(row: RentalRow, viewerId: string): RentalResponse {
+  /** The late fee so far is worked out at now. */
+  static of(
+    row: RentalRow,
+    viewerId: string,
+    now = new Date(),
+  ): RentalResponse {
     return Object.assign(new RentalResponse(), {
       id: row.id,
       bookingId: row.booking_id,
@@ -138,6 +163,9 @@ export class RentalResponse {
       closedAt: iso(row.closed_at),
       lateDays: row.late_days,
       lateFee: row.late_fee,
+      overdue: isOverdue(row),
+      overdueAt: iso(row.overdue_at),
+      lateFeeSoFar: lateFeeSoFar(row, now),
       lastError: row.last_error ?? '',
       createdAt: row.created_at.toISOString(),
       updatedAt: row.updated_at.toISOString(),
@@ -150,9 +178,13 @@ export class RentalListResponse {
   @ApiProperty({ type: [RentalResponse], description: 'Newest first.' })
   rentals: RentalResponse[];
 
-  static of(rows: RentalRow[], viewerId: string): RentalListResponse {
+  static of(
+    rows: RentalRow[],
+    viewerId: string,
+    now = new Date(),
+  ): RentalListResponse {
     return Object.assign(new RentalListResponse(), {
-      rentals: rows.map((row) => RentalResponse.of(row, viewerId)),
+      rentals: rows.map((row) => RentalResponse.of(row, viewerId, now)),
     });
   }
 }
