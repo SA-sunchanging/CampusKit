@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AccountsModule } from './accounts/accounts.module.js';
 import { HealthModule, postgresOptions } from '@app/common';
+import { OutboxModule } from '@app/messaging';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module.js';
 import { InternalUsersModule } from './internal/internal-users.module.js';
@@ -15,6 +16,7 @@ import { EmailVerificationModule } from './verification/email-verification.modul
     AuthModule,
     InternalUsersModule,
     EmailVerificationModule,
+    OutboxModule,
   ],
 })
 export class IdentityModule {}
