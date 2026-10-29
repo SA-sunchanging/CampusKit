@@ -1,4 +1,5 @@
 import type { AuthUser } from '@app/common';
+import { RENTAL_EVENTS } from '@app/contracts';
 import {
   BadRequestException,
   ConflictException,
@@ -13,6 +14,7 @@ import { PaymentClient } from '../clients/payment.client.js';
 import { checkCode } from './code-attempts.js';
 import { lateCharge } from './late-fee.js';
 import { lockForParty } from './rental-access.js';
+import { announce } from './rental-events.js';
 import { RentalResponse } from './rental.response.js';
 import {
   findRental,
@@ -59,7 +61,7 @@ export class ReturnService {
       (await this.settle(pending, call));
     const row = problem
       ? await this.recordFailure(id, problem)
-      : await this.close(id, now);
+      : await this.close(id, call, now);
     return RentalResponse.of(row, caller.sub);
   }
 
@@ -171,16 +173,29 @@ export class ReturnService {
     return updated ?? ((await findRental(this.db, id)) as RentalRow);
   }
 
-  /** SETTLEMENT_PENDING becomes CLOSED once, even when two returns race to this point. */
-  private async close(id: string, now: Date): Promise<RentalRow> {
-    const closed = await updateRental(
-      this.db,
-      `UPDATE rentals
-       SET status = 'CLOSED', closed_at = $2, last_error = NULL, updated_at = now()
-       WHERE id = $1 AND status = 'SETTLEMENT_PENDING'
-       RETURNING ${RENTAL_COLUMNS}`,
-      [id, now],
-    );
+  /**
+   * SETTLEMENT_PENDING becomes CLOSED once, even when two returns race to this point; only the
+   * return that made the change announces rental.closed, in the same transaction.
+   */
+  private async close(
+    id: string,
+    call: CallContext,
+    now: Date,
+  ): Promise<RentalRow> {
+    const closed = await this.db.transaction(async (tx) => {
+      const row = await updateRental(
+        tx,
+        `UPDATE rentals
+         SET status = 'CLOSED', closed_at = $2, last_error = NULL, updated_at = now()
+         WHERE id = $1 AND status = 'SETTLEMENT_PENDING'
+         RETURNING ${RENTAL_COLUMNS}`,
+        [id, now],
+      );
+      if (row) {
+        await announce(tx, RENTAL_EVENTS.closed, row, call.correlationId);
+      }
+      return row;
+    });
     if (!closed) {
       return (await findRental(this.db, id)) as RentalRow;
     }

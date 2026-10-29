@@ -1,4 +1,5 @@
 import type { AuthUser } from '@app/common';
+import { RENTAL_EVENTS } from '@app/contracts';
 import {
   BadRequestException,
   ConflictException,
@@ -13,6 +14,7 @@ import { PaymentClient } from '../clients/payment.client.js';
 import { checkCode } from './code-attempts.js';
 import { bookingProblem, pickupWindowError } from './pickup-checks.js';
 import { lockForParty } from './rental-access.js';
+import { announce } from './rental-events.js';
 import { RentalResponse } from './rental.response.js';
 import {
   findRental,
@@ -64,7 +66,7 @@ export class PickupService {
       await this.recordFailure(id, problem.text);
       throw problem.exception;
     }
-    return RentalResponse.of(await this.activate(id, now), caller.sub);
+    return RentalResponse.of(await this.activate(id, call, now), caller.sub);
   }
 
   /**
@@ -142,17 +144,30 @@ export class PickupService {
     );
   }
 
-  /** AWAITING_PICKUP becomes ACTIVE once, even when two pickups race to this point. */
-  private async activate(id: string, now: Date): Promise<RentalRow> {
-    const active = await updateRental(
-      this.db,
-      `UPDATE rentals
-       SET status = 'ACTIVE', picked_up_at = $2, pickup_attempts = 0,
-           last_error = NULL, updated_at = now()
-       WHERE id = $1 AND status = 'AWAITING_PICKUP'
-       RETURNING ${RENTAL_COLUMNS}`,
-      [id, now],
-    );
+  /**
+   * AWAITING_PICKUP becomes ACTIVE once, even when two pickups race to this point; only the
+   * pickup that made the change announces rental.started, in the same transaction.
+   */
+  private async activate(
+    id: string,
+    call: CallContext,
+    now: Date,
+  ): Promise<RentalRow> {
+    const active = await this.db.transaction(async (tx) => {
+      const row = await updateRental(
+        tx,
+        `UPDATE rentals
+         SET status = 'ACTIVE', picked_up_at = $2, pickup_attempts = 0,
+             last_error = NULL, updated_at = now()
+         WHERE id = $1 AND status = 'AWAITING_PICKUP'
+         RETURNING ${RENTAL_COLUMNS}`,
+        [id, now],
+      );
+      if (row) {
+        await announce(tx, RENTAL_EVENTS.started, row, call.correlationId);
+      }
+      return row;
+    });
     if (!active) {
       // A concurrent pickup with the same code won; the capture was idempotent.
       return (await findRental(this.db, id)) as RentalRow;

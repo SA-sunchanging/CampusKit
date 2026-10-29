@@ -85,6 +85,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
 
     afterEach(async () => {
       await test.db.query(`DELETE FROM rentals`);
+      await test.db.query(`DELETE FROM outbox_events`);
     });
 
     const stored = async (): Promise<RentalRow> =>
@@ -93,6 +94,15 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
           rentalId,
         ])) as RentalRow[]
       )[0];
+
+    /** How many events of this type the outbox holds. */
+    const announced = async (type: string): Promise<number> =>
+      (
+        (await test.db.query(
+          `SELECT count(*)::int AS n FROM outbox_events WHERE type = $1`,
+          [type],
+        )) as { n: number }[]
+      )[0].n;
 
     const wrong = (code: string) => (code === '000000' ? '111111' : '000000');
 
@@ -149,6 +159,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
       await expect(
         pickups.pickup(renter, rentalId, code, call, atPickup),
       ).rejects.toBeInstanceOf(ConflictException);
+      expect(await announced('rental.started')).toBe(1);
     });
 
     it('keeps AWAITING_PICKUP with last_error when the capture fails', async () => {
@@ -167,6 +178,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
         last_error:
           'Fee capture was declined: The fee authorization has expired',
       });
+      expect(await announced('rental.started')).toBe(0);
     });
 
     it('settles a late return, retries a failed settlement and closes once', async () => {
@@ -231,6 +243,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
           lateFee: 8000,
         });
       }
+      expect(await announced('rental.closed')).toBe(1);
     });
   },
 );

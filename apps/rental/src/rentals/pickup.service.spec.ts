@@ -88,6 +88,24 @@ describe('PickupService', () => {
     });
   });
 
+  it('announces rental.started to the owner and the renter', async () => {
+    const { fake, pickup } = setup();
+    await pickup();
+    expect(fake.events()).toEqual([
+      expect.objectContaining({
+        type: 'rental.started',
+        producer: 'rental',
+        recipients: [OWNER_ID, RENTER_ID],
+        correlationId: 'corr-1',
+        data: expect.objectContaining({
+          rentalId: RENTAL_ID,
+          status: 'ACTIVE',
+          lateFee: 0,
+        }) as unknown,
+      }),
+    ]);
+  });
+
   it('makes the transition conditional on AWAITING_PICKUP', async () => {
     const { fake, pickup } = setup();
     await pickup();
@@ -164,6 +182,7 @@ describe('PickupService', () => {
       });
       expect(booking.getBooking).not.toHaveBeenCalled();
       expect(payment.capture).not.toHaveBeenCalled();
+      expect(fake.events()).toEqual([]);
     });
 
     it('replaces the code at the fifth wrong attempt', async () => {
@@ -260,6 +279,7 @@ describe('PickupService', () => {
         last_error:
           'Fee capture was declined: The fee authorization has expired',
       });
+      expect(fake.events()).toEqual([]);
     });
 
     it('answers 503 when Payment is unavailable, and a retry then succeeds', async () => {
@@ -273,6 +293,7 @@ describe('PickupService', () => {
         ServiceUnavailableException,
       );
       expect(fake.row?.status).toBe('AWAITING_PICKUP');
+      expect(fake.events()).toEqual([]);
       const rental = await pickup();
       expect(rental).toMatchObject({ status: 'ACTIVE', lastError: '' });
       expect(payment.capture.mock.calls[1][0]).toEqual(
@@ -297,5 +318,6 @@ describe('PickupService', () => {
       status: 'ACTIVE',
       pickedUpAt: earlier.toISOString(),
     });
+    expect(fake.events()).toEqual([]);
   });
 });

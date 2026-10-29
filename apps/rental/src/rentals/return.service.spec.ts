@@ -122,6 +122,24 @@ describe('ReturnService', () => {
     expect(fake.row).toMatchObject({ late_days: 2, late_fee: 8000 });
   });
 
+  it('announces rental.closed with the late fee to the owner and the renter', async () => {
+    const { fake, confirmReturn } = setup();
+    await confirmReturn('987654', owner, new Date('2026-11-05T18:00:00Z'));
+    expect(fake.events()).toEqual([
+      expect.objectContaining({
+        type: 'rental.closed',
+        producer: 'rental',
+        recipients: [OWNER_ID, RENTER_ID],
+        correlationId: 'corr-1',
+        data: expect.objectContaining({
+          rentalId: RENTAL_ID,
+          status: 'CLOSED',
+          lateFee: 8000,
+        }) as unknown,
+      }),
+    ]);
+  });
+
   it('moves ACTIVE and SETTLEMENT_PENDING on only with conditional updates', async () => {
     const { fake, confirmReturn } = setup();
     await confirmReturn();
@@ -219,10 +237,11 @@ describe('ReturnService', () => {
         closedAt: '',
       });
       expect(fake.row?.status).toBe('SETTLEMENT_PENDING');
+      expect(fake.events()).toEqual([]);
     });
 
     it('stays SETTLEMENT_PENDING when Payment is unavailable', async () => {
-      const { payment, confirmReturn } = setup();
+      const { fake, payment, confirmReturn } = setup();
       payment.settle.mockResolvedValueOnce({
         ok: false,
         reason: 'unavailable',
@@ -234,6 +253,7 @@ describe('ReturnService', () => {
         lastError:
           'Settlement is unavailable: The payment service is unavailable',
       });
+      expect(fake.events()).toEqual([]);
     });
 
     it('stays SETTLEMENT_PENDING when Payment refuses', async () => {
@@ -299,6 +319,7 @@ describe('ReturnService', () => {
         status: 'CLOSED',
         closedAt: closedAt.toISOString(),
       });
+      expect(fake.events()).toEqual([]);
     });
 
     it('does not store an error on a rental a concurrent return closed', async () => {

@@ -1,3 +1,4 @@
+import type { EventEnvelope } from '@app/contracts';
 import type { DataSource } from 'typeorm';
 import type { RentalRow } from '../rentals/rental.row.js';
 
@@ -13,12 +14,13 @@ export interface Statement {
  * A rental_db with one rental, for unit specs. It understands the statements the handover
  * services send: SELECT by id (with or without FOR UPDATE) and
  * `UPDATE rentals SET col = $n | 'text' | 0 | NULL | now(), ... WHERE id = $1 [AND status = 'X']
- * [RETURNING ...]`, which it applies only when the WHERE matches. A transaction whose callback
- * throws puts the row back as it was.
+ * [RETURNING ...]`, which it applies only when the WHERE matches, and the outbox INSERT. A
+ * transaction whose callback throws puts the row and the outbox back as they were.
  */
 export class FakeRentalDb {
   readonly statements: Statement[] = [];
   private current: RentalRow | undefined;
+  private readonly outbox: EventEnvelope[] = [];
 
   constructor(row?: RentalRow) {
     this.current = row ? { ...row } : undefined;
@@ -41,6 +43,11 @@ export class FakeRentalDb {
       .filter((sql) => sql.trimStart().startsWith('UPDATE'));
   }
 
+  /** The envelopes written to outbox_events and kept, in order. */
+  events(): EventEnvelope[] {
+    return [...this.outbox];
+  }
+
   get dataSource(): DataSource {
     const query = (sql: string, params: unknown[] = []) =>
       this.query(sql, params);
@@ -48,10 +55,12 @@ export class FakeRentalDb {
       work: (tx: { query: typeof query }) => Promise<unknown>,
     ) => {
       const before = this.current ? { ...this.current } : undefined;
+      const written = this.outbox.length;
       try {
         return await work({ query });
       } catch (err) {
         this.current = before;
+        this.outbox.length = written;
         throw err;
       }
     };
@@ -69,6 +78,10 @@ export class FakeRentalDb {
     }
     if (text.startsWith('UPDATE rentals')) {
       return Promise.resolve(this.update(text, params));
+    }
+    if (text.startsWith('INSERT INTO outbox_events')) {
+      this.outbox.push(JSON.parse(params[2] as string) as EventEnvelope);
+      return Promise.resolve([]);
     }
     return Promise.reject(new Error(`Unexpected SQL: ${sql}`));
   }
