@@ -48,7 +48,7 @@ export class ListingsController {
     return this.queries.search(query);
   }
 
-  /** Public. A DRAFT is shown only when the caller's token belongs to its owner. */
+  /** Public. Any status but PUBLISHED is shown only to its owner and administrators. */
   @Get(':id')
   @ApiOkResponse({ type: ListingResponse })
   detail(

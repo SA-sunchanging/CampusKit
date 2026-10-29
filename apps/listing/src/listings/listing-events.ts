@@ -30,3 +30,21 @@ export async function announcePublished(
     data: listingEventData(listing),
   });
 }
+
+/** Tells the owner, through the outbox, that an administrator rejected the listing and why. */
+export async function announceRejected(
+  tx: EntityManager,
+  listing: Listing,
+  correlationId: string,
+): Promise<void> {
+  await writeOutbox(tx, {
+    producer: PRODUCER,
+    type: LISTING_EVENTS.rejected,
+    recipients: [listing.ownerId],
+    correlationId,
+    data: {
+      ...listingEventData(listing),
+      reason: listing.rejectionReason ?? undefined,
+    },
+  });
+}

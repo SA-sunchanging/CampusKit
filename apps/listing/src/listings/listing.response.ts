@@ -92,6 +92,16 @@ export class ListingResponse {
   })
   moderationFlags: string[];
 
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: "The administrator's reason. Set only on a REJECTED listing.",
+  })
+  rejectionReason: string | null;
+
+  @ApiProperty({ type: Date, nullable: true })
+  reviewedAt: Date | null;
+
   @ApiProperty()
   createdAt: Date;
 
@@ -120,6 +130,8 @@ export class ListingResponse {
       thumbnail: listing.thumbnail,
       publishError: listing.publishError,
       moderationFlags: listing.moderationFlags,
+      rejectionReason: listing.rejectionReason,
+      reviewedAt: listing.reviewedAt,
       createdAt: listing.createdAt,
       publishedAt: listing.publishedAt,
     });

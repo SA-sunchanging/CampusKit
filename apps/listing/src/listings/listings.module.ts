@@ -2,6 +2,8 @@ import { AuthModule } from '@app/common';
 import { BookingClientModule } from '@app/contracts';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ModerationController } from '../admin/moderation.controller.js';
+import { ModerationService } from '../admin/moderation.service.js';
 import { CalendarClient } from '../clients/calendar.client.js';
 import { IdentityClient } from '../clients/identity.client.js';
 import { InternalListingsController } from '../internal/internal-listings.controller.js';
@@ -17,10 +19,15 @@ import { ListingsService } from './listings.service.js';
     BookingClientModule,
     TypeOrmModule.forFeature([Listing, ListingPhoto]),
   ],
-  controllers: [ListingsController, InternalListingsController],
+  controllers: [
+    ListingsController,
+    InternalListingsController,
+    ModerationController,
+  ],
   providers: [
     ListingsService,
     ListingQueriesService,
+    ModerationService,
     IdentityClient,
     CalendarClient,
   ],

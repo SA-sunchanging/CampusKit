@@ -15,6 +15,10 @@ const other = {
   sub: '00000000-0000-4000-8000-000000000002',
   role: 'student' as const,
 };
+const admin = {
+  sub: '00000000-0000-4000-8000-000000000009',
+  role: 'admin' as const,
+};
 const id = '11111111-1111-4111-8111-111111111111';
 
 const listing = (fields: Partial<Listing> = {}) =>
@@ -114,6 +118,41 @@ describe('ListingQueriesService.detail', () => {
     });
     await expect(service.detail(id, other)).rejects.toThrow(NotFoundException);
     await expect(service.detail(id, null)).rejects.toThrow(NotFoundException);
+  });
+
+  it('shows a listing waiting for review to its owner and administrators only', async () => {
+    const { service, repo } = setup();
+    repo.findOneBy.mockResolvedValue(
+      listing({
+        status: 'PENDING_REVIEW',
+        publishedAt: null,
+        moderationFlags: ['Mentions "gun"'],
+      }),
+    );
+    await expect(service.detail(id, owner)).resolves.toMatchObject({
+      status: 'PENDING_REVIEW',
+      moderationFlags: ['Mentions "gun"'],
+    });
+    await expect(service.detail(id, admin)).resolves.toMatchObject({
+      status: 'PENDING_REVIEW',
+    });
+    await expect(service.detail(id, other)).rejects.toThrow(NotFoundException);
+    await expect(service.detail(id, null)).rejects.toThrow(NotFoundException);
+  });
+
+  it('shows the rejection reason to the owner of a REJECTED listing', async () => {
+    const { service, repo } = setup();
+    repo.findOneBy.mockResolvedValue(
+      listing({
+        status: 'REJECTED',
+        publishedAt: null,
+        rejectionReason: 'Not allowed on campus',
+      }),
+    );
+    await expect(service.detail(id, owner)).resolves.toMatchObject({
+      rejectionReason: 'Not allowed on campus',
+    });
+    await expect(service.detail(id, other)).rejects.toThrow(NotFoundException);
   });
 
   it('answers 404 for an unknown listing', async () => {

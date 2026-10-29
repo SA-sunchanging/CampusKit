@@ -23,6 +23,15 @@ export function likePattern(keyword: string): string {
   return `%${keyword.replace(/[\\%_]/g, '\\$&')}%`;
 }
 
+/** True when the viewer may see the listing in its current status. */
+function canSee(listing: Listing, viewer: AuthUser | null): boolean {
+  return (
+    listing.status === 'PUBLISHED' ||
+    viewer?.role === 'admin' ||
+    listing.ownerId === viewer?.sub
+  );
+}
+
 /** Read side of Listing: search, detail, and the quote for Booking. */
 @Injectable()
 export class ListingQueriesService {
@@ -61,13 +70,13 @@ export class ListingQueriesService {
     };
   }
 
-  /** A PUBLISHED listing for anyone; a DRAFT only for its owner (404 for everyone else). */
+  /**
+   * A PUBLISHED listing for anyone; any other status only for its owner and administrators
+   * (404 for everyone else, so a hidden listing is indistinguishable from a missing one).
+   */
   async detail(id: string, viewer: AuthUser | null): Promise<ListingResponse> {
     const listing = await this.listings.findOneBy({ id });
-    if (
-      !listing ||
-      (listing.status !== 'PUBLISHED' && listing.ownerId !== viewer?.sub)
-    ) {
+    if (!listing || !canSee(listing, viewer)) {
       throw new NotFoundException('Listing not found');
     }
     return ListingResponse.of(
