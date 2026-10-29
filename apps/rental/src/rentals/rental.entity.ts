@@ -102,6 +102,13 @@ export class Rental {
   @Column('text', { name: 'last_error', nullable: true })
   lastError: string | null;
 
+  /**
+   * When a pickup claimed the rental before capturing the fee; a cancellation waits until the
+   * pickup ends or the claim is older than its lease. Null when no pickup is running.
+   */
+  @Column('timestamptz', { name: 'pickup_claimed_at', nullable: true })
+  pickupClaimedAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

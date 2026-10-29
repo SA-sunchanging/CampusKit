@@ -33,6 +33,7 @@ export function rentalRow(overrides: Partial<RentalRow> = {}): RentalRow {
     late_days: 0,
     late_fee: 0,
     last_error: null,
+    pickup_claimed_at: null,
     created_at: new Date('2026-10-29T04:00:00Z'),
     updated_at: new Date('2026-10-29T04:00:00Z'),
     ...overrides,

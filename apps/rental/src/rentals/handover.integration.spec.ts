@@ -14,6 +14,7 @@ import {
   type TestDatabase,
 } from '../testing/test-database.js';
 import { PickupService } from './pickup.service.js';
+import { RentalCancellationService } from './rental-cancellation.service.js';
 import { RentalCreationService } from './rental-creation.service.js';
 import type { RentalRow } from './rental.row.js';
 import { ReturnService } from './return.service.js';
@@ -123,21 +124,19 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
       expect(after.status).toBe('AWAITING_PICKUP');
     });
 
-    it('picks up once when pickups race, and refuses a later one', async () => {
+    it('lets one of racing pickups claim the rental, and refuses the others and a later one', async () => {
       const { pickup_code: code } = await stored();
-      for (let i = 0; i < 4; i++) {
-        // A slow capture lets every pickup pass the code check before one of them activates.
-        payment.capture.mockImplementationOnce(
-          () =>
-            new Promise((resolve) =>
-              setTimeout(
-                () => resolve({ ok: true, value: { bookingId: BOOKING_ID } }),
-                50,
-              ),
+      // A slow capture keeps the claim while the other pickups arrive.
+      payment.capture.mockImplementationOnce(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(
+              () => resolve({ ok: true, value: { bookingId: BOOKING_ID } }),
+              50,
             ),
-        );
-      }
-      const replies = await Promise.all(
+          ),
+      );
+      const replies = await Promise.allSettled(
         Array.from({ length: 4 }, (_, i) =>
           pickups.pickup(
             renter,
@@ -149,17 +148,33 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
         ),
       );
       const row = await stored();
-      expect(row.status).toBe('ACTIVE');
+      expect(row).toMatchObject({ status: 'ACTIVE', pickup_claimed_at: null });
+      expect(replies.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
       for (const reply of replies) {
-        expect(reply).toMatchObject({
-          status: 'ACTIVE',
-          pickedUpAt: row.picked_up_at?.toISOString(),
-        });
+        if (reply.status === 'rejected') {
+          expect(reply.reason).toBeInstanceOf(ConflictException);
+        }
       }
+      expect(payment.capture).toHaveBeenCalledTimes(1);
       await expect(
         pickups.pickup(renter, rentalId, code, call, atPickup),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(await announced('rental.started')).toBe(1);
+    });
+
+    it('refuses a cancellation while a pickup captures the fee', async () => {
+      const { pickup_code: code } = await stored();
+      const cancellation = new RentalCancellationService(test.db);
+      let cancelError: unknown;
+      payment.capture.mockImplementationOnce(async () => {
+        cancelError = await cancellation
+          .cancelByBooking(BOOKING_ID, atPickup)
+          .catch((err: unknown) => err);
+        return { ok: true, value: { bookingId: BOOKING_ID } };
+      });
+      await pickups.pickup(renter, rentalId, code, call, atPickup);
+      expect(cancelError).toBeInstanceOf(ConflictException);
+      expect((await stored()).status).toBe('ACTIVE');
     });
 
     it('keeps AWAITING_PICKUP with last_error when the capture fails', async () => {

@@ -19,7 +19,9 @@ import {
   rentalRow,
   STRANGER_ID,
 } from '../testing/fixtures.js';
+import { PICKUP_CLAIM_LEASE_MS } from './pickup-claim.js';
 import { PickupService } from './pickup.service.js';
+import { RentalCancellationService } from './rental-cancellation.service.js';
 import type { RentalRow } from './rental.row.js';
 
 const renter = { sub: RENTER_ID, role: 'student' as const };
@@ -335,7 +337,7 @@ describe('PickupService', () => {
     expect(fake.events()).toEqual([]);
   });
 
-  it('answers 409 and stays CANCELLED when a cancel commits during the pickup', async () => {
+  it('answers 409 when a cancel ended the rental after the claim lapsed', async () => {
     const { fake, payment, pickup } = setup();
     payment.capture.mockImplementationOnce(() => {
       fake.set({ ...(fake.row as RentalRow), status: 'CANCELLED' });
@@ -344,5 +346,99 @@ describe('PickupService', () => {
     expect(await errorOf(pickup())).toBeInstanceOf(ConflictException);
     expect(fake.row?.status).toBe('CANCELLED');
     expect(fake.events()).toEqual([]);
+  });
+
+  describe('pickup claim', () => {
+    it('claims the rental before the booking check and the capture, and clears it on activation', async () => {
+      const { fake, booking, payment, pickup } = setup();
+      const claimedAt: (Date | null | undefined)[] = [];
+      booking.getBooking.mockImplementationOnce(() => {
+        claimedAt.push(fake.row?.pickup_claimed_at);
+        return Promise.resolve({ ok: true, value: confirmedBooking() });
+      });
+      payment.capture.mockImplementationOnce(() => {
+        claimedAt.push(fake.row?.pickup_claimed_at);
+        return Promise.resolve({ ok: true, value: captured });
+      });
+      await pickup();
+      expect(claimedAt).toEqual([now, now]);
+      expect(fake.row).toMatchObject({
+        status: 'ACTIVE',
+        pickup_claimed_at: null,
+      });
+    });
+
+    it('keeps a cancellation out while the fee is captured', async () => {
+      const { fake, payment, pickup } = setup();
+      const cancellation = new RentalCancellationService(fake.dataSource);
+      let cancelError: unknown;
+      payment.capture.mockImplementationOnce(async () => {
+        cancelError = await errorOf(
+          cancellation.cancelByBooking(BOOKING_ID, now),
+        );
+        return { ok: true, value: captured };
+      });
+      expect((await pickup()).status).toBe('ACTIVE');
+      expect(cancelError).toBeInstanceOf(ConflictException);
+      expect(fake.row?.status).toBe('ACTIVE');
+    });
+
+    it('refuses a second pickup while a fresh claim exists, without counting the code', async () => {
+      const claimed = new Date(now.getTime() - 60_000);
+      const { fake, booking, pickup } = setup(
+        rentalRow({ pickup_claimed_at: claimed }),
+      );
+      const err = await errorOf(pickup('000000'));
+      expect(err).toBeInstanceOf(ConflictException);
+      expect(fake.row).toMatchObject({
+        pickup_attempts: 0,
+        pickup_claimed_at: claimed,
+      });
+      expect(booking.getBooking).not.toHaveBeenCalled();
+    });
+
+    it('takes over a claim older than the lease', async () => {
+      const lapsed = new Date(now.getTime() - PICKUP_CLAIM_LEASE_MS);
+      const { fake, pickup } = setup(rentalRow({ pickup_claimed_at: lapsed }));
+      expect((await pickup()).status).toBe('ACTIVE');
+      expect(fake.updates()).toContainEqual(
+        expect.stringContaining('pickup_claimed_at <= $3'),
+      );
+    });
+
+    it.each([
+      [
+        'the capture fails',
+        (s: ReturnType<typeof setup>) =>
+          s.payment.capture.mockResolvedValueOnce({
+            ok: false,
+            reason: 'unavailable',
+            message: 'The payment service is unavailable',
+          }),
+      ],
+      [
+        'Booking refuses',
+        (s: ReturnType<typeof setup>) =>
+          s.booking.getBooking.mockResolvedValueOnce({
+            ok: true,
+            value: confirmedBooking({ status: 'CANCELLED' }),
+          }),
+      ],
+    ])(
+      'clears the claim when %s, so the booking can be cancelled',
+      async (_label, fail) => {
+        const s = setup();
+        fail(s);
+        await expect(s.pickup()).rejects.toBeDefined();
+        expect(s.fake.row).toMatchObject({
+          status: 'AWAITING_PICKUP',
+          pickup_claimed_at: null,
+        });
+        const cancellation = new RentalCancellationService(s.fake.dataSource);
+        await expect(
+          cancellation.cancelByBooking(BOOKING_ID, now),
+        ).resolves.toMatchObject({ status: 'CANCELLED' });
+      },
+    );
   });
 });

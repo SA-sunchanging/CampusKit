@@ -74,6 +74,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
         late_days: 0,
         late_fee: 0,
         last_error: null,
+        pickup_claimed_at: null,
       });
       expect(row?.created_at).toBeInstanceOf(Date);
     });

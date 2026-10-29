@@ -24,6 +24,7 @@ export interface RentalRow {
   late_days: number;
   late_fee: number;
   last_error: string | null;
+  pickup_claimed_at: Date | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -33,7 +34,7 @@ export const RENTAL_COLUMNS = `id, booking_id, listing_id, owner_id, renter_id,
   period_start, period_end, rental_fee, deposit, late_fee_per_day, status,
   pickup_code, return_code, pickup_attempts, return_attempts,
   picked_up_at, returned_at, closed_at, late_days, late_fee, last_error,
-  created_at, updated_at`;
+  pickup_claimed_at, created_at, updated_at`;
 
 /** The rental with this ID, locked until the transaction ends when lock is true. */
 export async function findRental(

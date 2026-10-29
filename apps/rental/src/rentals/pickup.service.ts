@@ -13,6 +13,7 @@ import type { CallContext } from '../clients/call-context.js';
 import { PaymentClient } from '../clients/payment.client.js';
 import { checkCode } from './code-attempts.js';
 import { bookingProblem, pickupWindowError } from './pickup-checks.js';
+import { claimPickup, hasFreshClaim } from './pickup-claim.js';
 import { lockForParty } from './rental-access.js';
 import { announce } from './rental-events.js';
 import { RentalResponse } from './rental.response.js';
@@ -72,8 +73,9 @@ export class PickupService {
   }
 
   /**
-   * Checks the status, the pickup window and the code on the locked row. A wrong code is
-   * committed with its counter before the 400, so retrying cannot undo the attempt.
+   * Checks the status, the pickup window and the code on the locked row, then claims the
+   * rental so a cancellation waits until this pickup ends. A wrong code is committed with its
+   * counter before the 400, so retrying cannot undo the attempt.
    */
   private async checkHandover(
     caller: AuthUser,
@@ -95,6 +97,11 @@ export class PickupService {
       if (row.status !== 'AWAITING_PICKUP') {
         throw new ConflictException('The item was already picked up');
       }
+      if (hasFreshClaim(row, now)) {
+        throw new ConflictException(
+          'A pickup of this rental is already in progress; try again in a moment',
+        );
+      }
       const windowError = pickupWindowError(row, now);
       if (windowError) {
         throw new ConflictException(windowError);
@@ -103,7 +110,11 @@ export class PickupService {
       if (check === 'replaced') {
         this.logger.warn(`Rental ${id}: too many wrong pickup codes, replaced`);
       }
-      return check === 'match' ? row : WRONG_CODE;
+      if (check !== 'match') {
+        return WRONG_CODE;
+      }
+      // The row is locked and unclaimed, so the claim succeeds.
+      return (await claimPickup(tx, id, now)) as RentalRow;
     });
     if (result === WRONG_CODE) {
       throw new BadRequestException('Wrong pickup code');
@@ -138,11 +149,14 @@ export class PickupService {
     return result.ok ? undefined : stepProblem('Fee capture', result);
   }
 
-  /** Keeps the reason for the page while the rental still awaits pickup. */
+  /**
+   * Keeps the reason for the page while the rental still awaits pickup, and drops the claim
+   * so the booking can be cancelled again.
+   */
   private async recordFailure(id: string, text: string): Promise<void> {
     await updateRental(
       this.db,
-      `UPDATE rentals SET last_error = $2, updated_at = now()
+      `UPDATE rentals SET last_error = $2, pickup_claimed_at = NULL, updated_at = now()
        WHERE id = $1 AND status = 'AWAITING_PICKUP'
        RETURNING ${RENTAL_COLUMNS}`,
       [id, text],
@@ -163,7 +177,7 @@ export class PickupService {
         tx,
         `UPDATE rentals
          SET status = 'ACTIVE', picked_up_at = $2, pickup_attempts = 0,
-             last_error = NULL, updated_at = now()
+             last_error = NULL, pickup_claimed_at = NULL, updated_at = now()
          WHERE id = $1 AND status = 'AWAITING_PICKUP'
          RETURNING ${RENTAL_COLUMNS}`,
         [id, now],
@@ -174,8 +188,8 @@ export class PickupService {
       return row;
     });
     if (!active) {
-      // A concurrent pickup with the same code won (the capture was idempotent), or the
-      // booking was cancelled meanwhile.
+      // A concurrent pickup whose claim had lapsed won (the capture was idempotent), or a
+      // cancellation ended the rental after this pickup's claim lapsed.
       const current = (await findRental(this.db, id)) as RentalRow;
       if (current.status === 'CANCELLED') {
         throw new ConflictException(CANCELLED_MESSAGE);

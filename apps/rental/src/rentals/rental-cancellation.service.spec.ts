@@ -3,9 +3,11 @@ import { FakeRentalDb } from '../testing/fake-rental-db.js';
 import {
   BOOKING_ID,
   errorOf,
+  NOW,
   RENTAL_ID,
   rentalRow,
 } from '../testing/fixtures.js';
+import { PICKUP_CLAIM_LEASE_MS } from './pickup-claim.js';
 import { RentalCancellationService } from './rental-cancellation.service.js';
 import type { RentalRow } from './rental.row.js';
 
@@ -45,6 +47,30 @@ describe('RentalCancellationService', () => {
     const rental = await service.cancelByBooking(BOOKING_ID);
     expect(rental.status).toBe('CANCELLED');
     expect(fake.updates()).toEqual([]);
+  });
+
+  it('answers 409 and changes nothing while a pickup holds a fresh claim', async () => {
+    const claimed = new Date(NOW.getTime() - 60_000);
+    const { fake, service } = setup(rentalRow({ pickup_claimed_at: claimed }));
+    const err = await errorOf(service.cancelByBooking(BOOKING_ID, NOW));
+    expect(err).toBeInstanceOf(ConflictException);
+    expect(fake.row).toMatchObject({
+      status: 'AWAITING_PICKUP',
+      pickup_claimed_at: claimed,
+    });
+    expect(fake.updates()).toEqual([]);
+  });
+
+  it('cancels once the claim is older than the lease', async () => {
+    const lapsed = new Date(NOW.getTime() - PICKUP_CLAIM_LEASE_MS);
+    const { fake, service } = setup(rentalRow({ pickup_claimed_at: lapsed }));
+    await service.cancelByBooking(BOOKING_ID, NOW);
+    expect(fake.row?.status).toBe('CANCELLED');
+    const [update] = fake.statements.filter(({ sql }) =>
+      sql.includes("SET status = 'CANCELLED'"),
+    );
+    expect(update.sql).toContain('pickup_claimed_at <= $2');
+    expect(update.params).toEqual([RENTAL_ID, lapsed]);
   });
 
   it('answers 404 when the booking has no rental', async () => {
