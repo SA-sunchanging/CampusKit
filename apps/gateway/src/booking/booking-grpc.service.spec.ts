@@ -30,9 +30,10 @@ async function rejection(promise: Promise<unknown>): Promise<HttpException> {
 
 describe('BookingGrpcService', () => {
   it('sends the request with the caller metadata', async () => {
-    const { service, getBooking } = setup(of({ id }));
+    const { service, getBooking } = setup(of({ id, status: 'PENDING' }));
     const metadata = new Metadata();
-    await expect(service.getBooking(id, metadata)).resolves.toEqual({ id });
+    const booking = await service.getBooking(id, metadata);
+    expect(booking).toMatchObject({ id, status: 'PENDING', declineReason: '' });
     expect(getBooking).toHaveBeenCalledWith({ id }, metadata);
   });
 
