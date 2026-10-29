@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { BookingClient } from '../clients/booking.client.js';
 import { PaymentClient } from '../clients/payment.client.js';
 import { InternalRentalsController } from '../internal/internal-rentals.controller.js';
+import { PickupService } from './pickup.service.js';
 import { RentalCreationService } from './rental-creation.service.js';
 import { RentalQueriesService } from './rental-queries.service.js';
 import { RentalsController } from './rentals.controller.js';
@@ -16,6 +17,7 @@ import { RentalsController } from './rentals.controller.js';
     RentalQueriesService,
     BookingClient,
     PaymentClient,
+    PickupService,
   ],
 })
 export class RentalsModule {}

@@ -1,3 +1,4 @@
+import type { BookingView } from '../clients/booking.client.js';
 import type { RentalRow } from '../rentals/rental.row.js';
 
 /** IDs and times shared by the rental unit specs. */
@@ -34,6 +35,25 @@ export function rentalRow(overrides: Partial<RentalRow> = {}): RentalRow {
     last_error: null,
     created_at: new Date('2026-10-29T04:00:00Z'),
     updated_at: new Date('2026-10-29T04:00:00Z'),
+    ...overrides,
+  };
+}
+
+/** The booking of rentalRow() as Booking's GetBooking answers it: CONFIRMED, same details. */
+export function confirmedBooking(
+  overrides: Partial<BookingView> = {},
+): BookingView {
+  return {
+    id: BOOKING_ID,
+    listingId: LISTING_ID,
+    renterId: RENTER_ID,
+    ownerId: OWNER_ID,
+    status: 'CONFIRMED',
+    period: {
+      start: '2026-11-01T17:00:00.000Z',
+      end: '2026-11-04T17:00:00.000Z',
+    },
+    terms: { rentalFee: 6000, deposit: 30000, lateFeePerDay: 4000 },
     ...overrides,
   };
 }
