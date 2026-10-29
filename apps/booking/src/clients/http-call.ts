@@ -62,3 +62,62 @@ export function errorMessage(body: unknown): string | undefined {
     ?.message;
   return typeof message === 'string' && message !== '' ? message : undefined;
 }
+
+/**
+ * The outcome of a call whose failure the caller records instead of throwing. "declined" is a
+ * definitive refusal (4xx); "unavailable" means the call may succeed when retried.
+ */
+export type ServiceResult<T> =
+  | { ok: true; value: T }
+  | { ok: false; reason: 'declined' | 'unavailable'; message: string };
+
+export interface ResultCall<T> {
+  /** Service name for messages, for example "payment". */
+  service: string;
+  url: string;
+  body: unknown;
+  correlationId: string;
+  isValid: (body: unknown) => body is T;
+}
+
+/**
+ * POSTs JSON and classifies the reply. A 2xx with a valid body is ok. 404 and 501 (endpoint
+ * not built yet), 5xx, an invalid body, timeouts and network failures are unavailable. Any
+ * other 4xx is declined, with the service's message.
+ */
+export async function postForResult<T>(
+  call: ResultCall<T>,
+  logger: Logger,
+): Promise<ServiceResult<T>> {
+  const reply = await send(
+    {
+      method: 'POST',
+      url: call.url,
+      body: call.body,
+      correlationId: call.correlationId,
+    },
+    logger,
+  );
+  if (isSuccess(reply) && call.isValid(reply.body)) {
+    return { ok: true, value: reply.body };
+  }
+  if (
+    reply !== undefined &&
+    reply.status >= 400 &&
+    reply.status < 500 &&
+    reply.status !== 404
+  ) {
+    return {
+      ok: false,
+      reason: 'declined',
+      message:
+        errorMessage(reply.body) ??
+        `The ${call.service} service refused the request (HTTP ${reply.status})`,
+    };
+  }
+  return {
+    ok: false,
+    reason: 'unavailable',
+    message: `The ${call.service} service is unavailable`,
+  };
+}
