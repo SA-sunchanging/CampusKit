@@ -10,6 +10,7 @@ export const BOOKING_STATUSES = [
   'DECLINED',
   'EXPIRED',
   'CANCELLED',
+  'FAILED',
 ] as const;
 export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 

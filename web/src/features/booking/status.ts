@@ -9,6 +9,7 @@ export const STATUS_LABELS: Record<BookingStatus, string> = {
   DECLINED: 'Declined',
   EXPIRED: 'Expired',
   CANCELLED: 'Cancelled',
+  FAILED: 'Payment failed',
 };
 
 export const STATUS_TONES: Record<BookingStatus, Tone> = {
@@ -18,6 +19,7 @@ export const STATUS_TONES: Record<BookingStatus, Tone> = {
   DECLINED: 'danger',
   EXPIRED: 'neutral',
   CANCELLED: 'neutral',
+  FAILED: 'danger',
 };
 
 function isKnown(status: string): status is BookingStatus {
