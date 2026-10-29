@@ -94,17 +94,17 @@ commits; Git contribution counts toward the progress grade.
 ### D: Rental and Payment
 
 **Core**
-- [ ] Payment: demo ledger with fee and deposit authorization, capture, void, and settlement (late fee, deposit release, payout); every operation carries a unique operation ID so a retry never repeats it.
-- [ ] Payment: payment status per booking for the web.
-- [ ] Rental: create the rental (idempotent per booking), issue pickup and return codes.
-- [ ] Rental: confirm pickup (recheck the booking over gRPC, capture the fee, ACTIVE); confirm return (SETTLEMENT_PENDING, release the calendar, settle, CLOSED); internal rental lookup for Review.
-- [ ] Web: rental page showing codes, code entry, status, and payment status.
+- [x] Payment: demo ledger with fee and deposit authorization, capture, void, and settlement (late fee, deposit release, payout); every operation carries a unique operation ID so a retry never repeats it.
+- [x] Payment: payment status per booking for the web.
+- [x] Rental: create the rental (idempotent per booking), issue pickup and return codes.
+- [x] Rental: confirm pickup (recheck the booking over gRPC, capture the fee, ACTIVE); confirm return (SETTLEMENT_PENDING, release the calendar, settle, CLOSED); internal rental lookup for Review.
+- [x] Web: rental page showing codes, code entry, status, and payment status.
 - [ ] Slides: risk matrix with at least three risks.
 
 **Should**
 - [ ] Condition evidence (photos, condition, accessories) at pickup and return.
 - [ ] Overdue job, late-fee calculation, and return-reminder events.
-- [ ] Settlement retry endpoint and a test that a duplicate capture is not charged twice.
+- [x] Settlement retry endpoint and a test that a duplicate capture is not charged twice.
 
 **Other**
 - Real payment provider sandbox, provider reconciliation, deposit-expiry alerts, dispute handling.
