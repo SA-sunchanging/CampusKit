@@ -22,6 +22,7 @@ import { Call, type CallContext } from '../clients/call-context.js';
 import { CreateListingDto } from './dto/create-listing.dto.js';
 import { SearchListingsQuery } from './dto/search-listings.query.js';
 import { ListingQueriesService } from './listing-queries.service.js';
+import { ListingSearchService } from './listing-search.service.js';
 import { SearchResultResponse } from './listing-summary.response.js';
 import { ListingResponse } from './listing.response.js';
 import { ListingsService } from './listings.service.js';
@@ -37,6 +38,7 @@ export class ListingsController {
   constructor(
     private readonly listings: ListingsService,
     private readonly queries: ListingQueriesService,
+    private readonly searches: ListingSearchService,
     private readonly jwt: JwtService,
   ) {}
 
@@ -47,7 +49,7 @@ export class ListingsController {
     @Query() query: SearchListingsQuery,
     @Call() call: CallContext,
   ): Promise<SearchResultResponse> {
-    return this.queries.search(query, call.correlationId);
+    return this.searches.search(query, call.correlationId);
   }
 
   /** Public. Any status but PUBLISHED is shown only to its owner and administrators. */

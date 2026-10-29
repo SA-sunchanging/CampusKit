@@ -9,6 +9,7 @@ import { IdentityClient } from '../clients/identity.client.js';
 import { ReviewClient } from '../clients/review.client.js';
 import { InternalListingsController } from '../internal/internal-listings.controller.js';
 import { ListingQueriesService } from './listing-queries.service.js';
+import { ListingSearchService } from './listing-search.service.js';
 import { ListingPhoto } from './listing-photo.entity.js';
 import { Listing } from './listing.entity.js';
 import { ListingsController } from './listings.controller.js';
@@ -28,6 +29,7 @@ import { ListingsService } from './listings.service.js';
   providers: [
     ListingsService,
     ListingQueriesService,
+    ListingSearchService,
     ModerationService,
     IdentityClient,
     CalendarClient,
