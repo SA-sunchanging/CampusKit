@@ -5,6 +5,7 @@ import { GrpcMethod } from '@nestjs/microservices';
 import type { DateRange } from '../calendar/date-range.js';
 import { callContextFrom } from '../clients/call-context.js';
 import { callerFrom } from '../grpc-auth.js';
+import { BookingCancellationService } from './booking-cancellation.service.js';
 import { BookingDecisionsService } from './booking-decisions.service.js';
 import { type BookingReply, toBookingReply } from './booking.reply.js';
 import { BookingsService } from './bookings.service.js';
@@ -18,7 +19,8 @@ interface BookingIdRequest {
   id?: string;
 }
 
-interface DeclineBookingRequest {
+/** DeclineBookingRequest and CancelBookingRequest. */
+interface BookingReasonRequest {
   id?: string;
   reason?: string;
 }
@@ -31,15 +33,31 @@ interface ListBookingsRequest {
 /**
  * Booking handlers of libs/contracts/proto/booking.proto; the calendar handlers live in calendar/.
  * Operations owned by Booking (see docs/architecture/services.md): request, approve, decline,
- * get and list bookings.
+ * cancel, get and list bookings.
  */
 @Controller()
 export class BookingsGrpcController {
   constructor(
     private readonly bookings: BookingsService,
     private readonly decisions: BookingDecisionsService,
+    private readonly cancellation: BookingCancellationService,
     private readonly jwt: JwtService,
   ) {}
+
+  @GrpcMethod('BookingService', 'CancelBooking')
+  async cancelBooking(
+    request: BookingReasonRequest,
+    metadata: Metadata,
+  ): Promise<BookingReply> {
+    const caller = callerFrom(metadata, this.jwt);
+    const booking = await this.cancellation.cancel(
+      caller,
+      request.id ?? '',
+      request.reason,
+      callContextFrom(metadata),
+    );
+    return toBookingReply(booking);
+  }
 
   @GrpcMethod('BookingService', 'RequestBooking')
   async requestBooking(
@@ -72,7 +90,7 @@ export class BookingsGrpcController {
 
   @GrpcMethod('BookingService', 'DeclineBooking')
   async declineBooking(
-    request: DeclineBookingRequest,
+    request: BookingReasonRequest,
     metadata: Metadata,
   ): Promise<BookingReply> {
     const caller = callerFrom(metadata, this.jwt);

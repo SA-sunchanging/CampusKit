@@ -5,6 +5,7 @@ import {
   createTestDatabase,
   type TestDatabase,
 } from '../testing/test-database.js';
+import { BookingCancellationService } from './booking-cancellation.service.js';
 import { BookingDecisionsService } from './booking-decisions.service.js';
 import { Compensation, failStartedApprovals } from './compensation.js';
 
@@ -133,6 +134,55 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
       expect((await stateOf(id)).voided).toBe(false);
       expect(await compensation.unvoided()).toContain(id);
       await expect(compensation.voidHolds(id, call)).resolves.toBe(true);
+      expect(await compensation.unvoided()).not.toContain(id);
+    });
+
+    it('retries the void of a cancelled CONFIRMED booking until Payment answers', async () => {
+      const id = await booking('CONFIRMED');
+      await test.db.query(
+        `UPDATE bookings SET rental_id = 'rental-1' WHERE id = $1`,
+        [id],
+      );
+      const rentalClient = {
+        cancelByBooking: vi
+          .fn()
+          .mockResolvedValue({ ok: true, value: 'cancelled' }),
+      };
+      const cancellation = new BookingCancellationService(
+        test.db,
+        rentalClient as unknown as RentalClient,
+        compensation,
+      );
+      payment.voidHolds.mockResolvedValueOnce({
+        ok: false,
+        reason: 'unavailable',
+        message: 'The payment service is unavailable',
+      });
+      const renterId = (
+        (await test.db.query(`SELECT renter_id FROM bookings WHERE id = $1`, [
+          id,
+        ])) as { renter_id: string }[]
+      )[0].renter_id;
+      const result = await cancellation.cancel(
+        { sub: renterId, role: 'student' },
+        id,
+        'Plans changed',
+        call,
+        now,
+      );
+      expect(result.status).toBe('CANCELLED');
+      expect(await stateOf(id)).toMatchObject({
+        status: 'CANCELLED',
+        voided: false,
+        held: 0,
+      });
+      expect(await compensation.unvoided()).toContain(id);
+      await expect(compensation.voidHolds(id, call)).resolves.toBe(true);
+      expect(await compensation.unvoided()).not.toContain(id);
+    });
+
+    it('never retries a void for a booking cancelled while PENDING', async () => {
+      const id = await booking('CANCELLED');
       expect(await compensation.unvoided()).not.toContain(id);
     });
 

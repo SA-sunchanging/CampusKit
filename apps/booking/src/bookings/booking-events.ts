@@ -21,19 +21,24 @@ export function bookingEventData(row: BookingRow): BookingEventData {
 /** The producer name in every Booking event envelope. */
 export const PRODUCER = 'booking';
 
-/** Writes a Booking event to the outbox inside the transaction that changed the booking. */
+/**
+ * Writes a Booking event to the outbox inside the transaction that changed the booking. A
+ * reason, when given, goes into the data for the inbox to show (booking.cancelled).
+ */
 export async function announce(
   tx: EntityManager,
   type: BookingEventType,
   row: BookingRow,
   recipients: string[],
   correlationId: string,
+  reason: string | null = null,
 ): Promise<void> {
+  const data = bookingEventData(row);
   await writeOutbox(tx, {
     producer: PRODUCER,
     type,
     recipients,
     correlationId,
-    data: bookingEventData(row),
+    data: reason === null ? data : { ...data, reason },
   });
 }

@@ -85,16 +85,28 @@ export function parseStatusFilter(
 
 /** A decline reason may be at most this many characters. */
 export const MAX_DECLINE_REASON = 500;
+/** A cancellation reason may be at most this many characters. */
+export const MAX_CANCEL_REASON = 200;
 
-/** The optional decline reason, trimmed; null when empty. Throws INVALID_ARGUMENT when too long. */
-export function parseDeclineReason(value: string | undefined): string | null {
+/** An optional reason, trimmed; null when empty. Throws INVALID_ARGUMENT when too long. */
+function parseReason(value: string | undefined, max: number): string | null {
   const reason = (value ?? '').trim();
   // Count code points, as PostgreSQL char_length does.
-  if (Array.from(reason).length > MAX_DECLINE_REASON) {
+  if (Array.from(reason).length > max) {
     throw rpcError(
       status.INVALID_ARGUMENT,
-      `reason must be at most ${MAX_DECLINE_REASON} characters`,
+      `reason must be at most ${max} characters`,
     );
   }
   return reason === '' ? null : reason;
+}
+
+/** The optional decline reason, trimmed; null when empty. Throws INVALID_ARGUMENT when too long. */
+export function parseDeclineReason(value: string | undefined): string | null {
+  return parseReason(value, MAX_DECLINE_REASON);
+}
+
+/** The optional cancellation reason, trimmed; null when empty. Throws INVALID_ARGUMENT when too long. */
+export function parseCancelReason(value: string | undefined): string | null {
+  return parseReason(value, MAX_CANCEL_REASON);
 }

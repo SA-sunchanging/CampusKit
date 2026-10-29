@@ -4,6 +4,7 @@ import {
   checkOpenRequests,
   checkRequestPeriod,
   expiresAt,
+  parseCancelReason,
   parseDeclineReason,
   parseRole,
   parseStatusFilter,
@@ -139,6 +140,20 @@ describe('parseDeclineReason', () => {
   it('accepts 500 characters and rejects 501', () => {
     expect(parseDeclineReason('x'.repeat(500))).toHaveLength(500);
     expect(codeOf(() => parseDeclineReason('x'.repeat(501)))).toBe(
+      status.INVALID_ARGUMENT,
+    );
+  });
+});
+
+describe('parseCancelReason', () => {
+  it('trims the reason and treats an empty one as none', () => {
+    expect(parseCancelReason(' Plans changed ')).toBe('Plans changed');
+    expect(parseCancelReason('')).toBeNull();
+  });
+
+  it('accepts 200 characters and rejects 201', () => {
+    expect(parseCancelReason('x'.repeat(200))).toHaveLength(200);
+    expect(codeOf(() => parseCancelReason('x'.repeat(201)))).toBe(
       status.INVALID_ARGUMENT,
     );
   });

@@ -20,7 +20,7 @@ export const SWEEP_INTERVAL_MS = 60_000;
  * Ends bookings that can no longer go ahead, so they do not hold dates or money: every minute
  * it expires PENDING requests the owner did not answer in time and fails AUTHORIZING bookings
  * whose period has started (releasing their dates and telling both people), then asks Payment
- * again to void the holds of FAILED bookings whose void has not succeeded yet.
+ * again to void the holds of FAILED and cancelled bookings whose void has not succeeded yet.
  * Starts when the application has bootstrapped and stops when it shuts down.
  */
 @Injectable()

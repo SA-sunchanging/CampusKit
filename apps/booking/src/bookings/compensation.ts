@@ -15,7 +15,10 @@ export const PERIOD_STARTED =
 export const SWEEP_BATCH = 50;
 
 /** Releases the reservations of the bookings, inside the caller's transaction. */
-async function releaseDates(tx: EntityManager, ids: string[]): Promise<void> {
+export async function releaseDates(
+  tx: EntityManager,
+  ids: string[],
+): Promise<void> {
   await tx.query(
     `UPDATE calendar_blocks SET released_at = now()
      WHERE booking_id = ANY($1::uuid[]) AND released_at IS NULL`,
@@ -95,7 +98,10 @@ export async function failStartedApprovals(
   return rows;
 }
 
-/** Voids the Payment holds of FAILED bookings and records when that succeeded. */
+/**
+ * Voids the Payment holds of FAILED bookings and of cancelled bookings that were CONFIRMED
+ * (they have a rental_id), and records when that succeeded.
+ */
 @Injectable()
 export class Compensation {
   private readonly logger = new Logger(Compensation.name);
@@ -125,11 +131,15 @@ export class Compensation {
     return true;
   }
 
-  /** IDs of FAILED bookings whose holds are not voided yet, oldest first. */
+  /**
+   * IDs of FAILED bookings and of cancelled CONFIRMED bookings whose holds are not voided yet,
+   * oldest first. A booking cancelled while PENDING never had holds.
+   */
   async unvoided(): Promise<string[]> {
     const rows = (await this.db.query(
       `SELECT id FROM bookings
-       WHERE status = 'FAILED' AND holds_voided_at IS NULL
+       WHERE (status = 'FAILED' OR (status = 'CANCELLED' AND rental_id IS NOT NULL))
+         AND holds_voided_at IS NULL
        ORDER BY updated_at, id
        LIMIT $1`,
       [SWEEP_BATCH],
