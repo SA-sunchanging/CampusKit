@@ -21,12 +21,29 @@ export interface Authorization {
   status: string;
 }
 
+/** Reply of POST /internal/payments/void. */
+export interface VoidResult {
+  bookingId: string;
+  /** The kinds of hold this operation released; empty when none was open. */
+  voided: string[];
+}
+
+/** The stable Payment operation ID of voiding a booking's holds. */
+export function voidOperationId(bookingId: string): string {
+  return `booking:${bookingId}:void`;
+}
+
+function isVoidResult(body: unknown): body is VoidResult {
+  const value = body as Partial<VoidResult> | undefined;
+  return typeof value?.bookingId === 'string' && Array.isArray(value.voided);
+}
+
 function isAuthorization(body: unknown): body is Authorization {
   const value = body as Partial<Authorization> | undefined;
   return typeof value?.id === 'string' && typeof value.status === 'string';
 }
 
-/** Calls Payment's internal authorization endpoint. */
+/** Calls Payment's internal authorization and void endpoints. */
 @Injectable()
 export class PaymentClient {
   private readonly logger = new Logger(PaymentClient.name);
@@ -44,6 +61,26 @@ export class PaymentClient {
         body: request,
         correlationId: call.correlationId,
         isValid: isAuthorization,
+      },
+      this.logger,
+    );
+  }
+
+  /**
+   * Releases every open hold of a booking that will not go ahead. The operation ID is stable,
+   * so a retry voids once. Never throws; a failure comes back as a ServiceResult.
+   */
+  voidHolds(
+    bookingId: string,
+    call: CallContext,
+  ): Promise<ServiceResult<VoidResult>> {
+    return postForResult(
+      {
+        service: 'payment',
+        url: `${this.baseUrl}/internal/payments/void`,
+        body: { operationId: voidOperationId(bookingId), bookingId },
+        correlationId: call.correlationId,
+        isValid: isVoidResult,
       },
       this.logger,
     );

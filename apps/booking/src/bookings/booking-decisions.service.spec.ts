@@ -5,6 +5,7 @@ import type { PaymentClient } from '../clients/payment.client.js';
 import type { RentalClient } from '../clients/rental.client.js';
 import { BookingDecisionsService } from './booking-decisions.service.js';
 import type { BookingRow } from './booking.row.js';
+import type { Compensation } from './compensation.js';
 
 const id = '22222222-2222-4222-8222-222222222222';
 const owner = {
@@ -73,6 +74,11 @@ function setup(initial: BookingRow = row()) {
       if (sql.includes('SET last_error = $2')) {
         return Promise.resolve(apply({ last_error: params[1] as string }));
       }
+      if (sql.includes("SET status = 'FAILED'")) {
+        return Promise.resolve(
+          apply({ status: 'FAILED', last_error: params[1] as string }),
+        );
+      }
       if (sql.includes("SET status = 'CONFIRMED'")) {
         return Promise.resolve(
           apply({ status: 'CONFIRMED', rental_id: params[1] as string }),
@@ -111,16 +117,18 @@ function setup(initial: BookingRow = row()) {
   const rental = {
     create: vi.fn().mockResolvedValue({ ok: true, value: { id: 'rental-1' } }),
   };
+  const compensation = { voidHolds: vi.fn().mockResolvedValue(true) };
   const service = new BookingDecisionsService(
     db as unknown as DataSource,
     payment as unknown as PaymentClient,
     rental as unknown as RentalClient,
+    compensation as unknown as Compensation,
   );
   const events = () =>
     tx.query.mock.calls
       .filter(([sql]) => sql.includes('INSERT INTO outbox_events'))
       .map(([, params]) => JSON.parse(params?.[2] as string));
-  return { state, tx, db, payment, rental, service, events };
+  return { state, tx, db, payment, rental, compensation, service, events };
 }
 
 async function codeOf(promise: Promise<unknown>): Promise<number | undefined> {
@@ -168,16 +176,25 @@ describe('BookingDecisionsService.approve', () => {
     expect(events()).toEqual([]);
   });
 
-  it('keeps the booking AUTHORIZING when Payment declines', async () => {
-    const { service, payment } = setup();
+  it('fails the booking, releases the dates and voids the holds when Payment declines', async () => {
+    const { service, payment, rental, compensation, state, events } = setup();
     payment.authorize.mockResolvedValueOnce({
       ok: false,
       reason: 'declined',
       message: 'No payment method',
     });
     const booking = await service.approve(owner, id, call, now);
-    expect(booking.status).toBe('AUTHORIZING');
+    expect(booking.status).toBe('FAILED');
     expect(booking.last_error).toContain('No payment method');
+    expect(state.released).toBe(true);
+    expect(rental.create).not.toHaveBeenCalled();
+    expect(compensation.voidHolds).toHaveBeenCalledWith(id, call);
+    expect(events()).toEqual([
+      expect.objectContaining({
+        type: 'booking.failed',
+        recipients: [owner.sub, renter.sub],
+      }),
+    ]);
   });
 
   it('retries an AUTHORIZING booking with the same calls', async () => {
@@ -203,14 +220,27 @@ describe('BookingDecisionsService.approve', () => {
     );
   });
 
-  it('stops retrying once the period has started', async () => {
-    const { service, payment } = setup(row({ status: 'AUTHORIZING' }));
-    expect(
-      await codeOf(
-        service.approve(owner, id, call, new Date('2026-11-01T17:00:00Z')),
-      ),
-    ).toBe(status.FAILED_PRECONDITION);
+  it('fails an AUTHORIZING booking once the period has started', async () => {
+    const { service, payment, compensation, state } = setup(
+      row({ status: 'AUTHORIZING' }),
+    );
+    const booking = await service.approve(
+      owner,
+      id,
+      call,
+      new Date('2026-11-01T17:00:00Z'),
+    );
+    expect(booking.status).toBe('FAILED');
+    expect(state.released).toBe(true);
     expect(payment.authorize).not.toHaveBeenCalled();
+    expect(compensation.voidHolds).toHaveBeenCalledWith(id, call);
+  });
+
+  it('refuses to approve a FAILED booking again', async () => {
+    const { service } = setup(row({ status: 'FAILED' }));
+    expect(await codeOf(service.approve(owner, id, call, now))).toBe(
+      status.FAILED_PRECONDITION,
+    );
   });
 
   it('returns a CONFIRMED booking as it is', async () => {

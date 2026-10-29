@@ -13,6 +13,7 @@ export const BOOKING_STATUSES = [
   'DECLINED',
   'EXPIRED',
   'CANCELLED',
+  'FAILED',
 ] as const;
 
 export type BookingStatus = (typeof BOOKING_STATUSES)[number];
@@ -67,6 +68,10 @@ export class Booking {
 
   @Column('text', { name: 'rental_id', nullable: true })
   rentalId: string | null;
+
+  /** When Payment voided the holds of a FAILED booking; null until then. */
+  @Column('timestamptz', { name: 'holds_voided_at', nullable: true })
+  holdsVoidedAt: Date | null;
 
   /** A PENDING request expires at this time if the owner does not answer. */
   @Column('timestamptz', { name: 'expires_at' })

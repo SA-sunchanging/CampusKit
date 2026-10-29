@@ -29,7 +29,8 @@ service BookingService {
 
   // The listing owner accepts a PENDING request. Booking authorizes the fee and deposit with
   // Payment and creates the rental with Rental, then returns status CONFIRMED (or AUTHORIZING
-  // while authorization is retried within its window).
+  // while authorization is retried within its window). A refusal by Payment or Rental, or a
+  // period that starts first, returns FAILED: the dates are released and the holds voided.
   rpc ApproveBooking (ApproveBookingRequest) returns (Booking);
 
   // The listing owner rejects a PENDING request. The dates are released. Returns status DECLINED.
@@ -64,7 +65,7 @@ message Booking {
   string id = 1;
   string listing_id = 2;
   string renter_id = 3;
-  // PENDING, AUTHORIZING, CONFIRMED, DECLINED, EXPIRED, or CANCELLED.
+  // PENDING, AUTHORIZING, CONFIRMED, DECLINED, EXPIRED, CANCELLED, or FAILED.
   string status = 4;
   DateRange period = 5;
   string owner_id = 6;

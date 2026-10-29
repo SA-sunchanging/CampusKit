@@ -87,6 +87,7 @@ describe('authorizeAndCreateRental', () => {
       ok: false,
       error:
         'Fee authorization is unavailable: The payment service is unavailable',
+      final: false,
     });
     expect(payment.authorize).toHaveBeenCalledTimes(1);
     expect(rental.create).not.toHaveBeenCalled();
@@ -104,6 +105,7 @@ describe('authorizeAndCreateRental', () => {
     await expect(run()).resolves.toEqual({
       ok: false,
       error: 'Deposit authorization was declined: Insufficient balance',
+      final: true,
     });
   });
 
@@ -113,7 +115,21 @@ describe('authorizeAndCreateRental', () => {
       ...unavailable,
       message: 'The rental service is unavailable',
     });
-    await expect(run()).resolves.toMatchObject({ ok: false });
+    await expect(run()).resolves.toMatchObject({ ok: false, final: false });
+  });
+
+  it('marks a refused rental creation as final', async () => {
+    const { rental, run } = setup();
+    rental.create.mockResolvedValueOnce({
+      ok: false,
+      reason: 'declined',
+      message: 'The period is invalid',
+    });
+    await expect(run()).resolves.toEqual({
+      ok: false,
+      error: 'Rental creation was declined: The period is invalid',
+      final: true,
+    });
   });
 
   it('skips a zero deposit', async () => {

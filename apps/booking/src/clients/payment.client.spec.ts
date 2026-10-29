@@ -82,3 +82,48 @@ describe('PaymentClient.authorize', () => {
     ).resolves.toMatchObject({ ok: false, reason: 'unavailable' });
   });
 });
+
+describe('PaymentClient.voidHolds', () => {
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('posts the void with a stable operation ID', async () => {
+    fetchMock.mockResolvedValueOnce(
+      reply(200, { bookingId: 'b1', voided: ['FEE'] }),
+    );
+    await expect(new PaymentClient().voidHolds('b1', call)).resolves.toEqual({
+      ok: true,
+      value: { bookingId: 'b1', voided: ['FEE'] },
+    });
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('http://localhost:3004/internal/payments/void');
+    expect(JSON.parse(init.body as string)).toEqual({
+      operationId: 'booking:b1:void',
+      bookingId: 'b1',
+    });
+  });
+
+  it('reports a reply without the voided list as unavailable', async () => {
+    fetchMock.mockResolvedValueOnce(reply(200, { bookingId: 'b1' }));
+    await expect(
+      new PaymentClient().voidHolds('b1', call),
+    ).resolves.toMatchObject({ ok: false, reason: 'unavailable' });
+  });
+
+  it('reports a timeout as unavailable', async () => {
+    fetchMock.mockRejectedValueOnce(
+      new DOMException('The operation timed out', 'TimeoutError'),
+    );
+    await expect(
+      new PaymentClient().voidHolds('b1', call),
+    ).resolves.toMatchObject({ ok: false, reason: 'unavailable' });
+  });
+});

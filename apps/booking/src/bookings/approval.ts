@@ -4,8 +4,9 @@ import type { PaymentClient } from '../clients/payment.client.js';
 import type { RentalClient } from '../clients/rental.client.js';
 import type { BookingRow } from './booking.row.js';
 
+/** final: the call was refused (a 4xx), so retrying the same calls cannot succeed. */
 export type ApprovalOutcome =
-  { ok: true; rentalId: string } | { ok: false; error: string };
+  { ok: true; rentalId: string } | { ok: false; error: string; final: boolean };
 
 /** The stable Payment operation ID of one authorization of a booking. */
 export function operationId(
@@ -16,15 +17,16 @@ export function operationId(
 }
 
 function failure(step: string, result: ServiceFailure): ApprovalOutcome {
-  const what = result.reason === 'declined' ? 'was declined' : 'is unavailable';
-  return { ok: false, error: `${step} ${what}: ${result.message}` };
+  const final = result.reason === 'declined';
+  const what = final ? 'was declined' : 'is unavailable';
+  return { ok: false, error: `${step} ${what}: ${result.message}`, final };
 }
 
 /**
  * The calls that turn an AUTHORIZING booking into a rental: authorize the fee, then the
  * deposit, then create the rental. Every call is idempotent (stable operation IDs, one rental
  * per booking), so a retry repeats them safely. A zero amount is not authorized. Stops at the
- * first failure and describes it.
+ * first failure, describes it, and says whether a retry could still succeed.
  */
 export async function authorizeAndCreateRental(
   payment: PaymentClient,

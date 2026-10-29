@@ -11,6 +11,7 @@ import { requireUuid, rpcError } from '../errors.js';
 import { authorizeAndCreateRental } from './approval.js';
 import { parseDeclineReason } from './booking-rules.js';
 import { announce } from './booking-events.js';
+import { Compensation, failApproval, PERIOD_STARTED } from './compensation.js';
 import {
   BOOKING_COLUMNS,
   type BookingRow,
@@ -59,13 +60,15 @@ export class BookingDecisionsService {
     @InjectDataSource() private readonly db: DataSource,
     private readonly payment: PaymentClient,
     private readonly rental: RentalClient,
+    private readonly compensation: Compensation,
   ) {}
 
   /**
    * The owner accepts a request. PENDING becomes AUTHORIZING; then Booking authorizes the fee
-   * and deposit and creates the rental, and the booking becomes CONFIRMED. When any of those
-   * calls fails, the booking stays AUTHORIZING with the reason in last_error, and approving
-   * again retries the same idempotent calls until the period starts.
+   * and deposit and creates the rental, and the booking becomes CONFIRMED. When a service is
+   * unavailable, the booking stays AUTHORIZING with the reason in last_error, and approving
+   * again retries the same idempotent calls until the period starts. When a service refuses,
+   * or the period has started, the booking becomes FAILED and its holds are voided.
    */
   async approve(
     caller: AuthUser,
@@ -74,8 +77,8 @@ export class BookingDecisionsService {
     now = new Date(),
   ): Promise<BookingRow> {
     requireUuid(id, 'id');
-    const booking = await this.startApproval(caller, id, now);
-    if (booking.status === 'CONFIRMED') {
+    const booking = await this.startApproval(caller, id, now, call);
+    if (booking.status !== 'AUTHORIZING') {
       return booking;
     }
     const outcome = await authorizeAndCreateRental(
@@ -84,11 +87,15 @@ export class BookingDecisionsService {
       booking,
       call,
     );
-    if (!outcome.ok) {
-      this.logger.warn(`Booking ${id} stays AUTHORIZING: ${outcome.error}`);
-      return this.recordFailure(id, outcome.error);
+    if (outcome.ok) {
+      return this.confirm(id, outcome.rentalId, call);
     }
-    return this.confirm(id, outcome.rentalId, call);
+    if (outcome.final) {
+      this.logger.warn(`Booking ${id} failed: ${outcome.error}`);
+      return this.fail(id, outcome.error, call);
+    }
+    this.logger.warn(`Booking ${id} stays AUTHORIZING: ${outcome.error}`);
+    return this.recordFailure(id, outcome.error);
   }
 
   /**
@@ -144,11 +151,15 @@ export class BookingDecisionsService {
     return result;
   }
 
-  /** Moves PENDING to AUTHORIZING, or returns an AUTHORIZING or CONFIRMED booking as it is. */
+  /**
+   * Moves PENDING to AUTHORIZING, or returns an AUTHORIZING or CONFIRMED booking as it is. An
+   * AUTHORIZING booking whose period has started becomes FAILED and is returned so.
+   */
   private async startApproval(
     caller: AuthUser,
     id: string,
     now: Date,
+    call: CallContext,
   ): Promise<BookingRow> {
     const result = await this.db.transaction(async (tx) => {
       const booking = await lockForOwner(tx, caller, id);
@@ -168,9 +179,13 @@ export class BookingDecisionsService {
           )) as BookingRow;
         case 'AUTHORIZING':
           if (now >= booking.period_start) {
-            throw rpcError(
-              status.FAILED_PRECONDITION,
-              'The rental period has started, so the booking can no longer be approved',
+            return (
+              (await failApproval(
+                tx,
+                id,
+                PERIOD_STARTED,
+                call.correlationId,
+              )) ?? booking
             );
           }
           return booking;
@@ -186,7 +201,28 @@ export class BookingDecisionsService {
     if (result === EXPIRED) {
       throw expiredError();
     }
+    if (result.status === 'FAILED') {
+      await this.compensation.voidHolds(id, call);
+    }
     return result;
+  }
+
+  /** Fails the booking for good, then voids its holds; the sweeper retries a failed void. */
+  private async fail(
+    id: string,
+    error: string,
+    call: CallContext,
+  ): Promise<BookingRow> {
+    const failed = await this.db.transaction(
+      async (tx) =>
+        (await failApproval(tx, id, error, call.correlationId)) ??
+        // undefined: a concurrent approval confirmed or failed the booking meanwhile.
+        ((await findBooking(tx, id)) as BookingRow),
+    );
+    if (failed.status === 'FAILED') {
+      await this.compensation.voidHolds(id, call);
+    }
+    return failed;
   }
 
   private recordFailure(id: string, error: string): Promise<BookingRow> {

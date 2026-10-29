@@ -4,9 +4,11 @@ import { IdentityClient } from '../clients/identity.client.js';
 import { ListingClient } from '../clients/listing.client.js';
 import { PaymentClient } from '../clients/payment.client.js';
 import { RentalClient } from '../clients/rental.client.js';
+import { ApprovalSweeper } from './approval-sweeper.js';
 import { BookingDecisionsService } from './booking-decisions.service.js';
 import { BookingsGrpcController } from './bookings.grpc-controller.js';
 import { BookingsService } from './bookings.service.js';
+import { Compensation } from './compensation.js';
 
 @Module({
   imports: [AuthModule],
@@ -14,6 +16,8 @@ import { BookingsService } from './bookings.service.js';
   providers: [
     BookingsService,
     BookingDecisionsService,
+    Compensation,
+    ApprovalSweeper,
     IdentityClient,
     ListingClient,
     PaymentClient,
