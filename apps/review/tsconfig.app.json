@@ -6,14 +6,6 @@
     "rootDir": "../..",
     "outDir": "../../dist/apps/review"
   },
-  "include": [
-    "src/**/*",
-    "../../libs/*/src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "test",
-    "**/*spec.ts"
-  ]
+  "include": ["src/**/*", "../../libs/*/src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
 }
