@@ -29,7 +29,56 @@ describe('SearchListingsQuery', () => {
     ['page', 'two'],
     ['category', 'CARS'],
     ['q', 'x'.repeat(101)],
+    ['location', 'SIAM'],
   ])('rejects %s=%s', (field, value) => {
     expect(parse({ [field]: value }).errors).toContain(field);
+  });
+
+  it('reads a pickup location and a period', () => {
+    const { dto, errors } = parse({
+      location: 'ENGINEERING',
+      start: '2026-11-01T17:00:00Z',
+      end: '2026-12-01T17:00:00Z',
+    });
+    expect(errors).toEqual([]);
+    expect(dto).toMatchObject({
+      location: 'ENGINEERING',
+      start: '2026-11-01T17:00:00Z',
+      end: '2026-12-01T17:00:00Z',
+    });
+  });
+
+  it('treats empty dates and location as any', () => {
+    const { dto, errors } = parse({ start: '', end: '', location: '' });
+    expect(errors).toEqual([]);
+    expect(dto.start).toBeUndefined();
+    expect(dto.location).toBeUndefined();
+  });
+
+  it.each([
+    ['start without end', { start: '2026-11-01T17:00:00Z' }, 'end'],
+    ['end without start', { end: '2026-11-02T17:00:00Z' }, 'start'],
+    [
+      'end before start',
+      { start: '2026-11-02T17:00:00Z', end: '2026-11-01T17:00:00Z' },
+      'end',
+    ],
+    [
+      'an empty period',
+      { start: '2026-11-01T17:00:00Z', end: '2026-11-01T17:00:00Z' },
+      'end',
+    ],
+    [
+      'more than 30 days',
+      { start: '2026-11-01T17:00:00Z', end: '2026-12-02T17:00:00Z' },
+      'end',
+    ],
+    [
+      'a date that is not ISO',
+      { start: 'tomorrow', end: '2026-11-02' },
+      'start',
+    ],
+  ])('rejects %s', (_case, query, field) => {
+    expect(parse(query).errors).toContain(field);
   });
 });

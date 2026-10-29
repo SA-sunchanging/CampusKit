@@ -41,11 +41,14 @@ export class ListingsController {
     private readonly jwt: JwtService,
   ) {}
 
-  /** Public: guests can browse before they register. */
+  /** Public: guests can browse before they register. With dates, 503 while Booking is down. */
   @Get()
   @ApiOkResponse({ type: SearchResultResponse })
-  search(@Query() query: SearchListingsQuery): Promise<SearchResultResponse> {
-    return this.queries.search(query);
+  search(
+    @Query() query: SearchListingsQuery,
+    @Call() call: CallContext,
+  ): Promise<SearchResultResponse> {
+    return this.queries.search(query, call.correlationId);
   }
 
   /** Public. Any status but PUBLISHED is shown only to its owner and administrators. */

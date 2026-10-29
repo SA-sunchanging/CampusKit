@@ -1,6 +1,13 @@
 import { BOOKING_CLIENT } from '@app/contracts';
 import { Metadata, status } from '@grpc/grpc-js';
-import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+  type OnModuleInit,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, type Observable, timeout } from 'rxjs';
 import type { Blackout } from '../listings/listing.entity.js';
@@ -15,6 +22,10 @@ interface BookingCalendar {
     request: { listingId: string; blackouts: Blackout[] },
     metadata: Metadata,
   ): Observable<{ ok: boolean }>;
+  filterAvailable(
+    request: { listingIds: string[]; period: Blackout },
+    metadata: Metadata,
+  ): Observable<{ listingIds?: string[] }>;
 }
 
 /** Thrown when Booking does not set up the calendar; the message is safe to show the owner. */
@@ -33,9 +44,10 @@ export function calendarErrorMessage(error: unknown): string {
   }
 }
 
-/** Sets up a listing's calendar in Booking over gRPC, as the calling user. */
+/** Calls the calendar of Booking over gRPC: setup as the calling user, and the search filter. */
 @Injectable()
 export class CalendarClient implements OnModuleInit {
+  private readonly logger = new Logger(CalendarClient.name);
   private booking: BookingCalendar;
 
   constructor(@Inject(BOOKING_CLIENT) private readonly client: ClientGrpc) {}
@@ -61,6 +73,36 @@ export class CalendarClient implements OnModuleInit {
       );
     } catch (error) {
       throw new CalendarSetupError(calendarErrorMessage(error));
+    }
+  }
+
+  /**
+   * The listings free for the whole period, in the given order (at most 200). Throws 503 when
+   * Booking cannot answer, because the caller asked for dates explicitly.
+   */
+  async filterAvailable(
+    listingIds: string[],
+    period: Blackout,
+    correlationId: string,
+  ): Promise<string[]> {
+    const metadata = new Metadata();
+    metadata.set('x-correlation-id', correlationId);
+    try {
+      const reply = await firstValueFrom(
+        this.booking
+          .filterAvailable({ listingIds, period }, metadata)
+          .pipe(timeout(TIMEOUT_MS)),
+      );
+      return reply.listingIds ?? [];
+    } catch (error) {
+      const { code, details } = error as { code?: number; details?: string };
+      if (code === status.INVALID_ARGUMENT) {
+        throw new BadRequestException(details ?? 'Invalid dates');
+      }
+      this.logger.warn(`FilterAvailable failed: ${details ?? String(error)}`);
+      throw new ServiceUnavailableException(
+        'The booking service is unavailable; search without dates or try again later',
+      );
     }
   }
 }
