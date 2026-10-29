@@ -1,0 +1,15 @@
+/* Unread count next to "Inbox" in the main nav (role E). Colors come from tokens.css. */
+.inbox-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1;
+}

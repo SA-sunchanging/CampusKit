@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { onSessionExpired, type Role } from '../auth/token.ts';
 import { useAuth } from '../auth/useAuth.ts';
+import UnreadBadge from '../features/inbox/UnreadBadge.tsx';
 import { BagIcon, Button } from '../ui/index.ts';
 import { navFor } from './nav.ts';
 
@@ -62,6 +63,7 @@ export default function Layout() {
           {navFor(user?.role ?? 'guest').map((item) => (
             <NavLink key={item.to} to={item.to} end>
               {item.label}
+              {item.to === '/inbox' && <UnreadBadge />}
             </NavLink>
           ))}
         </nav>
