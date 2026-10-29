@@ -45,3 +45,47 @@ export interface BookingEventData {
   /** The booking status after the change, for example 'PENDING'. */
   status: string;
 }
+
+/** Event types Listing publishes. Recipients: published to the owner. */
+export const LISTING_EVENTS = {
+  published: 'listing.published',
+} as const;
+
+export type ListingEventType =
+  (typeof LISTING_EVENTS)[keyof typeof LISTING_EVENTS];
+
+/** The data of every Listing event. */
+export interface ListingEventData {
+  listingId: string;
+  ownerId: string;
+  title: string;
+  /** The listing status after the change, for example 'PUBLISHED'. */
+  status: string;
+}
+
+/**
+ * Event types Rental publishes. Recipients: started (the renter picked the item up) and closed
+ * (the return is settled) to both the owner and the renter.
+ */
+export const RENTAL_EVENTS = {
+  started: 'rental.started',
+  closed: 'rental.closed',
+} as const;
+
+export type RentalEventType =
+  (typeof RENTAL_EVENTS)[keyof typeof RENTAL_EVENTS];
+
+/** The data of every Rental event. */
+export interface RentalEventData {
+  rentalId: string;
+  bookingId: string;
+  listingId: string;
+  ownerId: string;
+  renterId: string;
+  /** Half-open interval [start, end), ISO-8601 UTC. */
+  period: { start: string; end: string };
+  /** The rental status after the change, for example 'ACTIVE'. */
+  status: string;
+  /** Late fee charged at settlement, in satang; 0 until the rental closes. */
+  lateFee: number;
+}
