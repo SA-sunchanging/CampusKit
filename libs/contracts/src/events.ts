@@ -22,13 +22,16 @@ export interface EventEnvelope<T = unknown> {
 
 /**
  * Event types Booking publishes. Recipients: requested to the owner, declined to the renter,
- * confirmed and failed (an approval that could not be completed) to both.
+ * confirmed and failed (an approval that could not be completed) to both, expired (the owner did
+ * not answer in time) and cancelled (a participant cancelled before pickup) to both.
  */
 export const BOOKING_EVENTS = {
   requested: 'booking.requested',
   declined: 'booking.declined',
   confirmed: 'booking.confirmed',
   failed: 'booking.failed',
+  expired: 'booking.expired',
+  cancelled: 'booking.cancelled',
 } as const;
 
 export type BookingEventType =
@@ -46,9 +49,13 @@ export interface BookingEventData {
   status: string;
 }
 
-/** Event types Listing publishes. Recipients: published to the owner. */
+/**
+ * Event types Listing publishes. Recipients: published (directly or after administrator approval)
+ * and rejected (an administrator refused it) to the owner.
+ */
 export const LISTING_EVENTS = {
   published: 'listing.published',
+  rejected: 'listing.rejected',
 } as const;
 
 export type ListingEventType =
@@ -61,14 +68,19 @@ export interface ListingEventData {
   title: string;
   /** The listing status after the change, for example 'PUBLISHED'. */
   status: string;
+  /** Set on listing.rejected: the administrator's reason. */
+  reason?: string;
 }
 
 /**
- * Event types Rental publishes. Recipients: started (the renter picked the item up) and closed
- * (the return is settled) to both the owner and the renter.
+ * Event types Rental publishes. Recipients: started (the renter picked the item up), overdue (the
+ * period ended before the return) and closed (the return is settled) to both the owner and the
+ * renter; reminded (the period ends within a day) to the renter.
  */
 export const RENTAL_EVENTS = {
   started: 'rental.started',
+  reminded: 'rental.reminded',
+  overdue: 'rental.overdue',
   closed: 'rental.closed',
 } as const;
 
@@ -88,4 +100,19 @@ export interface RentalEventData {
   status: string;
   /** Late fee charged at settlement, in satang; 0 until the rental closes. */
   lateFee: number;
+}
+
+/** Event types Identity publishes. Recipients: verified (an administrator approved the student) to that student. */
+export const IDENTITY_EVENTS = {
+  verified: 'identity.verified',
+} as const;
+
+export type IdentityEventType =
+  (typeof IDENTITY_EVENTS)[keyof typeof IDENTITY_EVENTS];
+
+/** The data of every Identity event. */
+export interface IdentityEventData {
+  userId: string;
+  /** The student status after the change, for example 'VERIFIED'. */
+  studentStatus: string;
 }
