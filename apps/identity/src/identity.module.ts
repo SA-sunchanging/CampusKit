@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module.js';
 import { InternalUsersModule } from './internal/internal-users.module.js';
 import { migrations } from './migrations/index.js';
+import { StudentsModule } from './students/students.module.js';
 import { EmailVerificationModule } from './verification/email-verification.module.js';
 
 @Module({
@@ -16,6 +17,7 @@ import { EmailVerificationModule } from './verification/email-verification.modul
     AuthModule,
     InternalUsersModule,
     EmailVerificationModule,
+    StudentsModule,
     OutboxModule,
   ],
 })

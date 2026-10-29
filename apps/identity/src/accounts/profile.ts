@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { Account, Role, StudentStatus } from './account.entity.js';
+import {
+  type Account,
+  type Role,
+  STUDENT_STATUSES,
+  type StudentStatus,
+} from './account.entity.js';
 
 /** What an account looks like to its owner. Never includes the password hash. */
 export class Profile {
@@ -18,8 +23,22 @@ export class Profile {
   @ApiProperty()
   emailVerified: boolean;
 
-  @ApiProperty({ enum: ['UNSUBMITTED', 'PENDING', 'VERIFIED', 'REJECTED'] })
+  @ApiProperty({ enum: STUDENT_STATUSES })
   studentStatus: StudentStatus;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'The student ID submitted for review.',
+  })
+  studentId: string | null;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: "The administrator's reason. Set only on a REJECTED status.",
+  })
+  studentRejectionReason: string | null;
 
   @ApiProperty()
   createdAt: Date;
@@ -33,6 +52,8 @@ export function toProfile(account: Account): Profile {
     role: account.role,
     emailVerified: account.emailVerifiedAt !== null,
     studentStatus: account.studentStatus,
+    studentId: account.studentId,
+    studentRejectionReason: account.studentRejectionReason,
     createdAt: account.createdAt,
   });
 }

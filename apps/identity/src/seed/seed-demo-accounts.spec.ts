@@ -107,19 +107,22 @@ describe('seedDemoAccounts', () => {
     expect(JSON.stringify(upserted())).not.toContain(DEMO_PASSWORD);
   });
 
-  it('resets an existing demo account, including a suspension', async () => {
+  it('resets an existing demo account, including a suspension and a student review', async () => {
     const { seed, upserted } = setup([
       {
         id: '00000000-0000-4000-8000-000000000001',
         email: 'somchai@student.chula.ac.th',
         suspendedAt: new Date(),
         studentStatus: 'REJECTED',
+        studentRejectionReason: 'Not a current student',
       },
     ]);
     await seed();
     expect(byEmail(upserted(), 'somchai@student.chula.ac.th')).toMatchObject({
       suspendedAt: null,
       studentStatus: 'VERIFIED',
+      studentRejectionReason: null,
+      studentReviewedBy: null,
     });
   });
 

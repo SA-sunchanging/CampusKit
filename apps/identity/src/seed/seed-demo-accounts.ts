@@ -47,6 +47,11 @@ export async function seedDemoAccounts(
         passwordHash,
         emailVerifiedAt: DEMO_VERIFIED_AT,
         suspendedAt: null,
+        studentId: null,
+        studentSubmittedAt: null,
+        studentReviewedBy: null,
+        studentReviewedAt: null,
+        studentRejectionReason: null,
       })),
       ['id'],
     );

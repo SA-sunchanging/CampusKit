@@ -17,6 +17,11 @@ const savedAccount = (fields: Partial<Account>): Account => ({
   role: 'student',
   emailVerifiedAt: null,
   studentStatus: 'UNSUBMITTED',
+  studentId: null,
+  studentSubmittedAt: null,
+  studentReviewedBy: null,
+  studentReviewedAt: null,
+  studentRejectionReason: null,
   payoutProfile: null,
   suspendedAt: null,
   createdAt: new Date('2026-10-26T00:00:00Z'),
@@ -76,6 +81,8 @@ describe('AccountsService.register', () => {
       role: 'student',
       emailVerified: false,
       studentStatus: 'UNSUBMITTED',
+      studentId: null,
+      studentRejectionReason: null,
       createdAt: new Date('2026-10-26T00:00:00Z'),
     });
     expect(JSON.stringify(profile)).not.toContain('hash');
