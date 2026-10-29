@@ -20,11 +20,15 @@ export interface EventEnvelope<T = unknown> {
   data: T;
 }
 
-/** Event types Booking publishes. Recipients: requested to the owner, declined to the renter, confirmed to both. */
+/**
+ * Event types Booking publishes. Recipients: requested to the owner, declined to the renter,
+ * confirmed and failed (an approval that could not be completed) to both.
+ */
 export const BOOKING_EVENTS = {
   requested: 'booking.requested',
   declined: 'booking.declined',
   confirmed: 'booking.confirmed',
+  failed: 'booking.failed',
 } as const;
 
 export type BookingEventType =
