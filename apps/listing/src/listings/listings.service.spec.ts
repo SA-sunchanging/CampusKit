@@ -352,3 +352,67 @@ describe('ListingsService.publish', () => {
     );
   });
 });
+
+describe('ListingsService.unpublish', () => {
+  const published = () => ({
+    id: listingId,
+    ownerId: owner.sub,
+    status: 'PUBLISHED' as const,
+    publishedAt: now,
+    unpublishedAt: null,
+  });
+  const later = new Date('2026-10-30T05:00:00Z');
+
+  it('takes a PUBLISHED listing down and keeps when it was published', async () => {
+    const { service, listingRepo, events, store } = setup();
+    store(published());
+    const result = await service.unpublish(owner, listingId, later);
+    expect(listingRepo.update).toHaveBeenCalledWith(
+      { id: listingId, status: 'PUBLISHED' },
+      { status: 'UNPUBLISHED', unpublishedAt: later },
+    );
+    expect(result).toMatchObject({
+      status: 'UNPUBLISHED',
+      publishedAt: now,
+      unpublishedAt: later,
+    });
+    expect(events()).toEqual([]);
+  });
+
+  it('returns an UNPUBLISHED listing unchanged', async () => {
+    const { service, store } = setup();
+    store({ ...published(), status: 'UNPUBLISHED', unpublishedAt: now });
+    const result = await service.unpublish(owner, listingId, later);
+    expect(result).toMatchObject({
+      status: 'UNPUBLISHED',
+      unpublishedAt: now,
+    });
+  });
+
+  it.each(['DRAFT', 'PENDING_REVIEW', 'REJECTED'] as const)(
+    'answers 409 for a %s listing',
+    async (status) => {
+      const { service, store } = setup();
+      store({ ...published(), status, publishedAt: null });
+      await expect(service.unpublish(owner, listingId, later)).rejects.toThrow(
+        ConflictException,
+      );
+    },
+  );
+
+  it('refuses anyone but the owner', async () => {
+    const { service, listingRepo, store } = setup();
+    store(published());
+    await expect(service.unpublish(other, listingId, later)).rejects.toThrow(
+      ForbiddenException,
+    );
+    expect(listingRepo.update).not.toHaveBeenCalled();
+  });
+
+  it('answers 404 for an unknown listing', async () => {
+    const { service } = setup();
+    await expect(service.unpublish(owner, listingId, later)).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+});

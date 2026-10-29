@@ -86,4 +86,17 @@ export class ListingsController {
   ): Promise<ListingResponse> {
     return this.listings.publish(user, id, call);
   }
+
+  /** Owner only. Takes a PUBLISHED listing out of search; unpublishing again changes nothing. */
+  @Post(':id/unpublish')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: ListingResponse })
+  unpublish(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ListingResponse> {
+    return this.listings.unpublish(user, id);
+  }
 }

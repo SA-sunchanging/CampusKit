@@ -22,7 +22,7 @@ import { ListingResponse } from './listing.response.js';
 import { moderationFlags } from './moderation-rules.js';
 import { checkPhotoSizes } from './photos.js';
 
-/** Creating and publishing listings (UC-1 in docs/reference/use-cases.md). */
+/** Creating, publishing, and unpublishing listings (UC-1 in docs/reference/use-cases.md). */
 @Injectable()
 export class ListingsService {
   constructor(
@@ -100,13 +100,7 @@ export class ListingsService {
     id: string,
     call: CallContext,
   ): Promise<ListingResponse> {
-    const listing = await this.listings.findOneBy({ id });
-    if (!listing) {
-      throw new NotFoundException('Listing not found');
-    }
-    if (listing.ownerId !== user.sub) {
-      throw new ForbiddenException('Only the owner can publish this listing');
-    }
+    const listing = await this.ownListing(user, id, 'publish');
     if (listing.status === 'REJECTED' || listing.status === 'UNPUBLISHED') {
       throw new ConflictException(
         `A listing that is ${listing.status} cannot be published again`,
@@ -121,6 +115,30 @@ export class ListingsService {
     return this.tryPublish(listing, photos, call);
   }
 
+  /**
+   * Takes a PUBLISHED listing out of search and booking; nothing is announced. Bookings already
+   * made keep the terms they copied. Unpublishing again changes nothing; any status other than
+   * PUBLISHED or UNPUBLISHED answers 409.
+   */
+  async unpublish(
+    user: AuthUser,
+    id: string,
+    now = new Date(),
+  ): Promise<ListingResponse> {
+    await this.ownListing(user, id, 'unpublish');
+    await this.listings.update(
+      { id, status: 'PUBLISHED' },
+      { status: 'UNPUBLISHED', unpublishedAt: now },
+    );
+    const listing = await this.listings.findOneByOrFail({ id });
+    if (listing.status !== 'UNPUBLISHED') {
+      throw new ConflictException(
+        `A listing that is ${listing.status} cannot be unpublished`,
+      );
+    }
+    return ListingResponse.of(listing, await this.photoUrls(id));
+  }
+
   /** Data URLs of a listing's photos, cover first. */
   async photoUrls(listingId: string): Promise<string[]> {
     const rows = await this.photos.find({
@@ -128,6 +146,22 @@ export class ListingsService {
       order: { position: 'ASC' },
     });
     return rows.map((row) => row.dataUrl);
+  }
+
+  /** The listing, when the caller owns it; 404 when it does not exist, 403 for anyone else. */
+  private async ownListing(
+    user: AuthUser,
+    id: string,
+    action: string,
+  ): Promise<Listing> {
+    const listing = await this.listings.findOneBy({ id });
+    if (!listing) {
+      throw new NotFoundException('Listing not found');
+    }
+    if (listing.ownerId !== user.sub) {
+      throw new ForbiddenException(`Only the owner can ${action} this listing`);
+    }
+    return listing;
   }
 
   /**

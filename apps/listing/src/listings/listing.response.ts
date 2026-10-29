@@ -105,8 +105,16 @@ export class ListingResponse {
   @ApiProperty()
   createdAt: Date;
 
-  @ApiProperty({ type: Date, nullable: true })
+  @ApiProperty({
+    type: Date,
+    nullable: true,
+    description:
+      'When the listing was first published; kept after it is unpublished.',
+  })
   publishedAt: Date | null;
+
+  @ApiProperty({ type: Date, nullable: true })
+  unpublishedAt: Date | null;
 
   static of(listing: Listing, photos: string[]): ListingResponse {
     return Object.assign(new ListingResponse(), {
@@ -134,6 +142,7 @@ export class ListingResponse {
       reviewedAt: listing.reviewedAt,
       createdAt: listing.createdAt,
       publishedAt: listing.publishedAt,
+      unpublishedAt: listing.unpublishedAt,
     });
   }
 }

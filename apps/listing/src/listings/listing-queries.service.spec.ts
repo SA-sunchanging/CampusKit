@@ -155,6 +155,15 @@ describe('ListingQueriesService.detail', () => {
     await expect(service.detail(id, other)).rejects.toThrow(NotFoundException);
   });
 
+  it('shows an UNPUBLISHED listing to its owner only', async () => {
+    const { service, repo } = setup();
+    repo.findOneBy.mockResolvedValue(listing({ status: 'UNPUBLISHED' }));
+    await expect(service.detail(id, owner)).resolves.toMatchObject({
+      status: 'UNPUBLISHED',
+    });
+    await expect(service.detail(id, other)).rejects.toThrow(NotFoundException);
+  });
+
   it('answers 404 for an unknown listing', async () => {
     const { service, repo } = setup();
     repo.findOneBy.mockResolvedValue(null);
@@ -177,11 +186,16 @@ describe('ListingQueriesService.quote', () => {
     });
   });
 
-  it('refuses to quote a DRAFT', async () => {
-    const { service, repo } = setup();
-    repo.findOneBy.mockResolvedValue(listing({ status: 'DRAFT' }));
-    await expect(service.quote(id, period)).rejects.toThrow(ConflictException);
-  });
+  it.each(['DRAFT', 'PENDING_REVIEW', 'REJECTED', 'UNPUBLISHED'] as const)(
+    'refuses to quote a %s listing',
+    async (status) => {
+      const { service, repo } = setup();
+      repo.findOneBy.mockResolvedValue(listing({ status }));
+      await expect(service.quote(id, period)).rejects.toThrow(
+        ConflictException,
+      );
+    },
+  );
 
   it('answers 404 for an unknown listing', async () => {
     const { service, repo } = setup();
