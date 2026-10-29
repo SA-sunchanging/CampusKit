@@ -19,3 +19,25 @@ export interface EventEnvelope<T = unknown> {
   recipients: string[];
   data: T;
 }
+
+/** Event types Booking publishes. Recipients: requested to the owner, declined to the renter, confirmed to both. */
+export const BOOKING_EVENTS = {
+  requested: 'booking.requested',
+  declined: 'booking.declined',
+  confirmed: 'booking.confirmed',
+} as const;
+
+export type BookingEventType =
+  (typeof BOOKING_EVENTS)[keyof typeof BOOKING_EVENTS];
+
+/** The data of every Booking event. */
+export interface BookingEventData {
+  bookingId: string;
+  listingId: string;
+  ownerId: string;
+  renterId: string;
+  /** Half-open interval [start, end), ISO-8601 UTC. */
+  period: { start: string; end: string };
+  /** The booking status after the change, for example 'PENDING'. */
+  status: string;
+}
