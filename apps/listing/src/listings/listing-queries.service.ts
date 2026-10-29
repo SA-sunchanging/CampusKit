@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository, type SelectQueryBuilder } from 'typeorm';
 import { CalendarClient } from '../clients/calendar.client.js';
+import { NO_REPUTATION, ReviewClient } from '../clients/review.client.js';
 import { quoteFor } from '../internal/quote.js';
 import type { QuoteQuery } from '../internal/quote.query.js';
 import { QuoteResponse } from '../internal/quote.response.js';
@@ -51,11 +52,13 @@ export class ListingQueriesService {
     @InjectRepository(Listing) private readonly listings: Repository<Listing>,
     private readonly listingsService: ListingsService,
     private readonly calendar: CalendarClient,
+    private readonly reviews: ReviewClient,
   ) {}
 
   /**
    * PUBLISHED listings matching the keyword, category, and pickup point, newest first. With
-   * dates, only those Booking reports free for the whole period.
+   * dates, only those Booking reports free for the whole period. Each carries its owner's
+   * reputation from one Review call per page.
    */
   async search(
     query: SearchListingsQuery,
@@ -71,8 +74,17 @@ export class ListingQueriesService {
             correlationId,
           )
         : await this.page(builder, query);
+    const reputations = await this.reviews.reputations(
+      rows.map((row) => row.ownerId),
+      correlationId,
+    );
     return {
-      items: rows.map((row) => ListingSummaryResponse.of(row)),
+      items: rows.map((row) =>
+        ListingSummaryResponse.of(
+          row,
+          reputations.get(row.ownerId) ?? NO_REPUTATION,
+        ),
+      ),
       total,
       page: query.page,
       pageSize: query.pageSize,
@@ -160,14 +172,23 @@ export class ListingQueriesService {
    * A PUBLISHED listing for anyone; any other status only for its owner and administrators
    * (404 for everyone else, so a hidden listing is indistinguishable from a missing one).
    */
-  async detail(id: string, viewer: AuthUser | null): Promise<ListingResponse> {
+  async detail(
+    id: string,
+    viewer: AuthUser | null,
+    correlationId: string,
+  ): Promise<ListingResponse> {
     const listing = await this.listings.findOneBy({ id });
     if (!listing || !canSee(listing, viewer)) {
       throw new NotFoundException('Listing not found');
     }
+    const [photos, reputations] = await Promise.all([
+      this.listingsService.photoUrls(id),
+      this.reviews.reputations([listing.ownerId], correlationId),
+    ]);
     return ListingResponse.of(
       listing,
-      await this.listingsService.photoUrls(id),
+      photos,
+      reputations.get(listing.ownerId) ?? NO_REPUTATION,
     );
   }
 

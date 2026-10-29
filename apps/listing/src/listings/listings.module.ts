@@ -6,6 +6,7 @@ import { ModerationController } from '../admin/moderation.controller.js';
 import { ModerationService } from '../admin/moderation.service.js';
 import { CalendarClient } from '../clients/calendar.client.js';
 import { IdentityClient } from '../clients/identity.client.js';
+import { ReviewClient } from '../clients/review.client.js';
 import { InternalListingsController } from '../internal/internal-listings.controller.js';
 import { ListingQueriesService } from './listing-queries.service.js';
 import { ListingPhoto } from './listing-photo.entity.js';
@@ -30,6 +31,7 @@ import { ListingsService } from './listings.service.js';
     ModerationService,
     IdentityClient,
     CalendarClient,
+    ReviewClient,
   ],
   exports: [ListingsService],
 })

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { OwnerReputation } from '../clients/review.client.js';
 import {
   CATEGORIES,
   type Category,
@@ -35,13 +36,30 @@ export class ListingSummaryResponse {
   @ApiProperty()
   ownerName: string;
 
+  @ApiProperty({
+    type: Number,
+    nullable: true,
+    example: 4.5,
+    description:
+      "The owner's mean rating to one decimal; null without reviews or while Review is unavailable.",
+  })
+  ownerRating: number | null;
+
+  @ApiProperty({
+    description: 'Reviews of the owner; 0 while Review is unavailable.',
+  })
+  ownerReviewCount: number;
+
   @ApiProperty({ type: String, nullable: true })
   thumbnail: string | null;
 
   @ApiProperty()
   publishedAt: Date;
 
-  static of(listing: Listing): ListingSummaryResponse {
+  static of(
+    listing: Listing,
+    reputation: OwnerReputation,
+  ): ListingSummaryResponse {
     return Object.assign(new ListingSummaryResponse(), {
       id: listing.id,
       title: listing.title,
@@ -51,6 +69,8 @@ export class ListingSummaryResponse {
       deposit: listing.deposit,
       pickupLocations: listing.pickupLocations,
       ownerName: listing.ownerName,
+      ownerRating: reputation.ownerRating,
+      ownerReviewCount: reputation.ownerReviewCount,
       thumbnail: listing.thumbnail,
       publishedAt: listing.publishedAt,
     });

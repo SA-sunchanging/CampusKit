@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type { OwnerReputation } from '../clients/review.client.js';
 import {
   CATEGORIES,
   type Category,
@@ -29,6 +30,21 @@ export class ListingResponse {
 
   @ApiProperty()
   ownerName: string;
+
+  @ApiPropertyOptional({
+    type: Number,
+    nullable: true,
+    example: 4.5,
+    description:
+      "Only on GET /listings/{id}: the owner's mean rating to one decimal; null without reviews or while Review is unavailable.",
+  })
+  ownerRating?: number | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Only on GET /listings/{id}: reviews of the owner; 0 while Review is unavailable.',
+  })
+  ownerReviewCount?: number;
 
   @ApiProperty({ enum: LISTING_STATUSES })
   status: ListingStatus;
@@ -116,8 +132,14 @@ export class ListingResponse {
   @ApiProperty({ type: Date, nullable: true })
   unpublishedAt: Date | null;
 
-  static of(listing: Listing, photos: string[]): ListingResponse {
+  /** The owner's reputation is added only for the detail page. */
+  static of(
+    listing: Listing,
+    photos: string[],
+    reputation?: OwnerReputation,
+  ): ListingResponse {
     return Object.assign(new ListingResponse(), {
+      ...reputation,
       id: listing.id,
       ownerId: listing.ownerId,
       ownerName: listing.ownerName,

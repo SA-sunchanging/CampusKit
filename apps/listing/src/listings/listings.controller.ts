@@ -3,7 +3,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -56,9 +55,13 @@ export class ListingsController {
   @ApiOkResponse({ type: ListingResponse })
   detail(
     @Param('id', ParseUUIDPipe) id: string,
-    @Headers('authorization') authorization?: string,
+    @Call() call: CallContext,
   ): Promise<ListingResponse> {
-    return this.queries.detail(id, optionalViewer(authorization, this.jwt));
+    return this.queries.detail(
+      id,
+      optionalViewer(call.authorization, this.jwt),
+      call.correlationId,
+    );
   }
 
   @Post()

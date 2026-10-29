@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import type { Repository } from 'typeorm';
 import type { CalendarClient } from '../clients/calendar.client.js';
+import type { ReviewClient } from '../clients/review.client.js';
 import {
   likePattern,
   ListingQueriesService,
@@ -63,12 +64,14 @@ function setup() {
     photoUrls: vi.fn().mockResolvedValue(['data:image/jpeg;base64,AAAA']),
   };
   const calendar = { filterAvailable: vi.fn() };
+  const reviews = { reputations: vi.fn().mockResolvedValue(new Map()) };
   const service = new ListingQueriesService(
     repo as unknown as Repository<Listing>,
     listingsService as unknown as ListingsService,
     calendar as unknown as CalendarClient,
+    reviews as unknown as ReviewClient,
   );
-  return { service, repo, builder, calendar };
+  return { service, repo, builder, calendar, reviews };
 }
 
 describe('likePattern', () => {
@@ -203,11 +206,61 @@ describe('ListingQueriesService.search with dates', () => {
   });
 });
 
+describe('ListingQueriesService owner reputation', () => {
+  it('adds each owner rating to a page with one Review call', async () => {
+    const { service, builder, reviews } = setup();
+    builder.getManyAndCount.mockResolvedValue([
+      [
+        listing(),
+        listing({ id: 'second', ownerId: other.sub }),
+        listing({ id: 'third' }),
+      ],
+      3,
+    ]);
+    reviews.reputations.mockResolvedValue(
+      new Map([[owner.sub, { ownerRating: 4.5, ownerReviewCount: 12 }]]),
+    );
+    const result = await service.search({ page: 1, pageSize: 20 }, 'corr-1');
+    expect(reviews.reputations).toHaveBeenCalledTimes(1);
+    expect(reviews.reputations).toHaveBeenCalledWith(
+      [owner.sub, other.sub, owner.sub],
+      'corr-1',
+    );
+    expect(
+      result.items.map(({ ownerRating, ownerReviewCount }) => [
+        ownerRating,
+        ownerReviewCount,
+      ]),
+    ).toEqual([
+      [4.5, 12],
+      [null, 0],
+      [4.5, 12],
+    ]);
+  });
+
+  it('shows the owner rating on the detail page, or none when Review has nothing', async () => {
+    const { service, repo, reviews } = setup();
+    repo.findOneBy.mockResolvedValue(listing());
+    await expect(service.detail(id, null, 'corr-1')).resolves.toMatchObject({
+      ownerRating: null,
+      ownerReviewCount: 0,
+    });
+    reviews.reputations.mockResolvedValue(
+      new Map([[owner.sub, { ownerRating: 3, ownerReviewCount: 1 }]]),
+    );
+    await expect(service.detail(id, null, 'corr-1')).resolves.toMatchObject({
+      ownerRating: 3,
+      ownerReviewCount: 1,
+    });
+    expect(reviews.reputations).toHaveBeenCalledWith([owner.sub], 'corr-1');
+  });
+});
+
 describe('ListingQueriesService.detail', () => {
   it('shows a PUBLISHED listing to a guest, with photos', async () => {
     const { service, repo } = setup();
     repo.findOneBy.mockResolvedValue(listing());
-    const result = await service.detail(id, null);
+    const result = await service.detail(id, null, 'corr-1');
     expect(result.photos).toHaveLength(1);
   });
 
@@ -216,11 +269,15 @@ describe('ListingQueriesService.detail', () => {
     repo.findOneBy.mockResolvedValue(
       listing({ status: 'DRAFT', publishedAt: null }),
     );
-    await expect(service.detail(id, owner)).resolves.toMatchObject({
+    await expect(service.detail(id, owner, 'corr-1')).resolves.toMatchObject({
       status: 'DRAFT',
     });
-    await expect(service.detail(id, other)).rejects.toThrow(NotFoundException);
-    await expect(service.detail(id, null)).rejects.toThrow(NotFoundException);
+    await expect(service.detail(id, other, 'corr-1')).rejects.toThrow(
+      NotFoundException,
+    );
+    await expect(service.detail(id, null, 'corr-1')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('shows a listing waiting for review to its owner and administrators only', async () => {
@@ -232,15 +289,19 @@ describe('ListingQueriesService.detail', () => {
         moderationFlags: ['Mentions "gun"'],
       }),
     );
-    await expect(service.detail(id, owner)).resolves.toMatchObject({
+    await expect(service.detail(id, owner, 'corr-1')).resolves.toMatchObject({
       status: 'PENDING_REVIEW',
       moderationFlags: ['Mentions "gun"'],
     });
-    await expect(service.detail(id, admin)).resolves.toMatchObject({
+    await expect(service.detail(id, admin, 'corr-1')).resolves.toMatchObject({
       status: 'PENDING_REVIEW',
     });
-    await expect(service.detail(id, other)).rejects.toThrow(NotFoundException);
-    await expect(service.detail(id, null)).rejects.toThrow(NotFoundException);
+    await expect(service.detail(id, other, 'corr-1')).rejects.toThrow(
+      NotFoundException,
+    );
+    await expect(service.detail(id, null, 'corr-1')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('shows the rejection reason to the owner of a REJECTED listing', async () => {
@@ -252,25 +313,31 @@ describe('ListingQueriesService.detail', () => {
         rejectionReason: 'Not allowed on campus',
       }),
     );
-    await expect(service.detail(id, owner)).resolves.toMatchObject({
+    await expect(service.detail(id, owner, 'corr-1')).resolves.toMatchObject({
       rejectionReason: 'Not allowed on campus',
     });
-    await expect(service.detail(id, other)).rejects.toThrow(NotFoundException);
+    await expect(service.detail(id, other, 'corr-1')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('shows an UNPUBLISHED listing to its owner only', async () => {
     const { service, repo } = setup();
     repo.findOneBy.mockResolvedValue(listing({ status: 'UNPUBLISHED' }));
-    await expect(service.detail(id, owner)).resolves.toMatchObject({
+    await expect(service.detail(id, owner, 'corr-1')).resolves.toMatchObject({
       status: 'UNPUBLISHED',
     });
-    await expect(service.detail(id, other)).rejects.toThrow(NotFoundException);
+    await expect(service.detail(id, other, 'corr-1')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('answers 404 for an unknown listing', async () => {
     const { service, repo } = setup();
     repo.findOneBy.mockResolvedValue(null);
-    await expect(service.detail(id, owner)).rejects.toThrow(NotFoundException);
+    await expect(service.detail(id, owner, 'corr-1')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 });
 
