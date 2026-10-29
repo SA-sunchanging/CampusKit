@@ -62,6 +62,17 @@
   margin: 0;
 }
 
+.rental-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rental-overdue {
+  color: var(--color-danger-fg);
+  font-weight: 600;
+}
+
 .rental-note {
   margin: 0;
   font-size: var(--text-xs);

@@ -7,7 +7,12 @@ import {
   formatBaht,
   formatDateRange,
 } from '../../ui/index.ts';
-import { nextStepNote, statusLabel, statusTone } from './status.ts';
+import {
+  nextStepNote,
+  overdueNote,
+  statusLabel,
+  statusTone,
+} from './status.ts';
 
 // One rental on the rentals page (role D), seen as its renter or its owner.
 export default function RentalCard({
@@ -23,6 +28,7 @@ export default function RentalCard({
   const { period, terms } = rental;
   const [now] = useState(() => new Date());
   const note = nextStepNote(rental, viewerId, now);
+  const overdue = overdueNote(rental);
   const link = `/rentals/${rental.id}`;
   return (
     <article className="panel rental-card">
@@ -35,8 +41,10 @@ export default function RentalCard({
         <Badge tone={statusTone(rental.status)}>
           {statusLabel(rental.status)}
         </Badge>
+        {rental.overdue && <Badge tone="danger">Overdue</Badge>}
       </div>
       <p>{formatDateRange(period.start, period.end)}</p>
+      {overdue && <p className="rental-overdue">{overdue}</p>}
       <dl>
         <dt>Rental fee</dt>
         <dd>{formatBaht(terms.rentalFee)}</dd>

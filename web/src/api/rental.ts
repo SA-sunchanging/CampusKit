@@ -40,6 +40,12 @@ export interface Rental {
   lateDays: number;
   /** Satang, fixed at the return. */
   lateFee: number;
+  /** True while ACTIVE after Rental flagged it overdue: the period ended before the return. */
+  overdue: boolean;
+  /** When Rental flagged it overdue; empty until then, kept after the return. */
+  overdueAt: string;
+  /** Satang: the late fee if the item came back now; 0 unless overdue. */
+  lateFeeSoFar: number;
   /** Why the last pickup or settlement step failed; empty otherwise. */
   lastError: string;
   createdAt: string;

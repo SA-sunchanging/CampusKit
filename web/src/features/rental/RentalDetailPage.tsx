@@ -94,9 +94,12 @@ function RentalView({
       <PageHeader
         title={title ?? 'Rental'}
         aside={
-          <Badge tone={statusTone(rental.status)}>
-            {statusLabel(rental.status)}
-          </Badge>
+          <span className="rental-badges">
+            <Badge tone={statusTone(rental.status)}>
+              {statusLabel(rental.status)}
+            </Badge>
+            {rental.overdue && <Badge tone="danger">Overdue</Badge>}
+          </span>
         }
       />
       <div className="rental-detail">

@@ -1,5 +1,6 @@
 import type { AuthorizationStatus } from '../../api/payment.ts';
 import type { Rental, RentalStatus } from '../../api/rental.ts';
+import { formatBaht } from '../../ui/format.ts';
 import type { Tone } from '../../ui/index.ts';
 import { formatDateTime } from '../booking/dates.ts';
 
@@ -154,4 +155,15 @@ export function nextStepNote(
     return 'The rental period has ended, so the item can no longer be picked up.';
   }
   return null;
+}
+
+/**
+ * On an overdue rental: when the item was due back and the late fee so far, which Rental works
+ * out again at the return. Null when the rental is not overdue.
+ */
+export function overdueNote(
+  rental: Pick<Rental, 'overdue' | 'period' | 'lateFeeSoFar'>,
+): string | null {
+  if (!rental.overdue) return null;
+  return `Overdue: due back ${formatDateTime(rental.period.end)}. Late fee so far: ${formatBaht(rental.lateFeeSoFar)}.`;
 }

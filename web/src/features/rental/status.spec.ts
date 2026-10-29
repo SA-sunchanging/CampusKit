@@ -4,6 +4,7 @@ import { RENTAL_STATUSES, type RentalStatus } from '../../api/rental.ts';
 import {
   nextAction,
   nextStepNote,
+  overdueNote,
   PAYMENT_LABELS,
   PAYMENT_TONES,
   paymentLabel,
@@ -165,5 +166,17 @@ describe('nextStepNote', () => {
 
   it('says nothing to someone else', () => {
     expect(nextStepNote(rental('ACTIVE'), OTHER, INSIDE)).toBeNull();
+  });
+});
+
+describe('overdueNote', () => {
+  it('gives the due time in Bangkok and the late fee so far', () => {
+    expect(overdueNote({ overdue: true, period, lateFeeSoFar: 8000 })).toBe(
+      'Overdue: due back 2 Nov 2026, 00:00. Late fee so far: ฿80.',
+    );
+  });
+
+  it('says nothing when the rental is not overdue', () => {
+    expect(overdueNote({ overdue: false, period, lateFeeSoFar: 0 })).toBeNull();
   });
 });

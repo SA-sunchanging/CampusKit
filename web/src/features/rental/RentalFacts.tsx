@@ -18,6 +18,15 @@ export default function RentalFacts({ rental }: { rental: Rental }) {
         <dt>Late fee</dt>
         <dd>{formatBaht(terms.lateFeePerDay)} / day late</dd>
         <Time label="Picked up" iso={rental.pickedUpAt} />
+        {rental.overdue && (
+          <>
+            <Time label="Was due back" iso={period.end} />
+            <dt>Late fee so far</dt>
+            <dd className="rental-overdue">
+              {formatBaht(rental.lateFeeSoFar)}
+            </dd>
+          </>
+        )}
         <Time label="Returned" iso={rental.returnedAt} />
         {rental.lateDays > 0 && (
           <>
