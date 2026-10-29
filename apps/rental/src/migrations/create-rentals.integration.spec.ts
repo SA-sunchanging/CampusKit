@@ -1,5 +1,6 @@
 import {
   findRental,
+  findRentalByBooking,
   RENTAL_COLUMNS,
   updateRental,
 } from '../rentals/rental.row.js';
@@ -75,6 +76,13 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)(
         last_error: null,
       });
       expect(row?.created_at).toBeInstanceOf(Date);
+    });
+
+    it('accepts a CANCELLED rental and finds it by booking', async () => {
+      const id = await insert({ status: 'CANCELLED' });
+      await expect(
+        findRentalByBooking(test.db, booking, true),
+      ).resolves.toMatchObject({ id, status: 'CANCELLED' });
     });
 
     it('returns undefined for an unknown rental', async () => {

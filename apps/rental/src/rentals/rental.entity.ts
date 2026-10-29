@@ -10,13 +10,15 @@ import {
  * Statuses stored in rentals.status, in the order a rental moves through them:
  * AWAITING_PICKUP until the renter confirms pickup with the owner's code, ACTIVE until the owner
  * confirms the return with the renter's code, SETTLEMENT_PENDING while Payment settles the
- * deposit and late fee, and CLOSED once it has.
+ * deposit and late fee, and CLOSED once it has. CANCELLED ends a rental whose booking was
+ * cancelled while it was still AWAITING_PICKUP.
  */
 export const RENTAL_STATUSES = [
   'AWAITING_PICKUP',
   'ACTIVE',
   'SETTLEMENT_PENDING',
   'CLOSED',
+  'CANCELLED',
 ] as const;
 
 export type RentalStatus = (typeof RENTAL_STATUSES)[number];

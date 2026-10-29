@@ -35,6 +35,8 @@ export function captureOperationId(rentalId: string): string {
 
 const WRONG_CODE = 'WRONG_CODE';
 
+const CANCELLED_MESSAGE = 'The booking was cancelled, so there is no pickup';
+
 /**
  * The renter confirms pickup with the owner's code. The rental becomes ACTIVE once Booking
  * still shows the booking CONFIRMED for the same people and period and Payment has captured
@@ -87,6 +89,9 @@ export class PickupService {
         'renter',
         'Only the renter can confirm the pickup',
       );
+      if (row.status === 'CANCELLED') {
+        throw new ConflictException(CANCELLED_MESSAGE);
+      }
       if (row.status !== 'AWAITING_PICKUP') {
         throw new ConflictException('The item was already picked up');
       }
@@ -169,8 +174,13 @@ export class PickupService {
       return row;
     });
     if (!active) {
-      // A concurrent pickup with the same code won; the capture was idempotent.
-      return (await findRental(this.db, id)) as RentalRow;
+      // A concurrent pickup with the same code won (the capture was idempotent), or the
+      // booking was cancelled meanwhile.
+      const current = (await findRental(this.db, id)) as RentalRow;
+      if (current.status === 'CANCELLED') {
+        throw new ConflictException(CANCELLED_MESSAGE);
+      }
+      return current;
     }
     this.logger.log(`Rental ${id} is ACTIVE`);
     return active;

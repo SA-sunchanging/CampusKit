@@ -85,6 +85,10 @@ export class ReturnService {
           throw new ConflictException('The item has not been picked up yet');
         case 'CLOSED':
           throw new ConflictException('The rental is already closed');
+        case 'CANCELLED':
+          throw new ConflictException(
+            'The booking was cancelled before pickup',
+          );
         case 'SETTLEMENT_PENDING':
           // A retry: keep the stored return time and late fee, never recompute them.
           return row;

@@ -12,7 +12,7 @@ export interface Statement {
 
 /**
  * A rental_db with one rental, for unit specs. It understands the statements the handover
- * services send: SELECT by id (with or without FOR UPDATE) and
+ * services send: SELECT by id or booking_id (with or without FOR UPDATE) and
  * `UPDATE rentals SET col = $n | 'text' | 0 | NULL | now(), ... WHERE id = $1 [AND status = 'X']
  * [RETURNING ...]`, which it applies only when the WHERE matches, and the outbox INSERT. A
  * transaction whose callback throws puts the row and the outbox back as they were.
@@ -72,6 +72,12 @@ export class FakeRentalDb {
     const text = sql.trim();
     if (text.startsWith('SELECT') && text.includes('WHERE id = $1')) {
       const found = this.current?.id === params[0];
+      return Promise.resolve(
+        found && this.current ? [{ ...this.current }] : [],
+      );
+    }
+    if (text.startsWith('SELECT') && text.includes('WHERE booking_id = $1')) {
+      const found = this.current?.booking_id === params[0];
       return Promise.resolve(
         found && this.current ? [{ ...this.current }] : [],
       );

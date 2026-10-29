@@ -48,6 +48,19 @@ export async function findRental(
   return row;
 }
 
+/** The rental of this booking, locked until the transaction ends when lock is true. */
+export async function findRentalByBooking(
+  tx: Pick<EntityManager, 'query'>,
+  bookingId: string,
+  lock = false,
+): Promise<RentalRow | undefined> {
+  const [row] = (await tx.query(
+    `SELECT ${RENTAL_COLUMNS} FROM rentals WHERE booking_id = $1${lock ? ' FOR UPDATE' : ''}`,
+    [bookingId],
+  )) as RentalRow[];
+  return row;
+}
+
 /**
  * Runs an UPDATE ... RETURNING RENTAL_COLUMNS and returns the updated row, or undefined when
  * its WHERE matched nothing. TypeORM answers an UPDATE with [rows, affected].

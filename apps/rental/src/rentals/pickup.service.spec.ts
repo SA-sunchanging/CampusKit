@@ -158,6 +158,20 @@ describe('PickupService', () => {
     },
   );
 
+  it('answers 409 for a CANCELLED rental without checking the code', async () => {
+    const { fake, booking, payment, pickup } = setup(
+      rentalRow({ status: 'CANCELLED' }),
+    );
+    const err = await errorOf(pickup('000000'));
+    expect(err).toBeInstanceOf(ConflictException);
+    expect((err as Error).message).toBe(
+      'The booking was cancelled, so there is no pickup',
+    );
+    expect(fake.row?.pickup_attempts).toBe(0);
+    expect(booking.getBooking).not.toHaveBeenCalled();
+    expect(payment.capture).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['too early', '2026-10-31T16:59:59.999Z'],
     ['after the end', '2026-11-04T17:00:00.000Z'],
@@ -318,6 +332,17 @@ describe('PickupService', () => {
       status: 'ACTIVE',
       pickedUpAt: earlier.toISOString(),
     });
+    expect(fake.events()).toEqual([]);
+  });
+
+  it('answers 409 and stays CANCELLED when a cancel commits during the pickup', async () => {
+    const { fake, payment, pickup } = setup();
+    payment.capture.mockImplementationOnce(() => {
+      fake.set({ ...(fake.row as RentalRow), status: 'CANCELLED' });
+      return Promise.resolve({ ok: true, value: captured });
+    });
+    expect(await errorOf(pickup())).toBeInstanceOf(ConflictException);
+    expect(fake.row?.status).toBe('CANCELLED');
     expect(fake.events()).toEqual([]);
   });
 });

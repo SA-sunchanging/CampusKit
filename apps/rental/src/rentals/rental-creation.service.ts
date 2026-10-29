@@ -8,7 +8,11 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { CreateRentalResponse } from '../internal/create-rental.response.js';
 import { generateCode } from './codes.js';
-import { RENTAL_COLUMNS, type RentalRow } from './rental.row.js';
+import {
+  findRentalByBooking,
+  RENTAL_COLUMNS,
+  type RentalRow,
+} from './rental.row.js';
 
 /** Body of POST /internal/rentals, sent by Booking when it confirms a booking. */
 export interface CreateRentalRequest {
@@ -81,7 +85,7 @@ export class RentalCreationService {
       return CreateRentalResponse.of(inserted);
     }
     // A rental for this booking already exists, made by an earlier or concurrent request.
-    const existing = await this.findByBooking(request.bookingId);
+    const existing = await findRentalByBooking(this.db, request.bookingId);
     if (!existing || !sameRental(existing, rental)) {
       this.logger.warn(
         `Booking ${request.bookingId} already has a rental with other details`,
@@ -116,16 +120,6 @@ export class RentalCreationService {
         generateCode(),
         generateCode(),
       ],
-    )) as RentalRow[];
-    return row;
-  }
-
-  private async findByBooking(
-    bookingId: string,
-  ): Promise<RentalRow | undefined> {
-    const [row] = (await this.db.query(
-      `SELECT ${RENTAL_COLUMNS} FROM rentals WHERE booking_id = $1`,
-      [bookingId],
     )) as RentalRow[];
     return row;
   }

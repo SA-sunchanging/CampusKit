@@ -23,6 +23,7 @@ const expected: Record<RentalStatus, Record<string, [string, string]>> = {
     stranger: ['', ''],
   },
   CLOSED: { owner: ['', ''], renter: ['', ''], stranger: ['', ''] },
+  CANCELLED: { owner: ['', ''], renter: ['', ''], stranger: ['', ''] },
 };
 
 const cases = RENTAL_STATUSES.flatMap((status) =>

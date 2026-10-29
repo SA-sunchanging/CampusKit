@@ -175,6 +175,7 @@ describe('ReturnService', () => {
   it.each([
     ['AWAITING_PICKUP', 'The item has not been picked up yet'],
     ['CLOSED', 'The rental is already closed'],
+    ['CANCELLED', 'The booking was cancelled before pickup'],
   ] as const)('answers 409 when the rental is %s', async (status, message) => {
     const { booking, payment, confirmReturn } = setup(rentalRow({ status }));
     const err = await errorOf(confirmReturn());
