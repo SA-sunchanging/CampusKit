@@ -201,7 +201,7 @@ Identity, Listing, Booking, and Rental produce events. Duplicate delivery does n
 
 ## Booking rules and calls to Payment and Rental
 
-Booking implements the request and approval steps of the booking sequence above in `apps/booking`. The Payment and Rental endpoints below are a contract that Booking proposes; their owners still have to confirm it, and both services answer with stubs today.
+Booking implements the request and approval steps of the booking sequence above in `apps/booking`. Payment implements the authorize call below as described under Payment rules. The Rental endpoint below is a contract that Booking proposes; its owner still has to confirm it, and Rental answers with a stub today.
 
 ### Booking status
 
@@ -232,6 +232,62 @@ When the owner approves, Booking makes these calls in order. Each carries the `x
 `payerId` is the renter and `payeeId` the owner; amounts are integer satang, and times are ISO-8601 UTC. A refusal is a 4xx with the shared error body `{ error: { code, message } }`.
 
 If a call fails, the booking stays `AUTHORIZING` and the reason is stored with it: a 4xx other than 404 counts as a decline, while 404, 501, 5xx, a timeout or no connection counts as unavailable. The approval still answers successfully with status `AUTHORIZING`. The owner approves again to retry the same calls with the same operation IDs, until the period starts. When all three succeed, the booking becomes `CONFIRMED` and stores the rental ID. Voiding the authorizations of a booking that never confirms is deferred with the expiry worker.
+
+## Payment rules
+
+Payment keeps a demo ledger in `apps/payment`, with no real money and no provider calls (see `docs/adr/adr-006-isolate-payment-integration-behind-adapter.md`). Amounts are integer satang and times are ISO-8601 UTC. A booking has at most one fee (`FEE`) and one deposit (`DEPOSIT`) authorization, and both have the same payer (the renter) and payee (the owner).
+
+### Authorization status
+
+| Status | Meaning |
+|---|---|
+| `AUTHORIZED` | The amount is held. It can be captured (fee) or settled (deposit) until it expires. |
+| `EXPIRED` | Reported, not stored: an `AUTHORIZED` hold whose `expiresAt` has passed. Capture and settle refuse it; void still releases it. |
+| `CAPTURED` | The fee was taken at pickup. |
+| `SETTLED` | The deposit was split at the return: the late fee taken and the rest released. |
+| `VOIDED` | The hold was released in full without being used. |
+
+An authorization expires `PAYMENT_AUTHORIZATION_TTL_DAYS` days after it is made: a whole number from 1 to 3650, or 30 when the variable is unset or invalid.
+
+### Idempotency
+
+Every internal call carries an `operationId` of 1 to 200 characters that the caller keeps stable across retries. Payment runs each call in one transaction: it takes an advisory lock on the `operationId`, so a concurrent duplicate waits, and then looks for a ledger entry with that ID.
+
+- No entry: Payment locks the booking's authorizations, applies the change, and stores the entry with a SHA-256 hash of the request body (keys in sorted order) and the reply.
+- An entry with the same hash: Payment returns the stored reply and changes nothing.
+- An entry with a different hash, or for another operation: `409` with `operationId was already used for a different request`.
+
+A refusal stores nothing, so a corrected retry with the same `operationId` can still succeed.
+
+### Internal endpoints
+
+The gateway refuses `/internal/` paths from outside; inside the Compose network they need no credentials yet (see Open questions below). A body that fails validation answers `400`; a refusal of the rules answers `409`, both with the shared error body `{ error: { code, message } }`.
+
+| Call | Body | Reply | Rules |
+|---|---|---|---|
+| `POST /internal/payments/authorize` (Booking) | `{ operationId, bookingId, payerId, payeeId, kind, amount }`, `kind` is `FEE` or `DEPOSIT`, `amount` from 1 to 2147483647 | `201` `{ id, status }` | A payer who is also the payee answers `400`. A second hold of the same kind under a new `operationId`, or a hold whose payer or payee differs from the booking's other hold, answers `409`. Booking skips a zero amount, so a booking may have only one kind or none. |
+| `POST /internal/payments/capture` (Rental, at pickup) | `{ operationId, bookingId, amount }`, `amount` 0 or more | `200` `{ bookingId, kind: "FEE", capturedAmount, status }` | `amount` must equal the `AUTHORIZED`, unexpired fee, which becomes `CAPTURED`. With no fee authorization, an `amount` of 0 succeeds with `status` `NOT_REQUIRED` and `capturedAmount` 0. A missing, mismatched, expired, captured, settled or voided fee answers `409`. The deposit stays authorized. |
+| `POST /internal/payments/void` (Booking) | `{ operationId, bookingId }` | `200` `{ bookingId, voided }`, the kinds released by this call, `FEE` first | Every `AUTHORIZED` hold, expired or not, becomes `VOIDED` with its whole amount released. `CAPTURED` and `SETTLED` holds stay as they are; refunds are out of scope. |
+| `POST /internal/payments/settle` (Rental, at the return) | `{ operationId, bookingId, deposit, lateFee }`, both 0 or more | `200` `{ bookingId, lateFeeCharged, depositReleased, payout }` | See Settlement below. |
+
+### Settlement
+
+1. A booking is settled once: when it already has a payout, settle answers `409` with `The booking is already settled`.
+2. The fee, when the booking has one, must be `CAPTURED`; otherwise `409`.
+3. When `deposit` is more than 0, the deposit authorization must exist, be `AUTHORIZED` and unexpired, and hold exactly `deposit`; otherwise `409`. When `deposit` is 0, the booking must have no deposit authorization.
+4. `lateFeeCharged = min(lateFee, deposit)` and `depositReleased = deposit - lateFeeCharged`. The deposit becomes `SETTLED` with these two amounts. The renter is never charged more than the deposit.
+5. `payout` is the captured fee (0 without a fee) plus `lateFeeCharged`. Payment records one payout to the payee per booking. A booking with no authorization at all settles with every amount 0 and records no payout.
+
+For example, a fee of 6000, a deposit of 30000 and a late fee of 8000 give `lateFeeCharged` 8000, `depositReleased` 22000 and `payout` 14000.
+
+### Payment status
+
+`GET /api/payment/payments/bookings/{bookingId}` (needs a token; the service serves it at `/payments/bookings/{bookingId}`) answers `200` with `{ bookingId, authorizations, payout }`:
+
+- `authorizations` lists the holds, `FEE` before `DEPOSIT`, each as `{ id, kind, amount, capturedAmount, releasedAmount, status, expiresAt }`, where `status` is `EXPIRED` for an `AUTHORIZED` hold past its time.
+- `payout` is `{ amount, payeeId, paidAt }` after settlement, otherwise `null`.
+
+Only the payer and the payee can read a booking's payments; anyone else gets `404`. A booking with nothing authorized answers an empty list and a `null` payout to any caller, because Payment cannot tell who takes part in it.
 
 ## Gateway rules
 
