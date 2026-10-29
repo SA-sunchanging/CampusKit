@@ -91,7 +91,7 @@ function setup(initial: BookingRow = row()) {
       }
       if (sql.includes('WITH expired')) {
         state.booking = { ...state.booking, status: 'EXPIRED' };
-        return Promise.resolve([{ id }]);
+        return Promise.resolve([state.booking]);
       }
       if (sql.includes('UPDATE calendar_blocks')) {
         state.released = true;
@@ -362,7 +362,12 @@ describe('BookingDecisionsService.decline', () => {
       status.FAILED_PRECONDITION,
     );
     expect(state.booking.status).toBe('EXPIRED');
-    expect(events()).toEqual([]);
+    expect(events()).toEqual([
+      expect.objectContaining({
+        type: 'booking.expired',
+        recipients: [owner.sub, renter.sub],
+      }),
+    ]);
   });
 
   it('lets only the owner decline', async () => {

@@ -276,7 +276,7 @@ const bookingId = '22222222-2222-4222-8222-222222222222';
 describe('BookingsService.get', () => {
   it('returns a booking of the caller after expiring it if stale', async () => {
     const { tx, service } = readSetup([{ id: bookingId }]);
-    await expect(service.get(renter, bookingId, now)).resolves.toEqual({
+    await expect(service.get(renter, bookingId, call, now)).resolves.toEqual({
       id: bookingId,
     });
     const [expirySql, expiryParams] = tx.query.mock.calls[0];
@@ -288,14 +288,14 @@ describe('BookingsService.get', () => {
 
   it('answers NOT_FOUND to anyone but the renter and owner', async () => {
     const { service } = readSetup([]);
-    expect(await codeOf(service.get(renter, bookingId, now))).toBe(
+    expect(await codeOf(service.get(renter, bookingId, call, now))).toBe(
       status.NOT_FOUND,
     );
   });
 
   it('rejects an ID that is not a UUID', async () => {
     const { db, service } = setup();
-    expect(await codeOf(service.get(renter, '', now))).toBe(
+    expect(await codeOf(service.get(renter, '', call, now))).toBe(
       status.INVALID_ARGUMENT,
     );
     expect(db.transaction).not.toHaveBeenCalled();
@@ -305,9 +305,9 @@ describe('BookingsService.get', () => {
 describe('BookingsService.list', () => {
   it('lists the caller requests as renter, newest first, at most 100', async () => {
     const { tx, service } = readSetup([{ id: bookingId }]);
-    await expect(service.list(renter, 'renter', '', now)).resolves.toEqual([
-      { id: bookingId },
-    ]);
+    await expect(
+      service.list(renter, 'renter', '', call, now),
+    ).resolves.toEqual([{ id: bookingId }]);
     expect(tx.query.mock.calls[0][1]).toEqual([now, renter.sub]);
     const [sql, params] = tx.query.mock.calls[1];
     expect(sql).toContain('WHERE renter_id = $1');
@@ -317,7 +317,7 @@ describe('BookingsService.list', () => {
 
   it('lists requests on the caller listings with a status filter', async () => {
     const { tx, service } = readSetup([]);
-    await service.list(owner, 'owner', 'PENDING', now);
+    await service.list(owner, 'owner', 'PENDING', call, now);
     const [sql, params] = tx.query.mock.calls[1];
     expect(sql).toContain('WHERE owner_id = $1');
     expect(params).toEqual([owner.sub, 'PENDING', 100]);
@@ -325,10 +325,10 @@ describe('BookingsService.list', () => {
 
   it('rejects an unknown role or status', async () => {
     const { db, service } = setup();
-    expect(await codeOf(service.list(owner, 'admin', '', now))).toBe(
+    expect(await codeOf(service.list(owner, 'admin', '', call, now))).toBe(
       status.INVALID_ARGUMENT,
     );
-    expect(await codeOf(service.list(owner, 'owner', 'DONE', now))).toBe(
+    expect(await codeOf(service.list(owner, 'owner', 'DONE', call, now))).toBe(
       status.INVALID_ARGUMENT,
     );
     expect(db.transaction).not.toHaveBeenCalled();

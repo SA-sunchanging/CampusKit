@@ -101,11 +101,17 @@ export class BookingsService {
   async get(
     caller: AuthUser,
     id: string,
+    call: CallContext,
     now = new Date(),
   ): Promise<BookingRow> {
     requireUuid(id, 'id');
     return this.db.transaction(async (tx) => {
-      await expireStale(tx, oneBookingOf(id, caller.sub), now);
+      await expireStale(
+        tx,
+        oneBookingOf(id, caller.sub),
+        now,
+        call.correlationId,
+      );
       const [booking] = (await tx.query(
         `SELECT ${BOOKING_COLUMNS} FROM bookings
          WHERE id = $1 AND (renter_id = $2 OR owner_id = $2)`,
@@ -126,13 +132,19 @@ export class BookingsService {
     caller: AuthUser,
     role: string | undefined,
     statusFilter: string | undefined,
+    call: CallContext,
     now = new Date(),
   ): Promise<BookingRow[]> {
     const listRole = parseRole(role);
     const only = parseStatusFilter(statusFilter);
     const column = listRole === 'renter' ? 'renter_id' : 'owner_id';
     return this.db.transaction(async (tx) => {
-      await expireStale(tx, bookingsOf(caller.sub, listRole), now);
+      await expireStale(
+        tx,
+        bookingsOf(caller.sub, listRole),
+        now,
+        call.correlationId,
+      );
       return (await tx.query(
         `SELECT ${BOOKING_COLUMNS} FROM bookings
          WHERE ${column} = $1 AND ($2::text IS NULL OR status = $2)
@@ -151,7 +163,12 @@ export class BookingsService {
     await tx.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [
       `booking:renter:${r.renterId}`,
     ]);
-    await expireStale(tx, onListingOrByRenter(r.listingId, r.renterId), r.now);
+    await expireStale(
+      tx,
+      onListingOrByRenter(r.listingId, r.renterId),
+      r.now,
+      r.correlationId,
+    );
     await requireCalendar(tx, r.listingId);
     const [{ open }] = (await tx.query(
       `SELECT count(*)::int AS open FROM bookings

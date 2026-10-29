@@ -114,7 +114,7 @@ export class BookingDecisionsService {
     const result = await this.db.transaction(async (tx) => {
       const booking = await lockForOwner(tx, caller, id);
       if (isStale(booking, now)) {
-        await expireStale(tx, oneBooking(id), now);
+        await expireStale(tx, oneBooking(id), now, call.correlationId);
         return EXPIRED;
       }
       if (booking.status !== 'PENDING') {
@@ -165,7 +165,7 @@ export class BookingDecisionsService {
       const booking = await lockForOwner(tx, caller, id);
       if (isStale(booking, now)) {
         // Commit the expiry, then answer FAILED_PRECONDITION outside the transaction.
-        await expireStale(tx, oneBooking(id), now);
+        await expireStale(tx, oneBooking(id), now, call.correlationId);
         return EXPIRED;
       }
       switch (booking.status) {

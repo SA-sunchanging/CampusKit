@@ -91,7 +91,12 @@ export class BookingsGrpcController {
     metadata: Metadata,
   ): Promise<BookingReply> {
     const caller = callerFrom(metadata, this.jwt);
-    return toBookingReply(await this.bookings.get(caller, request.id ?? ''));
+    const booking = await this.bookings.get(
+      caller,
+      request.id ?? '',
+      callContextFrom(metadata),
+    );
+    return toBookingReply(booking);
   }
 
   @GrpcMethod('BookingService', 'ListBookings')
@@ -100,7 +105,12 @@ export class BookingsGrpcController {
     metadata: Metadata,
   ): Promise<{ bookings: BookingReply[] }> {
     const caller = callerFrom(metadata, this.jwt);
-    const rows = await this.bookings.list(caller, request.role, request.status);
+    const rows = await this.bookings.list(
+      caller,
+      request.role,
+      request.status,
+      callContextFrom(metadata),
+    );
     return { bookings: rows.map(toBookingReply) };
   }
 }

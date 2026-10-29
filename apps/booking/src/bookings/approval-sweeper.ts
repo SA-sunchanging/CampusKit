@@ -7,14 +7,20 @@ import {
 import { InjectDataSource } from '@nestjs/typeorm';
 import { randomUUID } from 'node:crypto';
 import { DataSource } from 'typeorm';
-import { Compensation, failStartedApprovals } from './compensation.js';
+import {
+  Compensation,
+  failStartedApprovals,
+  SWEEP_BATCH,
+} from './compensation.js';
+import { expireStale, staleBatch } from './expiry.js';
 
 export const SWEEP_INTERVAL_MS = 60_000;
 
 /**
- * Ends approvals that can no longer complete, so they do not hold dates or money: every
- * minute it fails AUTHORIZING bookings whose period has started (releasing their dates), then
- * asks Payment again to void the holds of FAILED bookings whose void has not succeeded yet.
+ * Ends bookings that can no longer go ahead, so they do not hold dates or money: every minute
+ * it expires PENDING requests the owner did not answer in time and fails AUTHORIZING bookings
+ * whose period has started (releasing their dates and telling both people), then asks Payment
+ * again to void the holds of FAILED bookings whose void has not succeeded yet.
  * Starts when the application has bootstrapped and stops when it shuts down.
  */
 @Injectable()
@@ -54,9 +60,17 @@ export class ApprovalSweeper
     }
   }
 
-  /** Fails the started approvals, then retries each pending void once. */
+  /** Expires unanswered requests, fails the started approvals, then retries each pending void once. */
   async sweep(now: Date): Promise<void> {
     const call = { correlationId: randomUUID() };
+    const expired = await this.db.transaction((tx) =>
+      expireStale(tx, staleBatch(SWEEP_BATCH), now, call.correlationId),
+    );
+    if (expired.length > 0) {
+      this.logger.log(
+        `Expired ${expired.length} unanswered requests (correlation ${call.correlationId})`,
+      );
+    }
     const failed = await this.db.transaction((tx) =>
       failStartedApprovals(tx, now, call.correlationId),
     );
