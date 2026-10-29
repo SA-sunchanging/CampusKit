@@ -48,6 +48,7 @@ interface State {
   booking: BookingRow;
   /** What a concurrent session left behind before this one's conditional update. */
   raced?: BookingRow;
+  released?: boolean;
 }
 
 /** A fake booking_db that applies the service's status updates to one row. */
@@ -77,9 +78,18 @@ function setup(initial: BookingRow = row()) {
           apply({ status: 'CONFIRMED', rental_id: params[1] as string }),
         );
       }
+      if (sql.includes("SET status = 'DECLINED'")) {
+        return Promise.resolve(
+          apply({ status: 'DECLINED', decline_reason: params[1] as string }),
+        );
+      }
       if (sql.includes('WITH expired')) {
         state.booking = { ...state.booking, status: 'EXPIRED' };
         return Promise.resolve([{ id }]);
+      }
+      if (sql.includes('UPDATE calendar_blocks')) {
+        state.released = true;
+        return Promise.resolve([[], 1]);
       }
       if (sql.includes('FROM bookings WHERE id = $1')) {
         return Promise.resolve([state.booking]);
@@ -93,12 +103,10 @@ function setup(initial: BookingRow = row()) {
     ),
   };
   const payment = {
-    authorize: vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        value: { id: 'a', status: 'AUTHORIZED' },
-      }),
+    authorize: vi.fn().mockResolvedValue({
+      ok: true,
+      value: { id: 'a', status: 'AUTHORIZED' },
+    }),
   };
   const rental = {
     create: vi.fn().mockResolvedValue({ ok: true, value: { id: 'rental-1' } }),
@@ -264,5 +272,76 @@ describe('BookingDecisionsService.approve', () => {
       status.INVALID_ARGUMENT,
     );
     expect(db.transaction).not.toHaveBeenCalled();
+  });
+});
+
+describe('BookingDecisionsService.decline', () => {
+  it('declines a PENDING request, releases the dates and tells the renter', async () => {
+    const { state, service, events } = setup();
+    const booking = await service.decline(
+      owner,
+      id,
+      '  Away that week ',
+      call,
+      now,
+    );
+    expect(booking).toMatchObject({
+      status: 'DECLINED',
+      decline_reason: 'Away that week',
+    });
+    expect(state.released).toBe(true);
+    expect(events()).toEqual([
+      expect.objectContaining({
+        type: 'booking.declined',
+        recipients: [renter.sub],
+        data: expect.objectContaining({ bookingId: id, status: 'DECLINED' }),
+      }),
+    ]);
+  });
+
+  it('stores no reason when none is given', async () => {
+    const { service } = setup();
+    const booking = await service.decline(owner, id, '', call, now);
+    expect(booking.decline_reason).toBeNull();
+  });
+
+  it('rejects a reason longer than 500 characters', async () => {
+    const { db, service } = setup();
+    expect(
+      await codeOf(service.decline(owner, id, 'x'.repeat(501), call, now)),
+    ).toBe(status.INVALID_ARGUMENT);
+    expect(db.transaction).not.toHaveBeenCalled();
+  });
+
+  it.each(['AUTHORIZING', 'CONFIRMED', 'DECLINED'] as const)(
+    'refuses a %s booking without releasing it',
+    async (current) => {
+      const { state, service } = setup(row({ status: current }));
+      expect(await codeOf(service.decline(owner, id, '', call, now))).toBe(
+        status.FAILED_PRECONDITION,
+      );
+      expect(state.released).toBeUndefined();
+    },
+  );
+
+  it('expires a stale PENDING request and answers FAILED_PRECONDITION', async () => {
+    const { state, service, events } = setup(
+      row({ expires_at: new Date('2026-10-29T04:59:00Z') }),
+    );
+    expect(await codeOf(service.decline(owner, id, '', call, now))).toBe(
+      status.FAILED_PRECONDITION,
+    );
+    expect(state.booking.status).toBe('EXPIRED');
+    expect(events()).toEqual([]);
+  });
+
+  it('lets only the owner decline', async () => {
+    const { service } = setup();
+    expect(await codeOf(service.decline(renter, id, '', call, now))).toBe(
+      status.PERMISSION_DENIED,
+    );
+    expect(await codeOf(service.decline(stranger, id, '', call, now))).toBe(
+      status.NOT_FOUND,
+    );
   });
 });

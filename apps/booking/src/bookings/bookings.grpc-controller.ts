@@ -18,6 +18,11 @@ interface BookingIdRequest {
   id?: string;
 }
 
+interface DeclineBookingRequest {
+  id?: string;
+  reason?: string;
+}
+
 interface ListBookingsRequest {
   role?: string;
   status?: string;
@@ -60,6 +65,21 @@ export class BookingsGrpcController {
     const booking = await this.decisions.approve(
       caller,
       request.id ?? '',
+      callContextFrom(metadata),
+    );
+    return toBookingReply(booking);
+  }
+
+  @GrpcMethod('BookingService', 'DeclineBooking')
+  async declineBooking(
+    request: DeclineBookingRequest,
+    metadata: Metadata,
+  ): Promise<BookingReply> {
+    const caller = callerFrom(metadata, this.jwt);
+    const booking = await this.decisions.decline(
+      caller,
+      request.id ?? '',
+      request.reason,
       callContextFrom(metadata),
     );
     return toBookingReply(booking);

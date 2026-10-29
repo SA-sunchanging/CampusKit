@@ -4,6 +4,7 @@ import {
   checkOpenRequests,
   checkRequestPeriod,
   expiresAt,
+  parseDeclineReason,
   parseRole,
   parseStatusFilter,
 } from './booking-rules.js';
@@ -123,6 +124,21 @@ describe('parseStatusFilter', () => {
   it('accepts a known status and rejects an unknown one', () => {
     expect(parseStatusFilter('CONFIRMED')).toBe('CONFIRMED');
     expect(codeOf(() => parseStatusFilter('pending'))).toBe(
+      status.INVALID_ARGUMENT,
+    );
+  });
+});
+
+describe('parseDeclineReason', () => {
+  it('trims the reason and treats an empty one as none', () => {
+    expect(parseDeclineReason('  Busy that week \n')).toBe('Busy that week');
+    expect(parseDeclineReason('   ')).toBeNull();
+    expect(parseDeclineReason(undefined)).toBeNull();
+  });
+
+  it('accepts 500 characters and rejects 501', () => {
+    expect(parseDeclineReason('x'.repeat(500))).toHaveLength(500);
+    expect(codeOf(() => parseDeclineReason('x'.repeat(501)))).toBe(
       status.INVALID_ARGUMENT,
     );
   });

@@ -9,6 +9,7 @@ import { PaymentClient } from '../clients/payment.client.js';
 import { RentalClient } from '../clients/rental.client.js';
 import { requireUuid, rpcError } from '../errors.js';
 import { authorizeAndCreateRental } from './approval.js';
+import { parseDeclineReason } from './booking-rules.js';
 import { announce } from './booking-events.js';
 import {
   BOOKING_COLUMNS,
@@ -88,6 +89,59 @@ export class BookingDecisionsService {
       return this.recordFailure(id, outcome.error);
     }
     return this.confirm(id, outcome.rentalId, call);
+  }
+
+  /**
+   * The owner rejects a PENDING request: the booking becomes DECLINED with the optional
+   * reason, the dates are released, and the renter is told through the outbox.
+   */
+  async decline(
+    caller: AuthUser,
+    id: string,
+    reason: string | undefined,
+    call: CallContext,
+    now = new Date(),
+  ): Promise<BookingRow> {
+    requireUuid(id, 'id');
+    const text = parseDeclineReason(reason);
+    const result = await this.db.transaction(async (tx) => {
+      const booking = await lockForOwner(tx, caller, id);
+      if (isStale(booking, now)) {
+        await expireStale(tx, oneBooking(id), now);
+        return EXPIRED;
+      }
+      if (booking.status !== 'PENDING') {
+        throw rpcError(
+          status.FAILED_PRECONDITION,
+          `The booking is ${booking.status} and cannot be declined`,
+        );
+      }
+      const declined = (await updateBooking(
+        tx,
+        `UPDATE bookings
+         SET status = 'DECLINED', decline_reason = $2, updated_at = now()
+         WHERE id = $1 AND status = 'PENDING'
+         RETURNING ${BOOKING_COLUMNS}`,
+        [id, text],
+      )) as BookingRow;
+      await tx.query(
+        `UPDATE calendar_blocks SET released_at = now()
+         WHERE booking_id = $1 AND released_at IS NULL`,
+        [id],
+      );
+      await announce(
+        tx,
+        BOOKING_EVENTS.declined,
+        declined,
+        [declined.renter_id],
+        call.correlationId,
+      );
+      return declined;
+    });
+    if (result === EXPIRED) {
+      throw expiredError();
+    }
+    return result;
   }
 
   /** Moves PENDING to AUTHORIZING, or returns an AUTHORIZING or CONFIRMED booking as it is. */

@@ -24,12 +24,10 @@ const unavailable = {
 
 function setup() {
   const payment = {
-    authorize: vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        value: { id: 'a', status: 'AUTHORIZED' },
-      }),
+    authorize: vi.fn().mockResolvedValue({
+      ok: true,
+      value: { id: 'a', status: 'AUTHORIZED' },
+    }),
   };
   const rental = {
     create: vi.fn().mockResolvedValue({ ok: true, value: { id: 'rental-1' } }),
