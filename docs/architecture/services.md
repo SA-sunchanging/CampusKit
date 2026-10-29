@@ -201,7 +201,7 @@ Identity, Listing, Booking, and Rental produce events. Duplicate delivery does n
 
 ## Booking rules and calls to Payment and Rental
 
-Booking implements the request and approval steps of the booking sequence above in `apps/booking`. Payment implements the authorize call below as described under Payment rules. The Rental endpoint below is a contract that Booking proposes; its owner still has to confirm it, and Rental answers with a stub today.
+Booking implements the request and approval steps of the booking sequence above in `apps/booking`. Payment and Rental implement the calls below, as described under Payment rules and Rental rules; their owner has confirmed this contract.
 
 ### Booking status
 
@@ -227,7 +227,7 @@ When the owner approves, Booking makes these calls in order. Each carries the `x
 |---|---|---|---|---|
 | 1 | `POST /internal/payments/authorize` on Payment | `{ operationId, bookingId, payerId, payeeId, kind: "FEE", amount }` | 2xx `{ id, status }` | Same `operationId`, `booking:<booking id>:authorize-fee`, so Payment authorizes once |
 | 2 | `POST /internal/payments/authorize` on Payment | Same, with `kind: "DEPOSIT"` | 2xx `{ id, status }` | `operationId` is `booking:<booking id>:authorize-deposit` |
-| 3 | `POST /internal/rentals` on Rental | `{ bookingId, listingId, ownerId, renterId, period: { start, end }, terms: { rentalFee, deposit, lateFeePerDay } }` | 2xx `{ id }` | Rental keeps one rental per `bookingId` and returns it again |
+| 3 | `POST /internal/rentals` on Rental | `{ bookingId, listingId, ownerId, renterId, period: { start, end }, terms: { rentalFee, deposit, lateFeePerDay } }` | 2xx `{ id, bookingId, status }`; Booking reads `id` | Rental keeps one rental per `bookingId` and returns it again |
 
 `payerId` is the renter and `payeeId` the owner; amounts are integer satang, and times are ISO-8601 UTC. A refusal is a 4xx with the shared error body `{ error: { code, message } }`.
 
@@ -288,6 +288,67 @@ For example, a fee of 6000, a deposit of 30000 and a late fee of 8000 give `late
 - `payout` is `{ amount, payeeId, paidAt }` after settlement, otherwise `null`.
 
 Only the payer and the payee can read a booking's payments; anyone else gets `404`. A booking with nothing authorized answers an empty list and a `null` payout to any caller, because Payment cannot tell who takes part in it.
+
+## Rental rules
+
+Rental runs the handover in `apps/rental`. Booking opens one rental per confirmed booking (see Approval calls above); the rental keeps the booking's listing, people, period and terms. Amounts are integer satang and times are ISO-8601 UTC. Rental writes no outbox events yet; the rental events wait for the shared outbox.
+
+### Rental status
+
+| Status | Meaning |
+|---|---|
+| `AWAITING_PICKUP` | Booking opened the rental. The owner holds the pickup code and gives it to the renter at the handover. |
+| `ACTIVE` | The renter confirmed pickup with the owner's code and Payment captured the fee; the deposit stays authorized. The renter holds the return code. |
+| `SETTLEMENT_PENDING` | The owner accepted the return with the renter's code. The return time and the late fee are fixed. Rental is releasing the dates and settling, or a step failed and waits for a retry. |
+| `CLOSED` | Booking released the dates and Payment settled the deposit, late fee and payout. Review accepts reviews of a closed rental. |
+
+### Codes
+
+- Both codes are six digits drawn from a cryptographic random source when the rental opens. They are stored as they are, because their holder must read them, and compared in constant time.
+- `pickupCode` is shown only to the owner, and only while `AWAITING_PICKUP`; `returnCode` only to the renter, and only while `ACTIVE`. Otherwise the field is an empty string.
+- Each code has its own counter of wrong attempts. A wrong code answers `400` with `Wrong pickup code` or `Wrong return code`, and the attempt is committed before the answer. The fifth wrong attempt in a row replaces the code with a new one and restarts the counter, so the holder reads the new code from the rental page. A successful step resets its counter.
+
+### Pickup
+
+`POST /api/rental/rentals/{id}/pickup` with `{ code }`, by the renter:
+
+1. Rental locks the rental and checks, in this order: the caller is the renter (anyone who does not take part gets `404`, the owner gets `403`); the status is `AWAITING_PICKUP` (otherwise `409` with `The item was already picked up`); the time is from 24 hours before the period starts until the period ends (otherwise `409`); the code (see Codes above).
+2. Rental calls `GetBooking` over gRPC with the renter's token. The booking must be `CONFIRMED` (otherwise `409` with `The booking is not confirmed`) and have the same listing, renter, owner and period as the rental (otherwise `409` with `The booking does not match the rental`).
+3. Rental calls `POST /internal/payments/capture` with `{ operationId: "rental:<rental id>:capture-fee", bookingId, amount }`, where `amount` is the rental fee.
+4. A conditional update makes the rental `ACTIVE` with `pickedUpAt`, and the answer is `200` with the rental.
+
+Steps 2 and 3 run outside the database transaction. When either fails, the rental stays `AWAITING_PICKUP`, the code stays valid and `lastError` keeps the reason, for example `Fee capture was declined: <Payment message>`. The answer is `409` when Booking or Payment refused (a 4xx other than 404, or the gRPC codes `NOT_FOUND`, `PERMISSION_DENIED`, `FAILED_PRECONDITION` and `INVALID_ARGUMENT`) and `503` when the service is unavailable (404, 501, 5xx, any other gRPC code, or no answer within 5 seconds). The renter enters the code again to retry; the capture keeps its operation ID, so the fee is taken once. When two pickups with the right code race, both answer the `ACTIVE` rental and only one update applies; a pickup that starts after the rental is `ACTIVE` answers `409`.
+
+### Return and settlement
+
+`POST /api/rental/rentals/{id}/return` with `{ code }`, by the owner:
+
+1. Rental locks the rental. The caller must be the owner (anyone who does not take part gets `404`, the renter gets `403`). `AWAITING_PICKUP` answers `409` with `The item has not been picked up yet`, and `CLOSED` answers `409` with `The rental is already closed`.
+2. While `ACTIVE`, the code is required (`400` with `The return code is required`, which counts no attempt). With the right code, Rental computes the late days and late fee at this moment and a conditional update makes the rental `SETTLEMENT_PENDING` with `returnedAt`, `lateDays` and `lateFee`.
+3. While `SETTLEMENT_PENDING`, the code is ignored and the stored return time and late fee are kept; they are never computed again.
+4. Rental calls `ReleaseCalendar` over gRPC with the owner's token, then `POST /internal/payments/settle` with `{ operationId: "rental:<rental id>:settle", bookingId, deposit, lateFee }`, where `lateFee` is the stored one.
+5. When both succeed, a conditional update makes the rental `CLOSED` with `closedAt` and clears `lastError`. When either fails, the rental stays `SETTLEMENT_PENDING` with `lastError` set to `<Step> was declined: <message>` or `<Step> is unavailable: <message>`, where the step is `Calendar release` or `Settlement`, and the answer is still `200` with that rental.
+
+The owner retries a failed settlement by calling return again, without a code. `ReleaseCalendar` changes nothing the second time and the settle operation ID is stable, so nothing is released or charged twice. When two returns race, only one update to `CLOSED` applies and both answer the closed rental; a return that starts after the rental is `CLOSED` answers `409`.
+
+Late fee: `lateDays` is `ceil((returnedAt - period.end) / 24 hours)` when the item comes back after the period ends, and 0 otherwise; there is no grace time. `lateFee` is `lateDays` times `lateFeePerDay`, at most 2147483647. Payment takes at most the deposit (see Settlement above).
+
+### Rental endpoints
+
+Every public route needs a token; the service serves them at `/rentals`. The gateway refuses the internal routes from outside. A body or ID that fails validation answers `400`.
+
+| Route | Caller | Answer |
+|---|---|---|
+| `GET /api/rental/rentals?role=` (`role` is `renter` or `owner`) | Anyone with a token | `200` with `{ rentals }`, the caller's rentals as renter or as owner, newest first, at most 100 |
+| `GET /api/rental/rentals/{id}` | The renter or the owner; anyone else gets `404` | `200` with the rental |
+| `POST /api/rental/rentals/{id}/pickup` with `{ code }` | The renter | `200` with the `ACTIVE` rental |
+| `POST /api/rental/rentals/{id}/return` with an optional `{ code }` | The owner | `200` with the `CLOSED` rental, or the `SETTLEMENT_PENDING` rental with `lastError` |
+| `POST /internal/rentals` with the body of the approval call above | Booking | `201` with `{ id, bookingId, status }`. The same `bookingId` returns the same rental; other people, period or terms for it answer `409`. An owner who is also the renter, or a period that does not end after it starts, answers `400`. |
+| `GET /internal/rentals/{id}` | Review | `200` with `{ id, bookingId, listingId, ownerId, renterId, status, closedAt }`, without codes; `404` when unknown |
+
+A rental in a response has `id`, `bookingId`, `listingId`, `ownerId`, `renterId`, `status`, `period` `{ start, end }`, `terms` `{ rentalFee, deposit, lateFeePerDay }`, `pickupCode`, `returnCode`, `pickedUpAt`, `returnedAt`, `closedAt`, `lateDays`, `lateFee`, `lastError`, `createdAt` and `updatedAt`. Every field is present, with an empty string or zero when it is not set.
+
+`apps/rental/e2e/rental-flow.mjs` runs the whole flow through the gateway of a running stack, from a new listing to the payout.
 
 ## Gateway rules
 
