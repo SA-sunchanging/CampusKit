@@ -16,6 +16,9 @@ import {
   type Period,
 } from './date-range.js';
 
+/** The most listing IDs one FilterAvailable call may carry (libs/contracts/proto/booking.proto). */
+export const MAX_FILTER_IDS = 200;
+
 /** The authoritative calendar of each listing: owner blackouts and booking reservations. */
 @Injectable()
 export class CalendarService {
@@ -100,6 +103,39 @@ export class CalendarService {
       throw rpcError(status.NOT_FOUND, 'Listing has no calendar');
     }
     return row.available;
+  }
+
+  /**
+   * Advisory, for search: the given listings whose calendar has no active block overlapping the
+   * period, in the given order. A listing without a calendar counts as unavailable.
+   */
+  async filterAvailable(
+    listingIds: string[],
+    range: DateRange | undefined,
+  ): Promise<string[]> {
+    if (listingIds.length > MAX_FILTER_IDS) {
+      throw rpcError(
+        status.INVALID_ARGUMENT,
+        `At most ${MAX_FILTER_IDS} listing_ids are allowed`,
+      );
+    }
+    listingIds.forEach((id) => requireUuid(id, 'listing_ids'));
+    const period: Period = parseInput(() => parsePeriod(range));
+    if (listingIds.length === 0) {
+      return [];
+    }
+    const rows = (await this.db.query(
+      `SELECT c.listing_id FROM calendars c
+       WHERE c.listing_id = ANY($1::uuid[])
+         AND NOT EXISTS (
+           SELECT 1 FROM calendar_blocks b
+           WHERE b.listing_id = c.listing_id AND b.released_at IS NULL
+             AND b.period && tstzrange($2, $3, '[)')
+         )`,
+      [listingIds, period.start, period.end],
+    )) as { listing_id: string }[];
+    const available = new Set(rows.map((row) => row.listing_id));
+    return listingIds.filter((id) => available.has(id.toLowerCase()));
   }
 
   /**

@@ -20,6 +20,11 @@ interface CheckAvailabilityRequest {
   period?: DateRange;
 }
 
+interface FilterAvailableRequest {
+  listingIds?: string[];
+  period?: DateRange;
+}
+
 /** Calendar handlers of libs/contracts/proto/booking.proto; the booking handlers live in bookings/. */
 @Controller()
 export class CalendarGrpcController {
@@ -51,6 +56,22 @@ export class CalendarGrpcController {
     return {
       available: await this.calendar.checkAvailability(
         request.listingId,
+        request.period,
+      ),
+    };
+  }
+
+  /**
+   * No caller token is required: Listing calls it for the public search, where guests have no
+   * token, and the answer only says which listings are free.
+   */
+  @GrpcMethod('BookingService', 'FilterAvailable')
+  async filterAvailable(
+    request: FilterAvailableRequest,
+  ): Promise<{ listingIds: string[] }> {
+    return {
+      listingIds: await this.calendar.filterAvailable(
+        request.listingIds ?? [],
         request.period,
       ),
     };

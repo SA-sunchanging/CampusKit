@@ -138,6 +138,69 @@ describe('CalendarService.checkAvailability', () => {
   });
 });
 
+describe('CalendarService.filterAvailable', () => {
+  const other = '33333333-3333-4333-8333-333333333333';
+  const third = '44444444-4444-4444-8444-444444444444';
+
+  it('returns the free listings in the given order with one query', async () => {
+    const { db, service } = setup();
+    db.query.mockResolvedValue([
+      { listing_id: listingId },
+      { listing_id: third },
+    ]);
+    await expect(
+      service.filterAvailable([third, other, listingId], blackout),
+    ).resolves.toEqual([third, listingId]);
+    expect(db.query).toHaveBeenCalledTimes(1);
+    const [sql, params] = db.query.mock.calls[0] as [string, unknown[]];
+    expect(sql).toContain('released_at IS NULL');
+    expect(sql).toContain("period && tstzrange($2, $3, '[)')");
+    expect(params).toEqual([
+      [third, other, listingId],
+      new Date(blackout.start),
+      new Date(blackout.end),
+    ]);
+  });
+
+  it('matches IDs sent in upper case', async () => {
+    const { db, service } = setup();
+    db.query.mockResolvedValue([{ listing_id: listingId }]);
+    const upper = listingId.toUpperCase();
+    await expect(service.filterAvailable([upper], blackout)).resolves.toEqual([
+      upper,
+    ]);
+  });
+
+  it('answers an empty list without a query', async () => {
+    const { db, service } = setup();
+    await expect(service.filterAvailable([], blackout)).resolves.toEqual([]);
+    expect(db.query).not.toHaveBeenCalled();
+  });
+
+  it('rejects more than 200 IDs, a bad ID, or a bad period', async () => {
+    const { db, service } = setup();
+    const many = Array.from({ length: 201 }, () => listingId);
+    expect(await codeOf(service.filterAvailable(many, blackout))).toBe(
+      status.INVALID_ARGUMENT,
+    );
+    expect(
+      await codeOf(service.filterAvailable([listingId, 'nope'], blackout)),
+    ).toBe(status.INVALID_ARGUMENT);
+    expect(await codeOf(service.filterAvailable([listingId], undefined))).toBe(
+      status.INVALID_ARGUMENT,
+    );
+    expect(
+      await codeOf(
+        service.filterAvailable([listingId], {
+          start: blackout.end,
+          end: blackout.start,
+        }),
+      ),
+    ).toBe(status.INVALID_ARGUMENT);
+    expect(db.query).not.toHaveBeenCalled();
+  });
+});
+
 describe('CalendarService.releaseCalendar', () => {
   const bookingId = '22222222-2222-4222-8222-222222222222';
   const renter = {
