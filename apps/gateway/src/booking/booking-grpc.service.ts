@@ -21,8 +21,12 @@ import type {
 } from './booking.response.js';
 import { toHttpError } from './grpc-error.js';
 
-/** Booking answers within this time, or the gateway answers 504. */
-export const BOOKING_TIMEOUT_MS = 10_000;
+/**
+ * Booking answers within this time, or the gateway answers 504. An approval makes up to four
+ * calls of at most 5 s each (authorize the fee and the deposit, create the rental, void the
+ * holds after a refusal), so this leaves room for those and the database.
+ */
+export const BOOKING_TIMEOUT_MS = 25_000;
 
 interface Period {
   start: string;
