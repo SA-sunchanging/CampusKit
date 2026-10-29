@@ -26,8 +26,13 @@ export const PICKUP_LOCATIONS = [
 ] as const;
 export type PickupLocation = (typeof PICKUP_LOCATIONS)[number];
 
-/** DRAFT until Booking has set up the calendar, then PUBLISHED and searchable. */
-export type ListingStatus = 'DRAFT' | 'PUBLISHED';
+/**
+ * DRAFT until Booking has set up the calendar. Then PUBLISHED and searchable, or
+ * PENDING_REVIEW until an administrator approves (PUBLISHED) or rejects it
+ * (REJECTED). The owner can take a PUBLISHED listing down (UNPUBLISHED).
+ */
+export type ListingStatus =
+  'DRAFT' | 'PENDING_REVIEW' | 'PUBLISHED' | 'REJECTED' | 'UNPUBLISHED';
 
 /** A half-open period [start, end); both ends are midnight in Bangkok. */
 export interface DateRange {
@@ -78,8 +83,40 @@ export interface Listing {
   thumbnail: string | null;
   /** Why the last publish attempt failed. Set only on a DRAFT. */
   publishError: string | null;
+  /** Why the listing was held for review; empty when it was not held. */
+  moderationFlags: string[];
+  /** The administrator's reason. Set only on a REJECTED listing. */
+  rejectionReason: string | null;
+  reviewedAt: string | null;
   createdAt: string;
+  /** When the listing was first published; kept after it is unpublished. */
   publishedAt: string | null;
+  unpublishedAt: string | null;
+}
+
+/** A listing in the administrator's review queue. */
+export interface ReviewItem {
+  id: string;
+  ownerId: string;
+  ownerName: string;
+  status: ListingStatus;
+  title: string;
+  category: Category;
+  description: string;
+  replacementValue: number;
+  dailyRate: number;
+  thumbnail: string | null;
+  moderationFlags: string[];
+  rejectionReason: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+}
+
+export interface ReviewQueue {
+  items: ReviewItem[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface CreateListingBody {
@@ -129,7 +166,10 @@ export function searchListings(params: SearchParams): Promise<ListingPage> {
   return api(`/listing/listings${searchQuery(params)}`);
 }
 
-/** A listing; the owner also gets their DRAFT. Others get 404 for a DRAFT. */
+/**
+ * A listing. Any status but PUBLISHED is shown only to its owner and
+ * administrators; others get 404.
+ */
 export function getListing(id: string): Promise<Listing> {
   return api(`/listing/listings/${encodeURIComponent(id)}`);
 }
@@ -146,5 +186,35 @@ export function createListing(body: CreateListingBody): Promise<Listing> {
 export function publishListing(id: string): Promise<Listing> {
   return api(`/listing/listings/${encodeURIComponent(id)}/publish`, {
     method: 'POST',
+  });
+}
+
+/** Builds "?status=...&page=..." for the review queue, leaving out page 1. */
+export function reviewQueueQuery(status: ListingStatus, page = 1): string {
+  const query = new URLSearchParams({ status });
+  if (page > 1) query.set('page', String(page));
+  return `?${query.toString()}`;
+}
+
+/** Listings in a status, oldest first (waiting for review by default). Admin only. */
+export function getReviewQueue(
+  status: ListingStatus = 'PENDING_REVIEW',
+  page = 1,
+): Promise<ReviewQueue> {
+  return api(`/listing/admin/listings${reviewQueueQuery(status, page)}`);
+}
+
+/** Publishes a listing waiting for review. Admin only; 409 for any other status. */
+export function approveListing(id: string): Promise<ReviewItem> {
+  return api(`/listing/admin/listings/${encodeURIComponent(id)}/approve`, {
+    method: 'POST',
+  });
+}
+
+/** Rejects a listing waiting for review; the owner sees the reason. Admin only. */
+export function rejectListing(id: string, reason: string): Promise<ReviewItem> {
+  return api(`/listing/admin/listings/${encodeURIComponent(id)}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
   });
 }

@@ -35,10 +35,16 @@ export const PICKUP_LABELS: Record<PickupLocation, string> = {
 
 export const STATUS_LABELS: Record<ListingStatus, string> = {
   DRAFT: 'Draft',
+  PENDING_REVIEW: 'Waiting for review',
   PUBLISHED: 'Published',
+  REJECTED: 'Rejected',
+  UNPUBLISHED: 'Unpublished',
 };
 
 export const STATUS_TONE: Record<ListingStatus, Tone> = {
   DRAFT: 'warning',
+  PENDING_REVIEW: 'warning',
   PUBLISHED: 'success',
+  REJECTED: 'danger',
+  UNPUBLISHED: 'neutral',
 };
