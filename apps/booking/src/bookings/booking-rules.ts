@@ -5,6 +5,7 @@ import {
   type Period,
 } from '../calendar/date-range.js';
 import { rpcError } from '../errors.js';
+import { BOOKING_STATUSES, type BookingStatus } from './booking.entity.js';
 
 /** A renter may hold at most this many PENDING or AUTHORIZING requests at once. */
 export const MAX_OPEN_REQUESTS = 5;
@@ -53,4 +54,31 @@ export function checkOpenRequests(open: number): void {
       `You can have at most ${MAX_OPEN_REQUESTS} open booking requests`,
     );
   }
+}
+
+export type ListRole = 'renter' | 'owner';
+
+/** The ListBookings role: "renter" or "owner". Throws INVALID_ARGUMENT otherwise. */
+export function parseRole(value: string | undefined): ListRole {
+  if (value === 'renter' || value === 'owner') {
+    return value;
+  }
+  throw rpcError(status.INVALID_ARGUMENT, 'role must be "renter" or "owner"');
+}
+
+/** The optional ListBookings status filter; empty means every status. */
+export function parseStatusFilter(
+  value: string | undefined,
+): BookingStatus | null {
+  if (!value) {
+    return null;
+  }
+  const match = BOOKING_STATUSES.find((known) => known === value);
+  if (!match) {
+    throw rpcError(
+      status.INVALID_ARGUMENT,
+      `status must be one of ${BOOKING_STATUSES.join(', ')}`,
+    );
+  }
+  return match;
 }

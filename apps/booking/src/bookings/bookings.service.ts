@@ -22,9 +22,19 @@ import {
   checkOpenRequests,
   checkRequestPeriod,
   expiresAt,
+  parseRole,
+  parseStatusFilter,
 } from './booking-rules.js';
 import { BOOKING_COLUMNS, type BookingRow } from './booking.row.js';
-import { expireStale, onListingOrByRenter } from './expiry.js';
+import {
+  bookingsOf,
+  expireStale,
+  oneBookingOf,
+  onListingOrByRenter,
+} from './expiry.js';
+
+/** ListBookings returns at most this many bookings. */
+export const LIST_LIMIT = 100;
 
 interface Reservation {
   renterId: string;
@@ -75,6 +85,52 @@ export class BookingsService {
       }
       throw err;
     }
+  }
+
+  /** One booking of the caller, as renter or owner. Anyone else gets NOT_FOUND. */
+  async get(
+    caller: AuthUser,
+    id: string,
+    now = new Date(),
+  ): Promise<BookingRow> {
+    requireUuid(id, 'id');
+    return this.db.transaction(async (tx) => {
+      await expireStale(tx, oneBookingOf(id, caller.sub), now);
+      const [booking] = (await tx.query(
+        `SELECT ${BOOKING_COLUMNS} FROM bookings
+         WHERE id = $1 AND (renter_id = $2 OR owner_id = $2)`,
+        [id, caller.sub],
+      )) as BookingRow[];
+      if (!booking) {
+        throw rpcError(status.NOT_FOUND, 'Booking not found');
+      }
+      return booking;
+    });
+  }
+
+  /**
+   * The caller's bookings as renter ("renter") or on their listings ("owner"), newest first,
+   * at most LIST_LIMIT, optionally of one status.
+   */
+  async list(
+    caller: AuthUser,
+    role: string | undefined,
+    statusFilter: string | undefined,
+    now = new Date(),
+  ): Promise<BookingRow[]> {
+    const listRole = parseRole(role);
+    const only = parseStatusFilter(statusFilter);
+    const column = listRole === 'renter' ? 'renter_id' : 'owner_id';
+    return this.db.transaction(async (tx) => {
+      await expireStale(tx, bookingsOf(caller.sub, listRole), now);
+      return (await tx.query(
+        `SELECT ${BOOKING_COLUMNS} FROM bookings
+         WHERE ${column} = $1 AND ($2::text IS NULL OR status = $2)
+         ORDER BY created_at DESC, id DESC
+         LIMIT $3`,
+        [caller.sub, only, LIST_LIMIT],
+      )) as BookingRow[];
+    });
   }
 
   private async reserve(

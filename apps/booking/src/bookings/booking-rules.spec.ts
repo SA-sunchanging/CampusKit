@@ -4,6 +4,8 @@ import {
   checkOpenRequests,
   checkRequestPeriod,
   expiresAt,
+  parseRole,
+  parseStatusFilter,
 } from './booking-rules.js';
 
 const now = new Date('2026-10-29T05:00:00Z');
@@ -97,5 +99,31 @@ describe('checkOpenRequests', () => {
 
   it('refuses a sixth open request', () => {
     expect(codeOf(() => checkOpenRequests(5))).toBe(status.FAILED_PRECONDITION);
+  });
+});
+
+describe('parseRole', () => {
+  it('accepts renter and owner', () => {
+    expect(parseRole('renter')).toBe('renter');
+    expect(parseRole('owner')).toBe('owner');
+  });
+
+  it('rejects anything else, including an empty role', () => {
+    expect(codeOf(() => parseRole(''))).toBe(status.INVALID_ARGUMENT);
+    expect(codeOf(() => parseRole('admin'))).toBe(status.INVALID_ARGUMENT);
+  });
+});
+
+describe('parseStatusFilter', () => {
+  it('treats an empty status as no filter', () => {
+    expect(parseStatusFilter('')).toBeNull();
+    expect(parseStatusFilter(undefined)).toBeNull();
+  });
+
+  it('accepts a known status and rejects an unknown one', () => {
+    expect(parseStatusFilter('CONFIRMED')).toBe('CONFIRMED');
+    expect(codeOf(() => parseStatusFilter('pending'))).toBe(
+      status.INVALID_ARGUMENT,
+    );
   });
 });

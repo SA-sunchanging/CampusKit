@@ -1,10 +1,9 @@
-import { Metadata, status } from '@grpc/grpc-js';
+import { Metadata } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { GrpcMethod } from '@nestjs/microservices';
 import type { DateRange } from '../calendar/date-range.js';
 import { callContextFrom } from '../clients/call-context.js';
-import { rpcError } from '../errors.js';
 import { callerFrom } from '../grpc-auth.js';
 import { type BookingReply, toBookingReply } from './booking.reply.js';
 import { BookingsService } from './bookings.service.js';
@@ -12,6 +11,15 @@ import { BookingsService } from './bookings.service.js';
 interface RequestBookingRequest {
   listingId?: string;
   period?: DateRange;
+}
+
+interface GetBookingRequest {
+  id?: string;
+}
+
+interface ListBookingsRequest {
+  role?: string;
+  status?: string;
 }
 
 /**
@@ -42,7 +50,21 @@ export class BookingsGrpcController {
   }
 
   @GrpcMethod('BookingService', 'GetBooking')
-  getBooking(): never {
-    throw rpcError(status.UNIMPLEMENTED, 'GetBooking is not implemented yet');
+  async getBooking(
+    request: GetBookingRequest,
+    metadata: Metadata,
+  ): Promise<BookingReply> {
+    const caller = callerFrom(metadata, this.jwt);
+    return toBookingReply(await this.bookings.get(caller, request.id ?? ''));
+  }
+
+  @GrpcMethod('BookingService', 'ListBookings')
+  async listBookings(
+    request: ListBookingsRequest,
+    metadata: Metadata,
+  ): Promise<{ bookings: BookingReply[] }> {
+    const caller = callerFrom(metadata, this.jwt);
+    const rows = await this.bookings.list(caller, request.role, request.status);
+    return { bookings: rows.map(toBookingReply) };
   }
 }
