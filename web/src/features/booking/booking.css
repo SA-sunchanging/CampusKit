@@ -35,3 +35,56 @@
   margin: 0 0 8px;
   font-size: var(--text-md);
 }
+
+/* Bookings page */
+.booking-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.booking-tab {
+  min-height: var(--tap);
+  padding: 8px 14px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.booking-tab:hover {
+  background: var(--color-tint-hover);
+}
+
+.booking-tab[aria-selected='true'] {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.booking-list {
+  display: grid;
+  gap: 16px;
+}
+
+.booking-list .booking-card {
+  margin: 0;
+}
+
+.booking-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.booking-card-head h3 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
