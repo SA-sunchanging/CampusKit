@@ -1,15 +1,35 @@
-import { Controller, Get, NotImplementedException } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { type AuthUser, CurrentUser, JwtAuthGuard } from '@app/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { PaymentStatusResponse } from './payment-status.response.js';
+import { PaymentStatusService } from './payment-status.service.js';
 
 /**
  * REST endpoints of the payment service, reached through the gateway at /api/payment/payments.
- * Operations owned by this service (see docs/architecture/services.md): payment method, fee and deposit authorization, capture, void and refund, late-fee settlement, payout.
+ * Operations owned by this service (see docs/architecture/services.md): fee and deposit
+ * authorization, capture, void, late-fee settlement and payout; the money-moving operations
+ * are internal endpoints for Booking and Rental.
  */
 @ApiTags('payments')
 @Controller('payments')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class PaymentsController {
-  @Get()
-  list(): never {
-    throw new NotImplementedException();
+  constructor(private readonly status: PaymentStatusService) {}
+
+  /** The holds and payout of a booking, for its renter or owner. */
+  @Get('bookings/:bookingId')
+  @ApiOkResponse({ type: PaymentStatusResponse })
+  forBooking(
+    @CurrentUser() user: AuthUser,
+    @Param('bookingId', ParseUUIDPipe) bookingId: string,
+  ): Promise<PaymentStatusResponse> {
+    return this.status.forBooking(user, bookingId);
   }
 }
