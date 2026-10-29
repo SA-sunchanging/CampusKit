@@ -11,6 +11,10 @@ interface SetupCalendarRequest {
   blackouts?: DateRange[];
 }
 
+interface ReleaseCalendarRequest {
+  bookingId?: string;
+}
+
 interface CheckAvailabilityRequest {
   listingId: string;
   period?: DateRange;
@@ -50,5 +54,15 @@ export class CalendarGrpcController {
         request.period,
       ),
     };
+  }
+
+  @GrpcMethod('BookingService', 'ReleaseCalendar')
+  async releaseCalendar(
+    request: ReleaseCalendarRequest,
+    metadata: Metadata,
+  ): Promise<{ ok: boolean }> {
+    const caller = callerFrom(metadata, this.jwt);
+    await this.calendar.releaseCalendar(caller, request.bookingId ?? '');
+    return { ok: true };
   }
 }

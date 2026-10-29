@@ -16,7 +16,7 @@ import {
   type Period,
 } from './date-range.js';
 
-/** The authoritative calendar of each listing: owner blackouts and, later, reservations. */
+/** The authoritative calendar of each listing: owner blackouts and booking reservations. */
 @Injectable()
 export class CalendarService {
   constructor(@InjectDataSource() private readonly db: DataSource) {}
@@ -100,5 +100,36 @@ export class CalendarService {
       throw rpcError(status.NOT_FOUND, 'Listing has no calendar');
     }
     return row.available;
+  }
+
+  /**
+   * Frees the dates of a CONFIRMED booking after the item is returned; Rental calls it as a
+   * participant. Repeating it changes nothing. Anyone who does not take part gets NOT_FOUND.
+   */
+  async releaseCalendar(caller: AuthUser, bookingId: string): Promise<void> {
+    requireUuid(bookingId, 'booking_id');
+    await this.db.transaction(async (tx) => {
+      const [booking] = (await tx.query(
+        `SELECT renter_id, owner_id, status FROM bookings WHERE id = $1 FOR UPDATE`,
+        [bookingId],
+      )) as { renter_id: string; owner_id: string; status: string }[];
+      if (
+        !booking ||
+        (booking.renter_id !== caller.sub && booking.owner_id !== caller.sub)
+      ) {
+        throw rpcError(status.NOT_FOUND, 'Booking not found');
+      }
+      if (booking.status !== 'CONFIRMED') {
+        throw rpcError(
+          status.FAILED_PRECONDITION,
+          'Only a confirmed booking can release its dates',
+        );
+      }
+      await tx.query(
+        `UPDATE calendar_blocks SET released_at = now()
+         WHERE booking_id = $1 AND released_at IS NULL`,
+        [bookingId],
+      );
+    });
   }
 }

@@ -137,3 +137,79 @@ describe('CalendarService.checkAvailability', () => {
     );
   });
 });
+
+describe('CalendarService.releaseCalendar', () => {
+  const bookingId = '22222222-2222-4222-8222-222222222222';
+  const renter = {
+    sub: '00000000-0000-4000-8000-000000000003',
+    role: 'student' as const,
+  };
+
+  function releaseSetup(bookingStatus: string | null) {
+    const { tx, db, service } = setup();
+    tx.query.mockImplementation((sql: string) =>
+      Promise.resolve(
+        sql.includes('FROM bookings') && bookingStatus
+          ? [
+              {
+                renter_id: renter.sub,
+                owner_id: owner.sub,
+                status: bookingStatus,
+              },
+            ]
+          : [],
+      ),
+    );
+    const released = () =>
+      tx.query.mock.calls.filter(([sql]) =>
+        (sql as string).includes('UPDATE calendar_blocks'),
+      );
+    return { tx, db, service, released };
+  }
+
+  it('releases the reservation of a confirmed booking for either participant', async () => {
+    for (const caller of [renter, owner]) {
+      const { service, released } = releaseSetup('CONFIRMED');
+      await service.releaseCalendar(caller, bookingId);
+      expect(released()).toHaveLength(1);
+      expect(released()[0][0]).toContain('released_at IS NULL');
+      expect(released()[0][1]).toEqual([bookingId]);
+    }
+  });
+
+  it('can be repeated, touching only blocks that are still active', async () => {
+    const { service, released } = releaseSetup('CONFIRMED');
+    await service.releaseCalendar(renter, bookingId);
+    await service.releaseCalendar(renter, bookingId);
+    expect(released()).toHaveLength(2);
+  });
+
+  it('refuses a booking that is not confirmed', async () => {
+    const { service, released } = releaseSetup('PENDING');
+    expect(await codeOf(service.releaseCalendar(renter, bookingId))).toBe(
+      status.FAILED_PRECONDITION,
+    );
+    expect(released()).toHaveLength(0);
+  });
+
+  it('answers NOT_FOUND to anyone else and for an unknown booking', async () => {
+    expect(
+      await codeOf(
+        releaseSetup('CONFIRMED').service.releaseCalendar(stranger, bookingId),
+      ),
+    ).toBe(status.NOT_FOUND);
+    expect(
+      await codeOf(
+        releaseSetup(null).service.releaseCalendar(renter, bookingId),
+      ),
+    ).toBe(status.NOT_FOUND);
+  });
+
+  it('rejects an ID that is not a UUID', async () => {
+    const { db, service } = releaseSetup('CONFIRMED');
+    expect(await codeOf(service.releaseCalendar(renter, ''))).toBe(
+      status.INVALID_ARGUMENT,
+    );
+    expect(db.transaction).not.toHaveBeenCalled();
+  });
+});
