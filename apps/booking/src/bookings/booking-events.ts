@@ -1,6 +1,6 @@
 import type { BookingEventData, BookingEventType } from '@app/contracts';
+import { writeOutbox } from '@app/messaging';
 import type { EntityManager } from 'typeorm';
-import { writeOutbox } from '../outbox/outbox.js';
 import type { BookingRow } from './booking.row.js';
 
 /** The data of a Booking event, taken from the row after the change. */
@@ -18,6 +18,9 @@ export function bookingEventData(row: BookingRow): BookingEventData {
   };
 }
 
+/** The producer name in every Booking event envelope. */
+export const PRODUCER = 'booking';
+
 /** Writes a Booking event to the outbox inside the transaction that changed the booking. */
 export async function announce(
   tx: EntityManager,
@@ -27,6 +30,7 @@ export async function announce(
   correlationId: string,
 ): Promise<void> {
   await writeOutbox(tx, {
+    producer: PRODUCER,
     type,
     recipients,
     correlationId,
