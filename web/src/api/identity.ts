@@ -29,6 +29,26 @@ export interface EmailCode {
   demoCode?: string;
 }
 
+/** A student in the administrator's review queue. */
+export interface StudentReviewItem {
+  id: string;
+  email: string;
+  displayName: string;
+  studentId: string | null;
+  studentStatus: StudentStatus;
+  submittedAt: string | null;
+  rejectionReason: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+}
+
+export interface StudentQueue {
+  items: StudentReviewItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 export interface Credentials {
   email: string;
   password: string;
@@ -88,5 +108,38 @@ export function submitStudentId(studentId: string): Promise<Profile> {
   return api('/identity/accounts/me/student-status', {
     method: 'POST',
     body: JSON.stringify({ studentId }),
+  });
+}
+
+/** Builds "?status=...&page=..." for the student queue, leaving out page 1. */
+export function studentQueueQuery(status: StudentStatus, page = 1): string {
+  const query = new URLSearchParams({ status });
+  if (page > 1) query.set('page', String(page));
+  return `?${query.toString()}`;
+}
+
+/** Students in a status, oldest submission first (waiting for review by default). Admin only. */
+export function getStudentQueue(
+  status: StudentStatus = 'PENDING',
+  page = 1,
+): Promise<StudentQueue> {
+  return api(`/identity/admin/students${studentQueueQuery(status, page)}`);
+}
+
+/** Verifies a PENDING student. Admin only; 409 for any other status. */
+export function approveStudent(id: string): Promise<StudentReviewItem> {
+  return api(`/identity/admin/students/${encodeURIComponent(id)}/approve`, {
+    method: 'POST',
+  });
+}
+
+/** Rejects a PENDING student; the student sees the reason. Admin only. */
+export function rejectStudent(
+  id: string,
+  reason: string,
+): Promise<StudentReviewItem> {
+  return api(`/identity/admin/students/${encodeURIComponent(id)}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
   });
 }

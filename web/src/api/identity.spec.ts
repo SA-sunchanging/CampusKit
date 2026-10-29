@@ -1,11 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryStorage } from '../test/memory-storage.ts';
 import {
+  approveStudent,
   confirmEmail,
+  getStudentQueue,
   registerAndLogin,
+  rejectStudent,
   requestEmailCode,
+  studentQueueQuery,
   submitStudentId,
 } from './identity.ts';
+
+const studentId = '11111111-1111-4111-8111-111111111111';
 
 const registration = {
   email: 'somchai@student.chula.ac.th',
@@ -149,6 +155,62 @@ describe('verification calls', () => {
       url: '/api/identity/accounts/me/student-status',
       method: 'POST',
       body: { studentId: '6630012321' },
+    });
+  });
+});
+
+describe('studentQueueQuery', () => {
+  it('always sends the status and leaves out page 1', () => {
+    expect(studentQueueQuery('PENDING')).toBe('?status=PENDING');
+  });
+
+  it('keeps pages after the first', () => {
+    expect(studentQueueQuery('REJECTED', 2)).toBe('?status=REJECTED&page=2');
+  });
+});
+
+describe('student review calls', () => {
+  beforeEach(() => {
+    vi.stubGlobal('localStorage', new MemoryStorage());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('asks for the students waiting for review by default', async () => {
+    const fetchMock = mockFetch(
+      Response.json({ items: [], total: 0, page: 1, pageSize: 20 }),
+    );
+    await getStudentQueue();
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      '/api/identity/admin/students?status=PENDING',
+    );
+  });
+
+  it('approves with an empty POST', async () => {
+    const fetchMock = mockFetch(
+      Response.json({ id: studentId, studentStatus: 'VERIFIED' }),
+    );
+    await expect(approveStudent(studentId)).resolves.toMatchObject({
+      studentStatus: 'VERIFIED',
+    });
+    expect(requestOf(fetchMock, 0)).toEqual({
+      url: `/api/identity/admin/students/${studentId}/approve`,
+      method: 'POST',
+      body: undefined,
+    });
+  });
+
+  it('rejects with the reason', async () => {
+    const fetchMock = mockFetch(
+      Response.json({ id: studentId, studentStatus: 'REJECTED' }),
+    );
+    await rejectStudent(studentId, 'Not enrolled this term');
+    expect(requestOf(fetchMock, 0)).toEqual({
+      url: `/api/identity/admin/students/${studentId}/reject`,
+      method: 'POST',
+      body: { reason: 'Not enrolled this term' },
     });
   });
 });

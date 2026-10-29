@@ -1,11 +1,13 @@
 import { type ComponentType, useState } from 'react';
 import { PageHeader } from '../../ui/index.ts';
 import ListingReview from './ListingReview.tsx';
+import StudentReview from './StudentReview.tsx';
 import './admin.css';
 
 // One entry per admin tool; add a tab by adding a line here.
 const TABS: { id: string; label: string; Panel: ComponentType }[] = [
   { id: 'listings', label: 'Listings', Panel: ListingReview },
+  { id: 'students', label: 'Students', Panel: StudentReview },
 ];
 
 // Administrator tools (role B), one tab each.
