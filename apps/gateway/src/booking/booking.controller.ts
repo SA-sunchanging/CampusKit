@@ -1,33 +1,21 @@
-import { BOOKING_CLIENT } from '@app/contracts';
-import { Controller, Get, Inject, OnModuleInit, Param } from '@nestjs/common';
-import type { ClientGrpc } from '@nestjs/microservices';
-import { ApiTags } from '@nestjs/swagger';
-import { firstValueFrom, type Observable } from 'rxjs';
-import { toHttpError } from './grpc-error.js';
-
-/** Methods of BookingService in libs/contracts/proto/booking.proto that the gateway calls. */
-interface BookingService {
-  getBooking(request: { id: string }): Observable<unknown>;
-}
+import type { Metadata } from '@grpc/grpc-js';
+import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { BookingGrpcService } from './booking-grpc.service.js';
+import { CallMetadata } from './grpc-metadata.js';
 
 /** Translates client REST requests under /api/booking into Booking gRPC calls. Owner: Booking. */
 @ApiTags('booking')
+@ApiBearerAuth()
 @Controller('api/booking')
-export class BookingController implements OnModuleInit {
-  private booking: BookingService;
-
-  constructor(@Inject(BOOKING_CLIENT) private readonly client: ClientGrpc) {}
-
-  onModuleInit(): void {
-    this.booking = this.client.getService<BookingService>('BookingService');
-  }
+export class BookingController {
+  constructor(private readonly booking: BookingGrpcService) {}
 
   @Get('bookings/:id')
-  async getBooking(@Param('id') id: string): Promise<unknown> {
-    try {
-      return await firstValueFrom(this.booking.getBooking({ id }));
-    } catch (error) {
-      throw toHttpError(error);
-    }
+  getBooking(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CallMetadata() metadata: Metadata,
+  ): Promise<unknown> {
+    return this.booking.getBooking(id, metadata);
   }
 }
