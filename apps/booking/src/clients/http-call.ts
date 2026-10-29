@@ -67,9 +67,13 @@ export function errorMessage(body: unknown): string | undefined {
  * The outcome of a call whose failure the caller records instead of throwing. "declined" is a
  * definitive refusal (4xx); "unavailable" means the call may succeed when retried.
  */
-export type ServiceResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; reason: 'declined' | 'unavailable'; message: string };
+export type ServiceResult<T> = { ok: true; value: T } | ServiceFailure;
+
+export interface ServiceFailure {
+  ok: false;
+  reason: 'declined' | 'unavailable';
+  message: string;
+}
 
 export interface ResultCall<T> {
   /** Service name for messages, for example "payment". */

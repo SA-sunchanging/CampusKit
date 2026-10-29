@@ -2,6 +2,7 @@ import type { EntityManager } from 'typeorm';
 import {
   bookingsOf,
   expireStale,
+  isStale,
   oneBooking,
   oneBookingOf,
   onListingOrByRenter,
@@ -45,5 +46,23 @@ describe('expireStale', () => {
     });
     expect(bookingsOf(userId, 'renter').where).toBe('renter_id = $2');
     expect(bookingsOf(userId, 'owner').where).toBe('owner_id = $2');
+  });
+});
+
+describe('isStale', () => {
+  it('is true for a PENDING request at or after its expiry', () => {
+    expect(isStale({ status: 'PENDING', expires_at: now }, now)).toBe(true);
+    expect(
+      isStale(
+        { status: 'PENDING', expires_at: new Date('2026-10-29T06:00:00Z') },
+        now,
+      ),
+    ).toBe(false);
+  });
+
+  it('is false for AUTHORIZING', () => {
+    expect(isStale({ status: 'AUTHORIZING', expires_at: now }, now)).toBe(
+      false,
+    );
   });
 });

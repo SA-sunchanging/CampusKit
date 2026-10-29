@@ -5,6 +5,7 @@ import { GrpcMethod } from '@nestjs/microservices';
 import type { DateRange } from '../calendar/date-range.js';
 import { callContextFrom } from '../clients/call-context.js';
 import { callerFrom } from '../grpc-auth.js';
+import { BookingDecisionsService } from './booking-decisions.service.js';
 import { type BookingReply, toBookingReply } from './booking.reply.js';
 import { BookingsService } from './bookings.service.js';
 
@@ -13,7 +14,7 @@ interface RequestBookingRequest {
   period?: DateRange;
 }
 
-interface GetBookingRequest {
+interface BookingIdRequest {
   id?: string;
 }
 
@@ -31,6 +32,7 @@ interface ListBookingsRequest {
 export class BookingsGrpcController {
   constructor(
     private readonly bookings: BookingsService,
+    private readonly decisions: BookingDecisionsService,
     private readonly jwt: JwtService,
   ) {}
 
@@ -49,9 +51,23 @@ export class BookingsGrpcController {
     return toBookingReply(booking);
   }
 
+  @GrpcMethod('BookingService', 'ApproveBooking')
+  async approveBooking(
+    request: BookingIdRequest,
+    metadata: Metadata,
+  ): Promise<BookingReply> {
+    const caller = callerFrom(metadata, this.jwt);
+    const booking = await this.decisions.approve(
+      caller,
+      request.id ?? '',
+      callContextFrom(metadata),
+    );
+    return toBookingReply(booking);
+  }
+
   @GrpcMethod('BookingService', 'GetBooking')
   async getBooking(
-    request: GetBookingRequest,
+    request: BookingIdRequest,
     metadata: Metadata,
   ): Promise<BookingReply> {
     const caller = callerFrom(metadata, this.jwt);

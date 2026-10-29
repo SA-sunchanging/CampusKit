@@ -1,4 +1,5 @@
 import type { EntityManager } from 'typeorm';
+import type { BookingRow } from './booking.row.js';
 
 /** Which bookings a lazy expiry looks at; the condition uses $2 onwards. */
 export interface ExpiryScope {
@@ -65,4 +66,12 @@ export async function expireStale(
     [now, ...scope.params],
   )) as { id: string }[];
   return rows.map((row) => row.id);
+}
+
+/** True for a PENDING booking whose answer window has passed; expireStale would expire it. */
+export function isStale(
+  booking: Pick<BookingRow, 'status' | 'expires_at'>,
+  now: Date,
+): boolean {
+  return booking.status === 'PENDING' && booking.expires_at <= now;
 }
