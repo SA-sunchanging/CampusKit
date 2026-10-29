@@ -40,6 +40,12 @@ function lateFeeNote(data: Data): string {
     : '';
 }
 
+/** " Reason: ...", or nothing when the event carries no reason. */
+function reasonNote(data: Data): string {
+  const reason = text(data, 'reason').trim();
+  return reason ? ` Reason: ${reason}` : '';
+}
+
 function listingLink(data: Data): string | undefined {
   const id = text(data, 'listingId');
   return id ? `/listings/${encodeURIComponent(id)}` : undefined;
@@ -76,6 +82,18 @@ const DESCRIBE = new Map<string, Describe>(
         : `Your booking${forPeriod(data)} could not be completed, so it is not confirmed. You can request the item again.`,
       link: '/bookings',
     }),
+    'booking.expired': (data, asOwner) => ({
+      title: 'Booking request expired',
+      body: asOwner
+        ? `A request${forPeriod(data)} expired before you answered it, so the dates are free again.`
+        : `The owner did not answer your request${forPeriod(data)} in time. You can request the item again.`,
+      link: '/bookings',
+    }),
+    'booking.cancelled': (data) => ({
+      title: 'Booking cancelled',
+      body: `The booking${forPeriod(data)} was cancelled before pickup, so the dates are free again.${reasonNote(data)}`,
+      link: '/bookings',
+    }),
     'listing.published': (data) => {
       const title = text(data, 'title');
       return {
@@ -86,11 +104,35 @@ const DESCRIBE = new Map<string, Describe>(
         link: listingLink(data),
       };
     },
+    'listing.rejected': (data) => {
+      const title = text(data, 'title');
+      return {
+        title: 'Listing not approved',
+        body:
+          (title
+            ? `An administrator did not approve "${title}", so it is not published.`
+            : 'An administrator did not approve your listing, so it is not published.') +
+          reasonNote(data),
+        link: listingLink(data),
+      };
+    },
     'rental.started': (data, asOwner) => ({
       title: 'Rental started',
       body: asOwner
         ? `The renter picked up your item${forPeriod(data)}.`
         : `You picked up the item${forPeriod(data)}. Return it on time to avoid a late fee.`,
+      link: rentalLink(data),
+    }),
+    'rental.reminded': (data) => ({
+      title: 'Return due soon',
+      body: `Your rental${forPeriod(data)} ends within a day. Return the item on time to avoid a late fee.`,
+      link: rentalLink(data),
+    }),
+    'rental.overdue': (data, asOwner) => ({
+      title: 'Rental overdue',
+      body: asOwner
+        ? `The rental${forPeriod(data)} has ended and your item is not back yet. A late fee applies for each started day.`
+        : `The rental${forPeriod(data)} has ended. Return the item now; a late fee applies for each started day.`,
       link: rentalLink(data),
     }),
     'rental.closed': (data, asOwner) => ({
@@ -101,6 +143,11 @@ const DESCRIBE = new Map<string, Describe>(
           : `You returned the item and the rental${forPeriod(data)} is settled.`) +
         lateFeeNote(data),
       link: rentalLink(data),
+    }),
+    'identity.verified': () => ({
+      title: 'Student status verified',
+      body: 'An administrator verified your student status. You can now book and list items.',
+      link: '/account',
     }),
   } satisfies Record<string, Describe>),
 );

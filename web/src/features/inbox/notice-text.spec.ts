@@ -68,6 +68,27 @@ describe('describeNotice for booking events', () => {
     expect(owner.link).toBe('/bookings');
     expect(renter.link).toBe('/bookings');
   });
+
+  it('words an expired request for each side', () => {
+    const owner = notice('booking.expired', booking, OWNER);
+    const renter = notice('booking.expired', booking, RENTER);
+    expect(owner.title).toBe('Booking request expired');
+    expect(owner.body).toMatch(/^A request for .* expired before you answered/);
+    expect(renter.body).toContain('request the item again');
+    expect(renter.link).toBe('/bookings');
+  });
+
+  it('words a cancelled booking with and without a reason', () => {
+    const plain = notice('booking.cancelled', booking, OWNER);
+    expect(plain.title).toBe('Booking cancelled');
+    expect(plain.body).toBe(
+      `The booking for ${RANGE} was cancelled before pickup, so the dates are free again.`,
+    );
+    const withReason = { ...booking, reason: 'Plans changed' };
+    expect(notice('booking.cancelled', withReason, RENTER).body).toMatch(
+      / Reason: Plans changed$/,
+    );
+  });
 });
 
 describe('describeNotice for listing events', () => {
@@ -91,6 +112,37 @@ describe('describeNotice for listing events', () => {
     const text = notice('listing.published', {}, OWNER);
     expect(text.body).toBe('Your listing is now open for booking.');
     expect(text.link).toBeUndefined();
+  });
+
+  it('names a rejected listing and gives the reason', () => {
+    const text = notice(
+      'listing.rejected',
+      {
+        listingId: 'l-1',
+        ownerId: OWNER,
+        title: 'Camera',
+        status: 'REJECTED',
+        reason: 'Photos missing',
+      },
+      OWNER,
+    );
+    expect(text.title).toBe('Listing not approved');
+    expect(text.body).toBe(
+      'An administrator did not approve "Camera", so it is not published. Reason: Photos missing',
+    );
+    expect(text.link).toBe('/listings/l-1');
+  });
+});
+
+describe('describeNotice for identity events', () => {
+  it('tells the student their status is verified', () => {
+    const text = notice(
+      'identity.verified',
+      { userId: RENTER, studentStatus: 'VERIFIED' },
+      RENTER,
+    );
+    expect(text.title).toBe('Student status verified');
+    expect(text.link).toBe('/account');
   });
 });
 
@@ -126,6 +178,21 @@ describe('describeNotice for rental events', () => {
     expect(notice('rental.closed', late, RENTER).body).toContain(
       formatBaht(5000),
     );
+  });
+
+  it('reminds the renter before the period ends', () => {
+    const text = notice('rental.reminded', rental, RENTER);
+    expect(text.title).toBe('Return due soon');
+    expect(text.body).toContain(RANGE);
+    expect(text.link).toBe('/rentals/r-1');
+  });
+
+  it('words an overdue rental for each side', () => {
+    const owner = notice('rental.overdue', rental, OWNER);
+    const renter = notice('rental.overdue', rental, RENTER);
+    expect(owner.title).toBe('Rental overdue');
+    expect(owner.body).toContain('your item is not back yet');
+    expect(renter.body).toContain('Return the item now');
   });
 
   it('falls back to the rentals page without a rental ID', () => {
