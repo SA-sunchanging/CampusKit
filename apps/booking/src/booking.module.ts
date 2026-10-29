@@ -4,6 +4,7 @@ import { BookingsModule } from './bookings/bookings.module.js';
 import { CalendarModule } from './calendar/calendar.module.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { migrations } from './migrations/index.js';
+import { OutboxModule } from './outbox/outbox.module.js';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { migrations } from './migrations/index.js';
     HealthModule.register('booking'),
     CalendarModule,
     BookingsModule,
+    OutboxModule,
   ],
 })
 export class BookingModule {}
