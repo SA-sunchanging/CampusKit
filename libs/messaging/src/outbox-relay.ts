@@ -1,5 +1,6 @@
+import { correlationIdFrom, runWithCorrelationId } from '@app/common';
 import type { EventEnvelope } from '@app/contracts';
-import { EventPublisher } from './event-publisher.js';
+import { BrokerUnavailableError, EventPublisher } from './event-publisher.js';
 import {
   Injectable,
   Logger,
@@ -19,7 +20,8 @@ interface OutboxRow {
 
 /**
  * Publishes unsent outbox_events to RabbitMQ, oldest first, and marks each one sent after the
- * broker confirms it. Delivery is at least once: Notification deduplicates on eventId.
+ * broker confirms it, each under the event's correlation ID. Delivery is at least once:
+ * Notification deduplicates on eventId.
  * Starts when the application has bootstrapped and stops when it shuts down.
  */
 @Injectable()
@@ -82,7 +84,9 @@ export class OutboxRelay implements OnApplicationBootstrap, OnModuleDestroy {
       )) as OutboxRow[];
       let sent = 0;
       for (const row of rows) {
-        if (!(await this.publishOne(tx, row))) {
+        // Log lines about an event carry the correlation ID of the request that caused it.
+        const id = correlationIdFrom(row.envelope.correlationId);
+        if (!(await runWithCorrelationId(id, () => this.publishOne(tx, row)))) {
           break;
         }
         sent++;
@@ -98,7 +102,10 @@ export class OutboxRelay implements OnApplicationBootstrap, OnModuleDestroy {
     try {
       await this.publisher.publish(row.envelope);
     } catch (err) {
-      this.logger.warn(`Publishing event ${row.id} failed: ${String(err)}`);
+      // The publisher logs a broker outage once; logging it here would repeat it every poll.
+      if (!(err instanceof BrokerUnavailableError)) {
+        this.logger.warn(`Publishing event ${row.id} failed: ${String(err)}`);
+      }
       return false;
     }
     await tx.query(`UPDATE outbox_events SET sent_at = now() WHERE id = $1`, [

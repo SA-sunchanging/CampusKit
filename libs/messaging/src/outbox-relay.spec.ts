@@ -1,9 +1,21 @@
-import type { EventPublisher } from './event-publisher.js';
+import { currentCorrelationId } from '@app/common';
+import { Logger } from '@nestjs/common';
 import type { DataSource } from 'typeorm';
+import {
+  BrokerUnavailableError,
+  type EventPublisher,
+} from './event-publisher.js';
 import { OutboxRelay } from './outbox-relay.js';
 
 function row(id: string) {
-  return { id, envelope: { eventId: id, type: 'booking.requested' } };
+  return {
+    id,
+    envelope: {
+      eventId: id,
+      type: 'booking.requested',
+      correlationId: `corr-${id}`,
+    },
+  };
 }
 
 function setup(rows = [row('e1'), row('e2'), row('e3')]) {
@@ -68,6 +80,53 @@ describe('OutboxRelay.relayBatch', () => {
     await expect(relay.relayBatch()).resolves.toBe(1);
     expect(log).toEqual(['publish e1', 'mark e1']);
     expect(publisher.publish).toHaveBeenCalledTimes(2);
+  });
+
+  it("publishes and marks each event under the event's correlation ID", async () => {
+    const { relay, publisher, tx } = setup();
+    const ids: (string | undefined)[] = [];
+    publisher.publish.mockImplementation(() => {
+      ids.push(currentCorrelationId());
+      return Promise.resolve();
+    });
+    tx.query.mockImplementation((sql: string) => {
+      if (sql.includes('UPDATE outbox_events')) {
+        ids.push(currentCorrelationId());
+      }
+      return Promise.resolve(
+        sql.includes('SELECT id, envelope') ? [row('e1'), row('e2')] : [],
+      );
+    });
+    await relay.relayBatch();
+    expect(ids).toEqual(['corr-e1', 'corr-e1', 'corr-e2', 'corr-e2']);
+    expect(currentCorrelationId()).toBeUndefined();
+  });
+
+  describe('failure logging', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('logs a failed publish under its correlation ID', async () => {
+      const { relay, publisher } = setup();
+      const ids: (string | undefined)[] = [];
+      vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => {
+        ids.push(currentCorrelationId());
+      });
+      publisher.publish.mockRejectedValueOnce(new Error('nacked'));
+      await relay.relayBatch();
+      expect(ids).toEqual(['corr-e1']);
+    });
+
+    it('leaves a broker outage to the publisher, which logs it once', async () => {
+      const { relay, publisher } = setup();
+      const warn = vi
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => {});
+      publisher.publish.mockRejectedValue(new BrokerUnavailableError());
+      await expect(relay.relayBatch()).resolves.toBe(0);
+      expect(warn).not.toHaveBeenCalled();
+    });
   });
 });
 
