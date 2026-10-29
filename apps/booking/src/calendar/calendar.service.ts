@@ -1,48 +1,20 @@
 import type { AuthUser } from '@app/common';
 import { status } from '@grpc/grpc-js';
 import { Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { isUUID } from 'class-validator';
-import { DataSource, QueryFailedError } from 'typeorm';
+import { DataSource } from 'typeorm';
 import {
-  CalendarInputError,
+  isExclusionViolation,
+  parseInput,
+  requireUuid,
+  rpcError,
+} from '../errors.js';
+import {
   type DateRange,
   parseBlackouts,
   parsePeriod,
   type Period,
 } from './date-range.js';
-
-const EXCLUSION_VIOLATION = '23P01';
-
-function rpcError(code: status, message: string): RpcException {
-  return new RpcException({ code, message });
-}
-
-function isExclusionViolation(err: unknown): boolean {
-  return (
-    err instanceof QueryFailedError &&
-    (err.driverError as { code?: string }).code === EXCLUSION_VIOLATION
-  );
-}
-
-function checkListingId(listingId: string): void {
-  if (!isUUID(listingId ?? '')) {
-    throw rpcError(status.INVALID_ARGUMENT, 'listing_id must be a UUID');
-  }
-}
-
-/** Runs input parsing and turns a broken calendar rule into INVALID_ARGUMENT. */
-function parseInput<T>(parse: () => T): T {
-  try {
-    return parse();
-  } catch (err) {
-    if (err instanceof CalendarInputError) {
-      throw rpcError(status.INVALID_ARGUMENT, err.message);
-    }
-    throw err;
-  }
-}
 
 /** The authoritative calendar of each listing: owner blackouts and, later, reservations. */
 @Injectable()
@@ -60,7 +32,7 @@ export class CalendarService {
     blackouts: DateRange[],
     now = new Date(),
   ): Promise<void> {
-    checkListingId(listingId);
+    requireUuid(listingId, 'listing_id');
     const periods = parseInput(() => parseBlackouts(blackouts, now));
     try {
       await this.db.transaction(async (tx) => {
@@ -112,7 +84,7 @@ export class CalendarService {
     listingId: string,
     range: DateRange | undefined,
   ): Promise<boolean> {
-    checkListingId(listingId);
+    requireUuid(listingId, 'listing_id');
     const period: Period = parseInput(() => parsePeriod(range));
     const [row] = (await this.db.query(
       `SELECT
