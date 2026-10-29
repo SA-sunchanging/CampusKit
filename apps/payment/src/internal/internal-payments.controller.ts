@@ -2,12 +2,15 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthorizeService } from '../ledger/authorize.js';
 import { CaptureService } from '../ledger/capture.js';
+import { SettleService } from '../ledger/settle.js';
 import { VoidService } from '../ledger/void.js';
 import { AuthorizeResponse } from './authorize.response.js';
 import { CaptureResponse } from './capture.response.js';
 import { AuthorizeDto } from './dto/authorize.dto.js';
 import { CaptureDto } from './dto/capture.dto.js';
+import { SettleDto } from './dto/settle.dto.js';
 import { VoidDto } from './dto/void.dto.js';
+import { SettleResponse } from './settle.response.js';
 import { VoidResponse } from './void.response.js';
 
 /**
@@ -22,6 +25,7 @@ export class InternalPaymentsController {
     private readonly authorizer: AuthorizeService,
     private readonly capturer: CaptureService,
     private readonly voider: VoidService,
+    private readonly settler: SettleService,
   ) {}
 
   @Post('authorize')
@@ -42,5 +46,12 @@ export class InternalPaymentsController {
   @ApiOkResponse({ type: VoidResponse })
   voidOpen(@Body() dto: VoidDto): Promise<VoidResponse> {
     return this.voider.voidOpen(dto);
+  }
+
+  @Post('settle')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: SettleResponse })
+  settle(@Body() dto: SettleDto): Promise<SettleResponse> {
+    return this.settler.settle(dto);
   }
 }
