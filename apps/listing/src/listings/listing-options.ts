@@ -24,8 +24,19 @@ export const PICKUP_LOCATIONS = [
 ] as const;
 export type PickupLocation = (typeof PICKUP_LOCATIONS)[number];
 
-/** DRAFT until Booking has set up the calendar, then PUBLISHED and searchable. */
-export const LISTING_STATUSES = ['DRAFT', 'PUBLISHED'] as const;
+/**
+ * DRAFT until Booking has set up the calendar. Then PUBLISHED and searchable, or PENDING_REVIEW
+ * when the moderation rule flags it, until an administrator approves (PUBLISHED) or rejects it
+ * (REJECTED). The owner can take a PUBLISHED listing down (UNPUBLISHED). Only PUBLISHED is
+ * searchable and can be booked.
+ */
+export const LISTING_STATUSES = [
+  'DRAFT',
+  'PENDING_REVIEW',
+  'PUBLISHED',
+  'REJECTED',
+  'UNPUBLISHED',
+] as const;
 export type ListingStatus = (typeof LISTING_STATUSES)[number];
 
 /** Money is integer satang (1 THB = 100 satang). */

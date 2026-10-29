@@ -1,5 +1,6 @@
 import type { AuthUser } from '@app/common';
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -18,6 +19,7 @@ import type { CreateListingDto } from './dto/create-listing.dto.js';
 import { ListingPhoto } from './listing-photo.entity.js';
 import { Listing } from './listing.entity.js';
 import { ListingResponse } from './listing.response.js';
+import { moderationFlags } from './moderation-rules.js';
 import { checkPhotoSizes } from './photos.js';
 
 /** Creating and publishing listings (UC-1 in docs/reference/use-cases.md). */
@@ -34,7 +36,8 @@ export class ListingsService {
 
   /**
    * Checks eligibility, validates, saves a DRAFT, and then tries to publish it. When Booking
-   * cannot set up the calendar the DRAFT stays, with publishError saying why.
+   * cannot set up the calendar the DRAFT stays, with publishError saying why. A listing the
+   * moderation rule flags waits in PENDING_REVIEW instead of being published.
    */
   async create(
     user: AuthUser,
@@ -68,7 +71,12 @@ export class ListingsService {
           blackouts,
           thumbnail: dto.thumbnail,
           publishError: null,
+          moderationFlags: [],
+          rejectionReason: null,
+          reviewedBy: null,
+          reviewedAt: null,
           publishedAt: null,
+          unpublishedAt: null,
         }),
       );
       await tx.getRepository(ListingPhoto).insert(
@@ -83,7 +91,10 @@ export class ListingsService {
     return this.tryPublish(listing, dto.photos, call);
   }
 
-  /** Retries publishing a DRAFT. Publishing a PUBLISHED listing again changes nothing. */
+  /**
+   * Retries publishing a DRAFT. A listing that is PUBLISHED or waiting for review is returned
+   * unchanged; a REJECTED or UNPUBLISHED one cannot be published again (409).
+   */
   async publish(
     user: AuthUser,
     id: string,
@@ -96,8 +107,13 @@ export class ListingsService {
     if (listing.ownerId !== user.sub) {
       throw new ForbiddenException('Only the owner can publish this listing');
     }
+    if (listing.status === 'REJECTED' || listing.status === 'UNPUBLISHED') {
+      throw new ConflictException(
+        `A listing that is ${listing.status} cannot be published again`,
+      );
+    }
     const photos = await this.photoUrls(id);
-    if (listing.status === 'PUBLISHED') {
+    if (listing.status !== 'DRAFT') {
       return ListingResponse.of(listing, photos);
     }
     // Eligibility can change after the DRAFT was saved, for example a suspension.
@@ -115,8 +131,8 @@ export class ListingsService {
   }
 
   /**
-   * Publishes when Booking sets up the calendar; otherwise the DRAFT keeps publishError saying
-   * why and nothing is announced.
+   * Publishes (or holds for review) when Booking sets up the calendar; otherwise the DRAFT keeps
+   * publishError saying why and nothing is announced.
    */
   private async tryPublish(
     listing: Listing,
@@ -125,24 +141,37 @@ export class ListingsService {
   ): Promise<ListingResponse> {
     const ready = await this.setUpCalendar(listing, call);
     const saved = ready
-      ? await this.markPublished(listing.id, call)
+      ? await this.leaveDraft(listing, call)
       : await this.recordPublishError(listing);
     return ListingResponse.of(saved, photos);
   }
 
   /**
-   * DRAFT becomes PUBLISHED once, even when two publishes race; only the publish that made the
-   * change writes listing.published, in the same transaction.
+   * DRAFT leaves once, even when two publishes race: to PENDING_REVIEW with the reasons when the
+   * moderation rule flags it, otherwise to PUBLISHED. Only the publish that made the change to
+   * PUBLISHED writes listing.published, in the same transaction.
    */
-  private markPublished(id: string, call: CallContext): Promise<Listing> {
+  private leaveDraft(listing: Listing, call: CallContext): Promise<Listing> {
+    const flags = moderationFlags(listing);
+    const id = listing.id;
     return this.db.transaction(async (tx) => {
       const repo = tx.getRepository(Listing);
       const { affected } = await repo.update(
         { id, status: 'DRAFT' },
-        { status: 'PUBLISHED', publishedAt: new Date(), publishError: null },
+        flags.length > 0
+          ? {
+              status: 'PENDING_REVIEW',
+              moderationFlags: flags,
+              publishError: null,
+            }
+          : {
+              status: 'PUBLISHED',
+              publishedAt: new Date(),
+              publishError: null,
+            },
       );
       const row = await repo.findOneByOrFail({ id });
-      if (affected === 1) {
+      if (affected === 1 && row.status === 'PUBLISHED') {
         await announcePublished(tx, row, call.correlationId);
       }
       return row;

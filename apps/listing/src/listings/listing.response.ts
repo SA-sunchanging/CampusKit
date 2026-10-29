@@ -85,6 +85,13 @@ export class ListingResponse {
   })
   publishError: string | null;
 
+  @ApiProperty({
+    type: [String],
+    description:
+      'Why the moderation rule held the listing for review; empty when it was not held.',
+  })
+  moderationFlags: string[];
+
   @ApiProperty()
   createdAt: Date;
 
@@ -112,6 +119,7 @@ export class ListingResponse {
       photos,
       thumbnail: listing.thumbnail,
       publishError: listing.publishError,
+      moderationFlags: listing.moderationFlags,
       createdAt: listing.createdAt,
       publishedAt: listing.publishedAt,
     });

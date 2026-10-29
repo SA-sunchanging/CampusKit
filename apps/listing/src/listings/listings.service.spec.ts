@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
@@ -153,6 +154,35 @@ describe('ListingsService.create', () => {
     ]);
   });
 
+  it('holds a high-value listing for review and announces nothing', async () => {
+    const { service, events } = setup();
+    const result = await service.create(
+      owner,
+      { ...dto, replacementValue: 1_000_000 },
+      call,
+      now,
+    );
+    expect(result.status).toBe('PENDING_REVIEW');
+    expect(result.moderationFlags).toEqual([
+      'Replacement value is 10,000 THB or more',
+    ]);
+    expect(result.publishedAt).toBeNull();
+    expect(events()).toEqual([]);
+  });
+
+  it('holds a listing that mentions a flagged word for review', async () => {
+    const { service, events } = setup();
+    const result = await service.create(
+      owner,
+      { ...dto, description: 'Includes a bottle of liquor.' },
+      call,
+      now,
+    );
+    expect(result.status).toBe('PENDING_REVIEW');
+    expect(result.moderationFlags).toEqual(['Mentions "liquor"']);
+    expect(events()).toEqual([]);
+  });
+
   it('checks eligibility before saving anything', async () => {
     const { service, identity, db } = setup();
     identity.requirePublisher.mockRejectedValue(new ForbiddenException('no'));
@@ -206,6 +236,9 @@ describe('ListingsService.publish', () => {
     id: listingId,
     ownerId: owner.sub,
     status: 'DRAFT' as const,
+    title: dto.title,
+    description: dto.description,
+    replacementValue: dto.replacementValue,
     blackouts: [],
     publishError: 'down',
     publishedAt: null,
@@ -231,6 +264,37 @@ describe('ListingsService.publish', () => {
       }),
     ]);
   });
+
+  it('holds a flagged DRAFT for review on retry', async () => {
+    const { service, events, store } = setup();
+    store({ ...draft(), title: 'Replica sword', description: 'Display only' });
+    const result = await service.publish(owner, listingId, call);
+    expect(result.status).toBe('PENDING_REVIEW');
+    expect(result.moderationFlags).toEqual(['Mentions "replica"']);
+    expect(result.publishError).toBeNull();
+    expect(events()).toEqual([]);
+  });
+
+  it('returns a listing waiting for review unchanged', async () => {
+    const { service, calendar, listingRepo, store } = setup();
+    store({ ...draft(), status: 'PENDING_REVIEW', publishError: null });
+    const result = await service.publish(owner, listingId, call);
+    expect(result.status).toBe('PENDING_REVIEW');
+    expect(calendar.setupCalendar).not.toHaveBeenCalled();
+    expect(listingRepo.update).not.toHaveBeenCalled();
+  });
+
+  it.each(['REJECTED', 'UNPUBLISHED'] as const)(
+    'refuses to publish a %s listing again',
+    async (status) => {
+      const { service, calendar, store } = setup();
+      store({ ...draft(), status });
+      await expect(service.publish(owner, listingId, call)).rejects.toThrow(
+        ConflictException,
+      );
+      expect(calendar.setupCalendar).not.toHaveBeenCalled();
+    },
+  );
 
   it('returns a PUBLISHED listing unchanged and announces nothing', async () => {
     const { service, listingRepo, calendar, events, store } = setup();

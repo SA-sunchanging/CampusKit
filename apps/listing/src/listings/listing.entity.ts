@@ -78,12 +78,31 @@ export class Listing {
   @Column('text', { name: 'publish_error', nullable: true })
   publishError: string | null;
 
+  /** Why the moderation rule held the listing for review; empty when it was not held. */
+  @Column('text', { name: 'moderation_flags', array: true })
+  moderationFlags: string[];
+
+  /** The administrator's reason; set only on a REJECTED listing. */
+  @Column('text', { name: 'rejection_reason', nullable: true })
+  rejectionReason: string | null;
+
+  /** The administrator who approved or rejected the listing. */
+  @Column('uuid', { name: 'reviewed_by', nullable: true })
+  reviewedBy: string | null;
+
+  @Column('timestamptz', { name: 'reviewed_at', nullable: true })
+  reviewedAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
+  /** When the listing was first published; kept after it is unpublished. */
   @Column('timestamptz', { name: 'published_at', nullable: true })
   publishedAt: Date | null;
+
+  @Column('timestamptz', { name: 'unpublished_at', nullable: true })
+  unpublishedAt: Date | null;
 }
