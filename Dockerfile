@@ -19,4 +19,7 @@ ARG APP
 ENV APP=${APP}
 COPY --from=build /app/dist/apps/${APP} ./dist/apps/${APP}
 COPY libs/contracts/proto ./libs/contracts/proto
-CMD node dist/apps/${APP}/main.js
+# OpenTelemetry must hook module loading before the service starts, so Node loads it first and
+# strips its types itself (see the file's header).
+COPY libs/common/src/telemetry/instrument.ts ./telemetry/instrument.ts
+CMD node --import ./telemetry/instrument.ts dist/apps/${APP}/main.js
