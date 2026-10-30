@@ -124,7 +124,8 @@ commits; Git contribution counts toward the progress grade.
 - [x] Correlation IDs in every log line, across services and events.
 
 **Other**
-- External email and push delivery, broker high availability, a metrics and tracing stack.
+- External email and push delivery, broker high availability.
+- Done on branch `feat/other-work`, not on `main`: a metrics and tracing stack (`docs/architecture/observability.md`).
 
 ## Interfaces between members
 

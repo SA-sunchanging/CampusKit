@@ -47,6 +47,21 @@ docker compose up --build
 
 Unimplemented endpoints answer `501 Not Implemented`.
 
+### Metrics and traces
+
+```sh
+docker compose --profile observability up --build -d
+```
+
+- Jaeger (traces): http://localhost:16686; search a service by the tag
+  `campuskit.correlation_id=<x-correlation-id>`
+- Grafana (dashboard "CampusKit overview"): http://localhost:3030 (view without login; admin
+  password `admin`)
+- Prometheus (targets and alerts): http://localhost:9090/alerts
+
+Without the profile the services still start OpenTelemetry and drop the traces. Set
+`OTEL_SDK_DISABLED=true` to turn it off. Details in `docs/architecture/observability.md`.
+
 ### Demo accounts
 
 ```sh
@@ -149,6 +164,8 @@ npm run build:all
 | booking | 50051 (gRPC), 3007 (health and docs) |
 | web | 8080 (Docker), 5173 (`npm run dev`) |
 | postgres / mongo / rabbitmq | 5432 / 27017 / 5672, 15672 |
+| every backend service: metrics | 9464 (inside the Compose network only) |
+| jaeger / prometheus / grafana | 16686 / 9090 / 3030 (`observability` profile) |
 
 Database users and passwords are demo values from `infra/postgres/init.sql` and `infra/mongo/init.js`.
 If you change an init script, recreate the volumes with `docker compose down -v`, which deletes local
