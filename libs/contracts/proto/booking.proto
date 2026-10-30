@@ -5,6 +5,10 @@
 // Caller identity (docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md):
 // the caller sends its bearer token as gRPC metadata ("authorization": "Bearer <JWT>"),
 // except for FilterAvailable, which serves public search and takes no caller token.
+// Service-only methods (SetupCalendar and FilterAvailable from Listing, ReleaseCalendar from
+// Rental) also require "x-service-token" metadata: a short-lived service JWT naming the caller
+// (docs/adr/adr-010-authenticate-internal-calls-with-service-tokens.md). A missing or invalid
+// token answers UNAUTHENTICATED; a token from another service answers PERMISSION_DENIED.
 // Booking reads the user from that token, never from a field in the request, and checks
 // ownership and participation itself. Every call also carries "x-correlation-id" metadata.
 //
