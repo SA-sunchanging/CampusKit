@@ -467,8 +467,8 @@ Review stores reviews in the MongoDB collection `reviews` in `apps/review`, one 
 | `POST /reviews` with `{ rentalId, rating, comment? }` | A participant       | `201` with the review; `404` unknown rental; `403` not a participant; `409` not `CLOSED` or already reviewed; `503` when Rental is unavailable  |
 | `GET /reviews?userId=&page=&pageSize=`                | Anyone with a token | `200` with `{ items, total, averageRating, page, pageSize }`, the reviews the user received, newest first; `pageSize` 20 by default, at most 50 |
 | `GET /reviews/rentals/{rentalId}`                     | Anyone with a token | `200` with `{ items }`, the reviews the caller wrote and received for that rental                                                               |
-| `GET /internal/users/{id}/reputation`                 | Services            | `200` with `{ userId, averageRating, reviewCount }`                                                                                             |
-| `GET /internal/reputation?userIds=` (1 to 50 IDs)     | Services            | `200` with `{ items }`, one summary per distinct ID in the order asked                                                                          |
+| `GET /internal/users/{id}/reputation`                 | Listing             | `200` with `{ userId, averageRating, reviewCount }`                                                                                             |
+| `GET /internal/reputation?userIds=` (1 to 50 IDs)     | Listing             | `200` with `{ items }`, one summary per distinct ID in the order asked                                                                          |
 
 `averageRating` is rounded half up to one decimal place, and `null` when the user has no reviews.
 
