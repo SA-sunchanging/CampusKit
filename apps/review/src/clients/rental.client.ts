@@ -1,10 +1,11 @@
-import { CORRELATION_HEADER } from '@app/common';
+import { CORRELATION_HEADER, SERVICE_TOKEN_HEADER } from '@app/common';
 import {
   Injectable,
   Logger,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { serviceTokens } from './service-token.js';
 
 /** Rental answers within this time or counts as unavailable. */
 export const TIMEOUT_MS = 5_000;
@@ -42,7 +43,10 @@ export class RentalClient {
     let res: Response;
     try {
       res = await fetch(url, {
-        headers: { [CORRELATION_HEADER]: correlationId },
+        headers: {
+          [CORRELATION_HEADER]: correlationId,
+          [SERVICE_TOKEN_HEADER]: serviceTokens.token(),
+        },
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
     } catch (err) {

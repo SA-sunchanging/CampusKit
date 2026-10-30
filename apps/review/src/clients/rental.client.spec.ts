@@ -1,3 +1,5 @@
+import { checkServiceToken, INTERNAL_JWT_SECRET } from '@app/common';
+import { JwtService } from '@nestjs/jwt';
 import { NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { RentalClient, type RentalView } from './rental.client.js';
 
@@ -9,6 +11,12 @@ const rental: RentalView = {
   renterId: '33333333-3333-4333-8333-333333333333',
   status: 'CLOSED',
 };
+
+/** True when the header carries a valid service token signed for Review. */
+function signedByReview(token: unknown): boolean {
+  const jwt = new JwtService({ secret: INTERNAL_JWT_SECRET });
+  return checkServiceToken(jwt, token, ['review']).ok;
+}
 
 function reply(code: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status: code });
@@ -26,14 +34,16 @@ describe('RentalClient', () => {
     vi.unstubAllGlobals();
   });
 
-  it('reads the rental with the correlation ID', async () => {
+  it('reads the rental with the service token and correlation ID', async () => {
     fetchMock.mockResolvedValueOnce(reply(200, rental));
     await expect(new RentalClient().get(RENTAL_ID, 'corr-1')).resolves.toEqual(
       rental,
     );
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe(`http://localhost:3003/internal/rentals/${RENTAL_ID}`);
-    expect(init.headers).toEqual({ 'x-correlation-id': 'corr-1' });
+    const headers = init.headers as Record<string, string>;
+    expect(headers['x-correlation-id']).toBe('corr-1');
+    expect(signedByReview(headers['x-service-token'])).toBe(true);
   });
 
   it('answers 404 when Rental does not know the rental', async () => {
