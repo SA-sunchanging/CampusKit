@@ -8,6 +8,7 @@ services:
     environment:
       PORT: 3003
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
+      INTERNAL_JWT_SECRET: ${INTERNAL_JWT_SECRET:-dev-only-internal-secret}
       DATABASE_URL: postgres://rental_user:rental_pass@postgres:5432/rental_db
       RABBITMQ_URL: amqp://campuskit:campuskit@rabbitmq:5672
       BOOKING_GRPC_URL: booking:50051

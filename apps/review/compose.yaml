@@ -8,6 +8,7 @@ services:
     environment:
       PORT: 3005
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
+      INTERNAL_JWT_SECRET: ${INTERNAL_JWT_SECRET:-dev-only-internal-secret}
       MONGO_URL: mongodb://review_user:review_pass@mongo:27017/review_db
       RENTAL_URL: http://rental:3003
     depends_on:

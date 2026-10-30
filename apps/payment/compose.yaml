@@ -8,6 +8,7 @@ services:
     environment:
       PORT: 3004
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
+      INTERNAL_JWT_SECRET: ${INTERNAL_JWT_SECRET:-dev-only-internal-secret}
       DATABASE_URL: postgres://payment_user:payment_pass@postgres:5432/payment_db
     depends_on:
       postgres:
