@@ -1,6 +1,14 @@
+import { checkServiceToken, INTERNAL_JWT_SECRET } from '@app/common';
+import { JwtService } from '@nestjs/jwt';
 import { type AuthorizeRequest, PaymentClient } from './payment.client.js';
 
 const call = { correlationId: 'corr-1' };
+
+/** True when the value is a valid service token signed for Booking. */
+function signedByBooking(token: unknown): boolean {
+  const jwt = new JwtService({ secret: INTERNAL_JWT_SECRET });
+  return checkServiceToken(jwt, token, ['booking']).ok;
+}
 const request: AuthorizeRequest = {
   operationId: 'booking:b1:authorize-fee',
   bookingId: 'b1',
@@ -26,7 +34,7 @@ describe('PaymentClient.authorize', () => {
     vi.unstubAllGlobals();
   });
 
-  it('posts the authorization with the correlation ID', async () => {
+  it('posts the authorization with the correlation ID and service token', async () => {
     fetchMock.mockResolvedValueOnce(
       reply(201, { id: 'auth-1', status: 'AUTHORIZED' }),
     );
@@ -36,10 +44,13 @@ describe('PaymentClient.authorize', () => {
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe('http://localhost:3004/internal/payments/authorize');
     expect(init.method).toBe('POST');
-    expect(init.headers).toEqual({
+    const headers = init.headers as Record<string, string>;
+    expect(headers).toEqual({
       'x-correlation-id': 'corr-1',
+      'x-service-token': expect.any(String),
       'content-type': 'application/json',
     });
+    expect(signedByBooking(headers['x-service-token'])).toBe(true);
     expect(JSON.parse(init.body as string)).toEqual(request);
   });
 

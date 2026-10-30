@@ -1,9 +1,17 @@
+import { checkServiceToken, INTERNAL_JWT_SECRET } from '@app/common';
+import { JwtService } from '@nestjs/jwt';
 import { status } from '@grpc/grpc-js';
 import type { RpcException } from '@nestjs/microservices';
 import { IdentityClient } from './identity.client.js';
 
 const userId = '00000000-0000-4000-8000-000000000001';
 const call = { correlationId: 'corr-1' };
+
+/** True when the value is a valid service token signed for Booking. */
+function signedByBooking(token: unknown): boolean {
+  const jwt = new JwtService({ secret: INTERNAL_JWT_SECRET });
+  return checkServiceToken(jwt, token, ['booking']).ok;
+}
 
 function reply(code: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status: code });
@@ -33,7 +41,7 @@ describe('IdentityClient.requireBooker', () => {
     vi.unstubAllGlobals();
   });
 
-  it('accepts an eligible user and forwards the correlation ID', async () => {
+  it('accepts an eligible user and sends the correlation ID and service token', async () => {
     fetchMock.mockResolvedValueOnce(
       reply(200, { canBook: true, reasons: ['PAYOUT_PROFILE_MISSING'] }),
     );
@@ -44,7 +52,9 @@ describe('IdentityClient.requireBooker', () => {
     expect(url).toBe(
       `http://localhost:3001/internal/users/${userId}/eligibility`,
     );
-    expect(init.headers).toEqual({ 'x-correlation-id': 'corr-1' });
+    const headers = init.headers as Record<string, string>;
+    expect(headers['x-correlation-id']).toBe('corr-1');
+    expect(signedByBooking(headers['x-service-token'])).toBe(true);
   });
 
   it('refuses a user who may not book, naming the reasons', async () => {

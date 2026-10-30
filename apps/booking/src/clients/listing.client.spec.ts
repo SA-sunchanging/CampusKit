@@ -1,9 +1,17 @@
+import { checkServiceToken, INTERNAL_JWT_SECRET } from '@app/common';
+import { JwtService } from '@nestjs/jwt';
 import { status } from '@grpc/grpc-js';
 import type { RpcException } from '@nestjs/microservices';
 import { ListingClient } from './listing.client.js';
 
 const listingId = '11111111-1111-4111-8111-111111111111';
 const call = { correlationId: 'corr-1' };
+
+/** True when the value is a valid service token signed for Booking. */
+function signedByBooking(token: unknown): boolean {
+  const jwt = new JwtService({ secret: INTERNAL_JWT_SECRET });
+  return checkServiceToken(jwt, token, ['booking']).ok;
+}
 const period = {
   start: new Date('2026-11-01T17:00:00Z'),
   end: new Date('2026-11-04T17:00:00Z'),
@@ -45,7 +53,7 @@ describe('ListingClient.quote', () => {
     vi.unstubAllGlobals();
   });
 
-  it('returns the quote for the period and forwards the correlation ID', async () => {
+  it('returns the quote for the period and sends the correlation ID and service token', async () => {
     fetchMock.mockResolvedValueOnce(reply(200, quote));
     await expect(
       new ListingClient().quote(listingId, period, call),
@@ -55,7 +63,9 @@ describe('ListingClient.quote', () => {
     expect(parsed.pathname).toBe(`/internal/listings/${listingId}/quote`);
     expect(parsed.searchParams.get('start')).toBe('2026-11-01T17:00:00.000Z');
     expect(parsed.searchParams.get('end')).toBe('2026-11-04T17:00:00.000Z');
-    expect(init.headers).toEqual({ 'x-correlation-id': 'corr-1' });
+    const headers = init.headers as Record<string, string>;
+    expect(headers['x-correlation-id']).toBe('corr-1');
+    expect(signedByBooking(headers['x-service-token'])).toBe(true);
   });
 
   it.each([

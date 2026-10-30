@@ -1,5 +1,6 @@
-import { CORRELATION_HEADER } from '@app/common';
+import { CORRELATION_HEADER, SERVICE_TOKEN_HEADER } from '@app/common';
 import type { Logger } from '@nestjs/common';
+import { serviceTokens } from './service-token.js';
 
 /** A service answers within this time or counts as unavailable. */
 export const TIMEOUT_MS = 5_000;
@@ -19,7 +20,7 @@ export interface HttpReply {
 }
 
 /**
- * Sends one request with the correlation ID header. Returns undefined when the service cannot
+ * Sends one request with the correlation ID and Booking's service token. Returns undefined when the service cannot
  * be reached or does not answer within TIMEOUT_MS; the caller decides what a status means.
  */
 export async function send(
@@ -28,6 +29,7 @@ export async function send(
 ): Promise<HttpReply | undefined> {
   const headers: Record<string, string> = {
     [CORRELATION_HEADER]: request.correlationId,
+    [SERVICE_TOKEN_HEADER]: serviceTokens.token(),
   };
   if (request.body !== undefined) {
     headers['content-type'] = 'application/json';
