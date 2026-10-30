@@ -1,5 +1,22 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  InternalAuthGuard,
+  InternalCallers,
+  SERVICE_TOKEN_HEADER,
+} from '@app/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiCreatedResponse,
+  ApiHeader,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthorizeService } from '../ledger/authorize.js';
 import { CaptureService } from '../ledger/capture.js';
 import { SettleService } from '../ledger/settle.js';
@@ -15,10 +32,13 @@ import { VoidResponse } from './void.response.js';
 
 /**
  * Service-to-service endpoints for Booking and Rental. The gateway does not forward /internal
- * paths. Internal service authentication is still open (docs/architecture/services.md).
+ * paths, and each route accepts only the service tokens of its callers
+ * (docs/adr/adr-010-authenticate-internal-calls-with-service-tokens.md).
  * A refusal answers 400 or 409; reusing an operationId with another body answers 409.
  */
 @ApiTags('internal')
+@ApiHeader({ name: SERVICE_TOKEN_HEADER, required: true })
+@UseGuards(InternalAuthGuard)
 @Controller('internal/payments')
 export class InternalPaymentsController {
   constructor(
@@ -29,12 +49,14 @@ export class InternalPaymentsController {
   ) {}
 
   @Post('authorize')
+  @InternalCallers('booking')
   @ApiCreatedResponse({ type: AuthorizeResponse })
   authorize(@Body() dto: AuthorizeDto): Promise<AuthorizeResponse> {
     return this.authorizer.authorize(dto);
   }
 
   @Post('capture')
+  @InternalCallers('rental')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: CaptureResponse })
   capture(@Body() dto: CaptureDto): Promise<CaptureResponse> {
@@ -42,6 +64,7 @@ export class InternalPaymentsController {
   }
 
   @Post('void')
+  @InternalCallers('booking')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: VoidResponse })
   voidOpen(@Body() dto: VoidDto): Promise<VoidResponse> {
@@ -49,6 +72,7 @@ export class InternalPaymentsController {
   }
 
   @Post('settle')
+  @InternalCallers('rental')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: SettleResponse })
   settle(@Body() dto: SettleDto): Promise<SettleResponse> {
