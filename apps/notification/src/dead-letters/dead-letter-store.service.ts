@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import type { Channel, ConsumeMessage } from 'amqplib';
 import type { Model } from 'mongoose';
 import { correlationIdOf, settle } from '../inbox/delivery.js';
+import { countKeptDeadLetter } from '../metrics.js';
 import { describeDeadLetter } from './dead-letter.js';
 import { DeadLetter } from './dead-letter.schema.js';
 
@@ -22,7 +23,8 @@ export class DeadLetterStoreService {
   /**
    * Stores one dead-lettered message, then acks it, under its event's correlation ID.
    * The write is an upsert on the key that only sets fields on insert, so a redelivery changes
-   * nothing. When MongoDB fails, the message is requeued and stays in the queue.
+   * nothing. When MongoDB fails, the message is requeued and stays in the queue. Each kept
+   * message is counted, so a growing count on the dashboard shows events that went nowhere.
    */
   keep(
     channel: Pick<Channel, 'ack' | 'nack'>,
@@ -47,6 +49,7 @@ export class DeadLetterStoreService {
       this.logger.warn(
         `Kept a dead letter from ${letter.queue ?? 'an unknown queue'} (${letter.reason ?? 'no reason'})`,
       );
+      countKeptDeadLetter();
       settle(channel, message, 'ack');
     });
   }

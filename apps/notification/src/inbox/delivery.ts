@@ -1,6 +1,7 @@
 import { correlationIdFrom, runWithCorrelationId } from '@app/common';
 import { Logger } from '@nestjs/common';
 import type { Channel, ConsumeMessage } from 'amqplib';
+import { countConsumedEvent } from '../metrics.js';
 import { parseEnvelope, type InboxEnvelope } from './envelope.js';
 
 /** What the consumer does with a message: ack it, dead-letter it, or put it back on the queue. */
@@ -77,7 +78,7 @@ export function correlationIdOf(content: Buffer): string {
 
 /**
  * Handles and settles one message under its event's correlation ID, so every log line about
- * it, here and in store, joins the request that caused the event.
+ * it, here and in store, joins the request that caused the event. Counts the decision.
  */
 export function deliver(
   channel: Pick<Channel, 'ack' | 'nack'>,
@@ -85,6 +86,8 @@ export function deliver(
   store: (envelope: InboxEnvelope) => Promise<void>,
 ): Promise<void> {
   return runWithCorrelationId(correlationIdOf(message.content), async () => {
-    settle(channel, message, await handleDelivery(message.content, store));
+    const decision = await handleDelivery(message.content, store);
+    countConsumedEvent(decision);
+    settle(channel, message, decision);
   });
 }

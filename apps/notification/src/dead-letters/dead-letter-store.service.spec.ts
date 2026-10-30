@@ -1,7 +1,9 @@
 import { currentCorrelationId } from '@app/common';
+import { recordMetrics } from '@app/common/testing/metric-recorder.js';
 import { Logger } from '@nestjs/common';
 import type { ConsumeMessage } from 'amqplib';
 import type { Model } from 'mongoose';
+import { DEAD_LETTERS_METRIC } from '../metrics.js';
 import { DeadLetterStoreService } from './dead-letter-store.service.js';
 import type { DeadLetter } from './dead-letter.schema.js';
 
@@ -78,5 +80,25 @@ describe('DeadLetterStoreService.keep', () => {
     await service.keep(channel, message);
     expect(channel.ack).not.toHaveBeenCalled();
     expect(channel.nack).toHaveBeenCalledWith(message, false, true);
+  });
+});
+
+describe('DeadLetterStoreService.keep metrics', () => {
+  const recorder = recordMetrics();
+  afterAll(() => recorder.stop());
+
+  /** Letters counted so far; the provider is installed while the file loads. */
+  async function kept(): Promise<number> {
+    const [point] = await recorder.points(DEAD_LETTERS_METRIC);
+    return Number(point?.value ?? 0);
+  }
+
+  it('counts a kept letter but not a requeued one', async () => {
+    const before = await kept();
+    const working = setup();
+    await working.service.keep(working.channel, message);
+    const failing = setup(() => Promise.reject(new Error('mongo down')));
+    await failing.service.keep(failing.channel, message);
+    expect((await kept()) - before).toBe(1);
   });
 });

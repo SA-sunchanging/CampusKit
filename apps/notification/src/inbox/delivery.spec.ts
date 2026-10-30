@@ -1,5 +1,8 @@
 import { currentCorrelationId } from '@app/common';
+import { recordMetrics } from '@app/common/testing/metric-recorder.js';
+import { Logger } from '@nestjs/common';
 import type { ConsumeMessage } from 'amqplib';
+import { EVENTS_CONSUMED_METRIC } from '../metrics.js';
 import {
   correlationIdOf,
   deliver,
@@ -135,5 +138,37 @@ describe('deliver', () => {
       deliver(channel, { content: body(other) } as ConsumeMessage, store),
     ]);
     expect(seen.sort()).toEqual(['corr-1:corr-1', 'corr-2:corr-2']);
+  });
+});
+
+describe('deliver metrics', () => {
+  const recorder = recordMetrics();
+  afterAll(() => recorder.stop());
+
+  /** The count per decision so far; the provider is installed while the file loads. */
+  async function counts(): Promise<Record<string, number>> {
+    const points = await recorder.points(EVENTS_CONSUMED_METRIC);
+    return Object.fromEntries(
+      points.map((p) => [String(p.attributes.decision), Number(p.value)]),
+    );
+  }
+
+  it('counts each decision', async () => {
+    const before = await counts();
+    const channel = { ack: vi.fn(), nack: vi.fn() };
+    vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    const store = () => Promise.resolve();
+    await deliver(channel, { content: body(VALID) } as ConsumeMessage, store);
+    await deliver(channel, { content: body(VALID) } as ConsumeMessage, store);
+    await deliver(
+      channel,
+      { content: Buffer.from('{not json') } as ConsumeMessage,
+      store,
+    );
+    vi.restoreAllMocks();
+    const after = await counts();
+    expect(after.ack - (before.ack ?? 0)).toBe(2);
+    expect(after['dead-letter'] - (before['dead-letter'] ?? 0)).toBe(1);
+    expect(after.requeue ?? 0).toBe(before.requeue ?? 0);
   });
 });
