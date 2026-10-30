@@ -45,11 +45,11 @@ commits; Git contribution counts toward the progress grade.
 - [ ] Slides: service discovery (Compose DNS and environment configuration), C4 context and container views.
 
 **Should**
-- [ ] Email verification code (shown on the UI in demo mode) and administrator review of student status, with a page for the admin.
-- [ ] Identity writes `identity.verified` events through the outbox.
-- [ ] Internal service authentication between services (still an open question in `docs/architecture/services.md`).
+- [x] Email verification code (shown on the UI in demo mode) and administrator review of student status, with a page for the admin.
+- [x] Identity writes `identity.verified` events through the outbox.
+- [x] Internal service authentication between services (`docs/adr/adr-010-authenticate-internal-calls-with-service-tokens.md`).
 - [x] GitHub Actions that run typecheck, lint, test, and build on each push.
-- [ ] Shared web theme and UI components in `web/src/ui` (demo style), with sample screens at `/ui-preview`.
+- [x] Shared web theme and UI components in `web/src/ui` (demo style), with sample screens at `/ui-preview`.
 
 **Other**
 - University identity provider, account restriction and erasure, TLS between services.
@@ -64,9 +64,9 @@ commits; Git contribution counts toward the progress grade.
 - [ ] Load test with k6, two types (for example load and stress) on search and detail, with 1,500 seeded listings; explain the results.
 
 **Should**
-- [ ] Moderation: flagged or high-value listings wait for administrator approval; admin moderation page; `listing.published` and `listing.rejected` events.
-- [ ] Filter by dates and campus location; owner reputation in search results (from Review).
-- [ ] Unpublish a listing.
+- [x] Moderation: flagged or high-value listings wait for administrator approval; admin moderation page; `listing.published` and `listing.rejected` events.
+- [x] Filter by dates and campus location; owner reputation in search results (from Review).
+- [x] Unpublish a listing.
 - [ ] Second quality attribute: scalability, by running more Listing replicas and comparing k6 results.
 
 **Other**
@@ -84,7 +84,7 @@ commits; Git contribution counts toward the progress grade.
 - [ ] Slides: sequence diagrams; assemble the final slide deck and the live-demo script.
 
 **Should**
-- [ ] Expiry worker for requests the owner does not answer; cancellation before pickup.
+- [x] Expiry worker for requests the owner does not answer; cancellation before pickup.
 - [x] Compensation: void authorizations and release dates when confirmation fails; authorization retry window.
 - [x] Concurrency test: many overlapping requests at once, exactly one succeeds.
 
@@ -102,8 +102,8 @@ commits; Git contribution counts toward the progress grade.
 - [ ] Slides: risk matrix with at least three risks.
 
 **Should**
-- [ ] Condition evidence (photos, condition, accessories) at pickup and return.
-- [ ] Overdue job, late-fee calculation, and return-reminder events.
+- [x] Condition evidence (photos, condition, accessories) at pickup and return.
+- [x] Overdue job, late-fee calculation, and return-reminder events.
 - [x] Settlement retry endpoint and a test that a duplicate capture is not charged twice.
 
 **Other**
@@ -119,9 +119,9 @@ commits; Git contribution counts toward the progress grade.
 - [x] Quality attribute: resilience. Stop RabbitMQ during bookings and measure that no booking fails and every event arrives after recovery.
 
 **Should**
-- [ ] Reviews: submit after a CLOSED rental (participants only, one review each), reputation summary for Listing; web review form.
-- [ ] Automatic reconnect to RabbitMQ (`amqplib` has a recovery option); a way to inspect dead-lettered events. Reconnect is done in Notification; inspecting dead-lettered events is left.
-- [ ] Correlation IDs in every log line, across services and events.
+- [x] Reviews: submit after a CLOSED rental (participants only, one review each), reputation summary for Listing; web review form.
+- [x] Automatic reconnect to RabbitMQ (`amqplib` has a recovery option); a way to inspect dead-lettered events.
+- [x] Correlation IDs in every log line, across services and events.
 
 **Other**
 - External email and push delivery, broker high availability, a metrics and tracing stack.
