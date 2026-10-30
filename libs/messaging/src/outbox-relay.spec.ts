@@ -1,11 +1,12 @@
 import { currentCorrelationId } from '@app/common';
+import { recordMetrics } from '@app/common/testing/metric-recorder.js';
 import { Logger } from '@nestjs/common';
 import type { DataSource } from 'typeorm';
 import {
   BrokerUnavailableError,
   type EventPublisher,
 } from './event-publisher.js';
-import { OutboxRelay } from './outbox-relay.js';
+import { OUTBOX_PENDING_METRIC, OutboxRelay } from './outbox-relay.js';
 
 function row(id: string) {
   return {
@@ -167,5 +168,58 @@ describe('OutboxRelay polling', () => {
     relay.onModuleDestroy();
     await vi.advanceTimersByTimeAsync(3_000);
     expect(db.transaction).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('OutboxRelay pending gauge', () => {
+  const recorder = recordMetrics();
+  afterAll(() => recorder.stop());
+
+  function relayWith(query: () => Promise<unknown>) {
+    const db = {
+      query: vi.fn((_sql: string) => query()),
+      transaction: vi.fn(),
+    };
+    const relay = new OutboxRelay(
+      db as unknown as DataSource,
+      {} as unknown as EventPublisher,
+    );
+    relay.onApplicationBootstrap();
+    return { db, relay };
+  }
+
+  it('reports the unsent rows at each collection', async () => {
+    const { db, relay } = relayWith(() => Promise.resolve([{ pending: 7 }]));
+    try {
+      expect(await recorder.points(OUTBOX_PENDING_METRIC)).toEqual([
+        { attributes: {}, value: 7 },
+      ]);
+      expect(db.query.mock.calls[0][0]).toContain('WHERE sent_at IS NULL');
+    } finally {
+      relay.onModuleDestroy();
+    }
+  });
+
+  it('logs instead of failing the collection when the database fails', async () => {
+    const warn = vi
+      .spyOn(Logger.prototype, 'warn')
+      .mockImplementation(() => {});
+    const { relay } = relayWith(() => Promise.reject(new Error('down')));
+    try {
+      await expect(recorder.points(OUTBOX_PENDING_METRIC)).resolves.toEqual(
+        expect.any(Array),
+      );
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('down'));
+    } finally {
+      relay.onModuleDestroy();
+      vi.restoreAllMocks();
+    }
+  });
+
+  it('stops reporting after shutdown', async () => {
+    const { db, relay } = relayWith(() => Promise.resolve([{ pending: 1 }]));
+    relay.onModuleDestroy();
+    await recorder.points(OUTBOX_PENDING_METRIC);
+    expect(db.query).not.toHaveBeenCalled();
   });
 });

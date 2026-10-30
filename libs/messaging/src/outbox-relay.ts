@@ -8,6 +8,11 @@ import {
   type OnModuleDestroy,
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
+import {
+  metrics,
+  type ObservableGauge,
+  type ObservableResult,
+} from '@opentelemetry/api';
 import { DataSource, type EntityManager } from 'typeorm';
 
 export const OUTBOX_POLL_INTERVAL_MS = 1_000;
@@ -18,17 +23,22 @@ interface OutboxRow {
   envelope: EventEnvelope;
 }
 
+/** Unsent rows, read at each metrics scrape; a backlog that keeps growing means a silent failure. */
+export const OUTBOX_PENDING_METRIC = 'campuskit.outbox.pending';
+
 /**
  * Publishes unsent outbox_events to RabbitMQ, oldest first, and marks each one sent after the
  * broker confirms it, each under the event's correlation ID. Delivery is at least once:
  * Notification deduplicates on eventId.
- * Starts when the application has bootstrapped and stops when it shuts down.
+ * Starts when the application has bootstrapped and stops when it shuts down. Reports the number
+ * of unsent rows as the OUTBOX_PENDING_METRIC gauge.
  */
 @Injectable()
 export class OutboxRelay implements OnApplicationBootstrap, OnModuleDestroy {
   private readonly logger = new Logger(OutboxRelay.name);
   private timer?: NodeJS.Timeout;
   private running = false;
+  private pendingGauge?: ObservableGauge;
 
   constructor(
     @InjectDataSource() private readonly db: DataSource,
@@ -37,10 +47,17 @@ export class OutboxRelay implements OnApplicationBootstrap, OnModuleDestroy {
 
   onApplicationBootstrap(): void {
     this.start();
+    this.pendingGauge = metrics
+      .getMeter('@app/messaging')
+      .createObservableGauge(OUTBOX_PENDING_METRIC, {
+        description: 'Outbox events not yet confirmed by the broker',
+      });
+    this.pendingGauge.addCallback(this.observePending);
   }
 
   onModuleDestroy(): void {
     this.stop();
+    this.pendingGauge?.removeCallback(this.observePending);
   }
 
   start(): void {
@@ -94,6 +111,20 @@ export class OutboxRelay implements OnApplicationBootstrap, OnModuleDestroy {
       return sent;
     });
   }
+
+  /** Reports the unsent rows; skips the point when the database does not answer. */
+  private readonly observePending = async (
+    result: ObservableResult,
+  ): Promise<void> => {
+    try {
+      const [{ pending }] = (await this.db.query(
+        `SELECT count(*)::int AS pending FROM outbox_events WHERE sent_at IS NULL`,
+      )) as { pending: number }[];
+      result.observe(pending);
+    } catch (err) {
+      this.logger.warn(`Counting unsent outbox events failed: ${String(err)}`);
+    }
+  };
 
   private async publishOne(
     tx: EntityManager,
