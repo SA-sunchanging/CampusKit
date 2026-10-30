@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rentalsQuery, returnBody } from './rental.ts';
+import { evidenceBody, rentalsQuery, returnBody } from './rental.ts';
 
 describe('rentalsQuery', () => {
   it('sends the role', () => {
@@ -16,5 +16,30 @@ describe('returnBody', () => {
   it('sends no code for a settlement retry', () => {
     expect(returnBody()).toEqual({});
     expect(returnBody('')).toEqual({});
+  });
+});
+
+describe('evidenceBody', () => {
+  const input = {
+    stage: 'PICKUP' as const,
+    condition: 'GOOD' as const,
+    accessories: [' Charger ', '', '  ', 'Case'],
+    photos: ['data:image/jpeg;base64,AAAA'],
+  };
+
+  it('trims the accessories and drops blank ones', () => {
+    expect(evidenceBody(input)).toEqual({
+      stage: 'PICKUP',
+      condition: 'GOOD',
+      accessories: ['Charger', 'Case'],
+      photos: ['data:image/jpeg;base64,AAAA'],
+    });
+  });
+
+  it('sends the note only when written', () => {
+    expect(evidenceBody({ ...input, note: '  Scratch on the lid ' }).note).toBe(
+      'Scratch on the lid',
+    );
+    expect(evidenceBody({ ...input, note: '   ' })).not.toHaveProperty('note');
   });
 });

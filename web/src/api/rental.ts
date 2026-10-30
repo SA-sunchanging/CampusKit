@@ -1,6 +1,6 @@
 import type { Terms } from './booking.ts';
 import { api } from './client.ts';
-import type { DateRange } from './listing.ts';
+import type { Condition, DateRange } from './listing.ts';
 
 // Rental calls through the gateway (role D). Types follow the gateway's Swagger page
 // (tag "rentals"). Money is integer satang; times are ISO-8601 UTC.
@@ -91,5 +91,70 @@ export function confirmReturn(id: string, code?: string): Promise<Rental> {
   return api(`/rental/rentals/${encodeURIComponent(id)}/return`, {
     method: 'POST',
     body: JSON.stringify(returnBody(code)),
+  });
+}
+
+/** PICKUP is recorded while AWAITING_PICKUP; RETURN while ACTIVE. */
+export type EvidenceStage = 'PICKUP' | 'RETURN';
+
+export const MAX_EVIDENCE_PHOTOS = 3;
+export const MAX_ACCESSORIES = 20;
+export const MAX_ACCESSORY_LENGTH = 60;
+export const MAX_EVIDENCE_NOTE_LENGTH = 500;
+
+/** What one party recorded at one stage. No note is an empty string. */
+export interface Evidence {
+  id: string;
+  rentalId: string;
+  stage: EvidenceStage;
+  recordedBy: string;
+  recorderRole: RentalRole;
+  /** The listing condition codes. */
+  condition: Condition;
+  accessories: string[];
+  /** Compressed JPEG data URLs, at most 3. */
+  photos: string[];
+  note: string;
+  createdAt: string;
+}
+
+export interface EvidenceInput {
+  stage: EvidenceStage;
+  condition: Condition;
+  accessories: string[];
+  photos: string[];
+  note?: string;
+}
+
+/** The evidence body: trimmed accessories without blanks, and the note only when written. */
+export function evidenceBody(input: EvidenceInput): EvidenceInput {
+  const note = input.note?.trim();
+  return {
+    stage: input.stage,
+    condition: input.condition,
+    accessories: input.accessories
+      .map((item) => item.trim())
+      .filter((item) => item !== ''),
+    photos: input.photos,
+    ...(note ? { note } : {}),
+  };
+}
+
+/** The renter or the owner only: both parties' records for both stages, pickup first. */
+export async function listEvidence(id: string): Promise<Evidence[]> {
+  const body = await api<{ evidence: Evidence[] }>(
+    `/rental/rentals/${encodeURIComponent(id)}/evidence`,
+  );
+  return body.evidence;
+}
+
+/** The renter or the owner, once per stage; a second record answers 409. */
+export function recordEvidence(
+  id: string,
+  input: EvidenceInput,
+): Promise<Evidence> {
+  return api(`/rental/rentals/${encodeURIComponent(id)}/evidence`, {
+    method: 'POST',
+    body: JSON.stringify(evidenceBody(input)),
   });
 }
