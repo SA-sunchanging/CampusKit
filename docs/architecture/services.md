@@ -22,7 +22,7 @@ Operation labels describe responsibilities, not exact endpoint names.
 | Service                   | Responsibility                            | Current operations                                                                                                                                                             | Collaborators and delivery                                                                                                                             | Protocol                      | Database                  |
 | ------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- | ------------------------- |
 | **Student Identity**      | Authentication, verification, eligibility | Register and log in; verify email with a one-time code; submit and review student status; check eligibility and profile                                                        | Gateway validates and propagates the JWT. Other services query eligibility and profile. Outbox events.                                                 | REST                          | PostgreSQL `identity_db`  |
-| **Listing**               | Items, pricing, screening                 | Create a DRAFT and publish it; screen and moderate; unpublish; search, detail, quote                                                                                           | Identity: eligibility and profile. Booking: calendar setup (gRPC). Outbox events.                                                                      | REST; gRPC client             | PostgreSQL `listing_db`   |
+| **Listing**               | Items, pricing, screening                 | Create a DRAFT and publish it; screen and moderate; unpublish; search, detail, quote                                                                                           | Identity: eligibility and profile. Booking: calendar setup and availability filter (gRPC). Review: owner reputation. Outbox events.                    | REST; gRPC client             | PostgreSQL `listing_db`   |
 | **Booking**               | Authoritative calendar and agreed terms   | Set calendar; check availability; request, approve, decline, cancel booking; expire stale requests; release calendar; fail approvals that cannot complete and void their holds | Identity: eligibility. Listing: quote. Payment: authorize and void. Rental: create and cancel. Outbox events.                                          | gRPC server; REST client      | PostgreSQL `booking_db`   |
 | **Rental**                | Custody and settlement workflow           | Pickup and return evidence and codes; confirm pickup and return; settlement and retry; cancel before pickup; scheduled overdue checks and reminders                            | Booking: status, calendar release, affected bookings (gRPC). Payment: capture and settle. Outbox events. Closes after successful settlement.           | REST; gRPC client             | PostgreSQL `rental_db`    |
 | **Payment**               | Demo ledger and payment adapter           | Payment method; fee and deposit authorization; capture; void; late-fee settlement; payout                                                                                      | Local ledger adapter; no real provider calls. Stable financial operation IDs prevent duplicates. Booking and Rental publish the related notifications. | REST                          | PostgreSQL `payment_db`   |
@@ -32,7 +32,7 @@ Operation labels describe responsibilities, not exact endpoint names.
 ### Deferred capabilities
 
 - Student Identity: account-restriction management, erasure, identity-document purge, and pseudonymisation remain proposed operations.
-- Listing: editing or resubmitting a rejected listing is deferred. Listing does not yet call the Review reputation summary.
+- Listing: editing or resubmitting a rejected listing, and checking more than the 200 newest matches of a date search, are deferred.
 - Booking: calendar reconciliation and rescheduling after a late return are deferred.
 - Rental: settlement holds and dispute workflows are deferred.
 - Payment: refunds and real-provider reconciliation are deferred.
@@ -87,7 +87,7 @@ flowchart LR
 
   listing -- "REST" --> identity
   listing -- "gRPC" --> booking
-  listing -- "REST (planned)" --> review
+  listing -- "REST" --> review
   booking -- "REST" --> identity
   booking -- "REST" --> listing
   booking -- "REST" --> payment
@@ -246,19 +246,26 @@ Only `PUBLISHED` listings are searchable and quotable. A listing in any other st
 
 Photos are inline data URLs (JPEG, PNG or WebP), at most 400 KB each and 60 KB for the thumbnail. The web app resizes and compresses them before upload; search returns only the thumbnail.
 
+### Search
+
+- `start` and `end` come together, as strict ISO-8601, with `end` after `start` and at most 30 days apart; otherwise `400`.
+- With dates, Listing takes the 200 newest matches of the other filters, asks Booking `FilterAvailable` once, keeps their order and pages in memory; `total` counts the free ones among them. Booking down or slower than 5 seconds answers `503`. Without dates Listing never calls Booking.
+- `FilterAvailable` is advisory, takes no caller token (guests search too), accepts at most 200 IDs, and treats a listing without a calendar as unavailable.
+- Each search item and the detail carry `ownerRating` (null without reviews) and `ownerReviewCount`, from one Review `GET /internal/reputation` call per request with a 1.5-second timeout. When Review fails they are null and 0, a warning is logged, and the request still succeeds.
+
 ### Endpoints
 
-| Route                                                | Caller        | Answer                                                                                                                                           |
-| ---------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /listings?q=&category=&page=&pageSize=`         | Public        | `200` with `{ items, total, page, pageSize }`; only `PUBLISHED` listings; `q` matches title and description; `pageSize` at most 50               |
-| `GET /listings/{id}`                                 | Public        | `200` with the listing and its photos; a listing that is not `PUBLISHED` only for its owner and administrators, otherwise `404`                  |
-| `POST /listings`                                     | Student       | `201` with the listing: `PUBLISHED`, `PENDING_REVIEW`, or DRAFT with `publishError`                                                              |
-| `POST /listings/{id}/publish`                        | Owner         | `200` with the listing; `403` for anyone else                                                                                                    |
-| `POST /listings/{id}/unpublish`                      | Owner         | `200` with the `UNPUBLISHED` listing, also on a repeat; `409` from any status other than `PUBLISHED`                                             |
-| `GET /admin/listings?status=&page=&pageSize=`        | Administrator | `200` with the listings in that status (`PENDING_REVIEW` by default), oldest first, with their flags                                             |
-| `POST /admin/listings/{id}/approve`                  | Administrator | `200` with the `PUBLISHED` listing; `409` unless `PENDING_REVIEW`                                                                                |
-| `POST /admin/listings/{id}/reject` with `{ reason }` | Administrator | `200` with the `REJECTED` listing; `409` unless `PENDING_REVIEW`                                                                                 |
-| `GET /internal/listings/{id}/quote?start=&end=`      | Booking       | `200` with `{ listingId, ownerId, days, rentalFee, deposit, lateFeePerDay }`; `rentalFee` is the daily rate times the days, with no platform fee |
+| Route                                                              | Caller        | Answer                                                                                                                                                                            |
+| ------------------------------------------------------------------ | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /listings?q=&category=&location=&start=&end=&page=&pageSize=` | Public        | `200` with `{ items, total, page, pageSize }`; only `PUBLISHED` listings; `q` matches title and description; `location` is a pickup code; `pageSize` at most 50. See Search below |
+| `GET /listings/{id}`                                               | Public        | `200` with the listing and its photos; a listing that is not `PUBLISHED` only for its owner and administrators, otherwise `404`                                                   |
+| `POST /listings`                                                   | Student       | `201` with the listing: `PUBLISHED`, `PENDING_REVIEW`, or DRAFT with `publishError`                                                                                               |
+| `POST /listings/{id}/publish`                                      | Owner         | `200` with the listing; `403` for anyone else                                                                                                                                     |
+| `POST /listings/{id}/unpublish`                                    | Owner         | `200` with the `UNPUBLISHED` listing, also on a repeat; `409` from any status other than `PUBLISHED`                                                                              |
+| `GET /admin/listings?status=&page=&pageSize=`                      | Administrator | `200` with the listings in that status (`PENDING_REVIEW` by default), oldest first, with their flags                                                                              |
+| `POST /admin/listings/{id}/approve`                                | Administrator | `200` with the `PUBLISHED` listing; `409` unless `PENDING_REVIEW`                                                                                                                 |
+| `POST /admin/listings/{id}/reject` with `{ reason }`               | Administrator | `200` with the `REJECTED` listing; `409` unless `PENDING_REVIEW`                                                                                                                  |
+| `GET /internal/listings/{id}/quote?start=&end=`                    | Booking       | `200` with `{ listingId, ownerId, days, rentalFee, deposit, lateFeePerDay }`; `rentalFee` is the daily rate times the days, with no platform fee                                  |
 
 The administrator routes answer `403` to anyone else. The quote answers `400` when `start` or `end` is not midnight in Bangkok, the period is shorter than one day, or it is longer than the listing's maximum rental days; `404` for an unknown listing; and `409` for a listing that is not published. Whether the dates are free is Booking's check.
 
