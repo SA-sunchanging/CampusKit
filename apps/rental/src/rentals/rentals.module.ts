@@ -3,6 +3,8 @@ import { BookingClientModule } from '@app/contracts';
 import { Module } from '@nestjs/common';
 import { BookingClient } from '../clients/booking.client.js';
 import { PaymentClient } from '../clients/payment.client.js';
+import { EvidenceController } from '../evidence/evidence.controller.js';
+import { EvidenceService } from '../evidence/evidence.service.js';
 import { InternalRentalsController } from '../internal/internal-rentals.controller.js';
 import { PickupService } from './pickup.service.js';
 import { RentalCancellationService } from './rental-cancellation.service.js';
@@ -14,7 +16,11 @@ import { ReturnService } from './return.service.js';
 
 @Module({
   imports: [AuthModule, BookingClientModule],
-  controllers: [RentalsController, InternalRentalsController],
+  controllers: [
+    RentalsController,
+    EvidenceController,
+    InternalRentalsController,
+  ],
   providers: [
     RentalCreationService,
     RentalCancellationService,
@@ -24,6 +30,7 @@ import { ReturnService } from './return.service.js';
     PickupService,
     ReturnService,
     RentalSweeper,
+    EvidenceService,
   ],
 })
 export class RentalsModule {}
