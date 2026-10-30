@@ -250,7 +250,7 @@ Photos are inline data URLs (JPEG, PNG or WebP), at most 400 KB each and 60 KB f
 
 - `start` and `end` come together, as strict ISO-8601, with `end` after `start` and at most 30 days apart; otherwise `400`.
 - With dates, Listing takes the 200 newest matches of the other filters, asks Booking `FilterAvailable` once, keeps their order and pages in memory; `total` counts the free ones among them. Booking down or slower than 5 seconds answers `503`. Without dates Listing never calls Booking.
-- `FilterAvailable` is advisory, takes no caller token (guests search too), accepts at most 200 IDs, and treats a listing without a calendar as unavailable.
+- `FilterAvailable` is advisory, takes no user token (guests search too) but requires Listing's service token, accepts at most 200 IDs, and treats a listing without a calendar as unavailable.
 - Each search item and the detail carry `ownerRating` (null without reviews) and `ownerReviewCount`, from one Review `GET /internal/reputation` call per request with a 1.5-second timeout. When Review fails they are null and 0, a warning is logged, and the request still succeeds.
 
 ### Endpoints
@@ -346,7 +346,7 @@ A refusal stores nothing, so a corrected retry with the same `operationId` can s
 
 ### Internal endpoints
 
-The gateway refuses `/internal/` paths from outside; inside the Compose network they need no credentials yet (see Open questions below). A body that fails validation answers `400`; a refusal of the rules answers `409`, both with the shared error body `{ error: { code, message } }`.
+The gateway refuses `/internal/` paths from outside. Every internal route requires an `x-service-token` header: a short-lived HS256 service JWT (`sub` the calling service, `aud` `campuskit-internal`, five-minute expiry, signed with `INTERNAL_JWT_SECRET`) from a caller on the route's allowlist; a missing or invalid token answers `401` and a service not on the list `403` (see `docs/adr/adr-010-authenticate-internal-calls-with-service-tokens.md`). A body that fails validation answers `400`; a refusal of the rules answers `409`, both with the shared error body `{ error: { code, message } }`.
 
 | Call                                                     | Body                                                                                                                      | Reply                                                                       | Rules                                                                                                                                                                                                                                                                                                 |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -536,7 +536,7 @@ When a service is down or does not answer within 15 seconds, the gateway answers
 
 The gateway forwards the `Authorization` header unchanged, and each service still checks the token and authorises the request (see `docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md`).
 
-The gateway serves the Booking routes itself and calls Booking over gRPC (`libs/contracts/proto/booking.proto`). Every Booking route needs a token. On each call the gateway sends the caller's `Authorization` header and the correlation ID as the gRPC metadata `authorization` and `x-correlation-id`; Booking reads the caller from the token. `SetupCalendar` and `ReleaseCalendar` have no REST route; Listing and Rental call them over gRPC.
+The gateway serves the Booking routes itself and calls Booking over gRPC (`libs/contracts/proto/booking.proto`). Every Booking route needs a token. On each call the gateway sends the caller's `Authorization` header and the correlation ID as the gRPC metadata `authorization` and `x-correlation-id`; Booking reads the caller from the token. `SetupCalendar` and `ReleaseCalendar` have no REST route; Listing and Rental call them over gRPC. `SetupCalendar` and `FilterAvailable` also require Listing's service token, and `ReleaseCalendar` Rental's, as the `x-service-token` metadata; a missing or invalid one answers `UNAUTHENTICATED` and another service's `PERMISSION_DENIED`. The methods the gateway calls rely on the user token alone.
 
 | Route                                                                                             | Booking method      | Answer                                  |
 | ------------------------------------------------------------------------------------------------- | ------------------- | --------------------------------------- |
@@ -581,4 +581,4 @@ These are a validation plan, not claimed test results.
 
 ## Open questions
 
-- **Internal service authentication is not specified.** `docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md` requires internal service credentials for service-to-service calls but does not choose a mechanism. Until one is chosen, the gateway refuses every `/internal/` path from outside, but inside the Compose network internal endpoints accept calls without credentials.
+None at the moment. Internal service authentication is settled in `docs/adr/adr-010-authenticate-internal-calls-with-service-tokens.md`.
