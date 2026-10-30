@@ -3,7 +3,8 @@
 // Add fields with new numbers; never reuse or renumber an existing field.
 //
 // Caller identity (docs/adr/adr-002-authenticate-centrally-authorise-at-data-owner.md):
-// the caller sends its bearer token as gRPC metadata ("authorization": "Bearer <JWT>").
+// the caller sends its bearer token as gRPC metadata ("authorization": "Bearer <JWT>"),
+// except for FilterAvailable, which serves public search and takes no caller token.
 // Booking reads the user from that token, never from a field in the request, and checks
 // ownership and participation itself. Every call also carries "x-correlation-id" metadata.
 //
@@ -54,6 +55,7 @@ service BookingService {
 
   // Listing calls this when a search names dates: of the given listings (at most 200), returns
   // those whose calendar is free for the whole period. Advisory, like CheckAvailability.
+  // No caller token: guests search too. A listing without a calendar counts as unavailable.
   rpc FilterAvailable (FilterAvailableRequest) returns (FilterAvailableReply);
 }
 
