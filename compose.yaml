@@ -4,6 +4,7 @@ name: campuskit
 
 include:
   - infra/compose.yaml
+  - infra/observability/compose.yaml
   - apps/gateway/compose.yaml
   - apps/identity/compose.yaml
   - apps/listing/compose.yaml

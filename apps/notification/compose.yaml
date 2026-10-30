@@ -6,6 +6,9 @@ services:
       args:
         APP: notification
     environment:
+      OTEL_SERVICE_NAME: notification
+      # Traces go to Jaeger when the observability profile runs; otherwise they are dropped.
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
       PORT: 3006
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
       MONGO_URL: mongodb://notification_user:notification_pass@mongo:27017/notification_db

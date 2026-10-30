@@ -1,0 +1,35 @@
+# Metrics, traces and alerts (docs/architecture/observability.md). Off by default so the normal
+# stack and the load tests stay as they were; start them with
+#   docker compose --profile observability up --build -d
+services:
+  jaeger:
+    image: jaegertracing/jaeger:2.11.0
+    profiles: [observability]
+    ports:
+      - "16686:16686" # UI; services send OTLP/HTTP to jaeger:4318 inside the network
+
+  prometheus:
+    image: prom/prometheus:v3.7.3
+    profiles: [observability]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alerts.yml:/etc/prometheus/alerts.yml:ro
+
+  grafana:
+    image: grafana/grafana:12.2.1
+    profiles: [observability]
+    ports:
+      - "3030:3000"
+    environment:
+      # Demo only: anyone who reaches the port can view the dashboard without logging in.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+      - jaeger

@@ -8,6 +8,9 @@ services:
     ports:
       - "3000:3000"
     environment:
+      OTEL_SERVICE_NAME: gateway
+      # Traces go to Jaeger when the observability profile runs; otherwise they are dropped.
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
       PORT: 3000
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret}
       BOOKING_GRPC_URL: booking:50051

@@ -1,0 +1,27 @@
+# Silent failures: nothing crashes in front of the user, but work stops moving.
+groups:
+  - name: campuskit
+    rules:
+      - alert: ServiceDown
+        expr: up{job="campuskit"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.service }} does not answer metric scrapes"
+
+      - alert: OutboxBacklog
+        # Events wait in the outbox while RabbitMQ is down; the relay catches up within seconds after.
+        expr: campuskit_outbox_pending > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.service }} has {{ $value }} events not yet published"
+
+      - alert: DeadLetters
+        expr: increase(campuskit_dead_letters_total[10m]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "Notification dead-lettered events in the last 10 minutes"
