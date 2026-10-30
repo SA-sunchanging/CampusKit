@@ -1,4 +1,9 @@
 import {
+  InternalAuthGuard,
+  InternalCallers,
+  SERVICE_TOKEN_HEADER,
+} from '@app/common';
+import {
   Body,
   Controller,
   Get,
@@ -7,8 +12,14 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiCreatedResponse,
+  ApiHeader,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RentalCancellationService } from '../rentals/rental-cancellation.service.js';
 import { RentalCreationService } from '../rentals/rental-creation.service.js';
 import { RentalQueriesService } from '../rentals/rental-queries.service.js';
@@ -18,9 +29,13 @@ import { InternalRentalResponse } from './internal-rental.response.js';
 
 /**
  * Service-to-service endpoints for Booking and Review. The gateway does not forward /internal
- * paths. Internal service authentication is still open (docs/architecture/services.md).
+ * paths, and each route accepts only the service tokens of its callers
+ * (docs/adr/adr-010-authenticate-internal-calls-with-service-tokens.md).
  */
 @ApiTags('internal')
+@ApiHeader({ name: SERVICE_TOKEN_HEADER, required: true })
+@UseGuards(InternalAuthGuard)
+@InternalCallers('booking')
 @Controller('internal/rentals')
 export class InternalRentalsController {
   constructor(
@@ -51,6 +66,7 @@ export class InternalRentalsController {
 
   /** The people and status of a rental, for Review; 404 when unknown. */
   @Get(':id')
+  @InternalCallers('review')
   @ApiOkResponse({ type: InternalRentalResponse })
   get(@Param('id', ParseUUIDPipe) id: string): Promise<InternalRentalResponse> {
     return this.queries.getInternal(id);

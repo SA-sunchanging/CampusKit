@@ -1,3 +1,4 @@
+import { SERVICE_TOKEN_HEADER } from '@app/common';
 import { BOOKING_CLIENT } from '@app/contracts';
 import { Metadata, status } from '@grpc/grpc-js';
 import { Inject, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
@@ -5,6 +6,7 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, type Observable, timeout } from 'rxjs';
 import type { CallContext } from './call-context.js';
 import type { ServiceFailure, ServiceResult } from './http-call.js';
+import { serviceTokens } from './service-token.js';
 
 /** Booking answers within this time or counts as unavailable. */
 export const TIMEOUT_MS = 5_000;
@@ -128,10 +130,14 @@ export class BookingClient implements OnModuleInit {
   }
 }
 
-/** The caller's token, forwarded unchanged, and the correlation ID. */
+/**
+ * The caller's token, forwarded unchanged, the correlation ID, and Rental's service token, which
+ * Booking requires on ReleaseCalendar.
+ */
 function metadataOf(call: CallContext): Metadata {
   const metadata = new Metadata();
   metadata.set('authorization', call.authorization);
   metadata.set('x-correlation-id', call.correlationId);
+  metadata.set(SERVICE_TOKEN_HEADER, serviceTokens.token());
   return metadata;
 }

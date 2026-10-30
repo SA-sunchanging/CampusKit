@@ -1,3 +1,5 @@
+import { checkServiceToken, INTERNAL_JWT_SECRET } from '@app/common';
+import { JwtService } from '@nestjs/jwt';
 import { status } from '@grpc/grpc-js';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { NEVER, of, throwError } from 'rxjs';
@@ -9,6 +11,12 @@ import {
 } from './booking.client.js';
 
 const call = { authorization: 'Bearer token', correlationId: 'corr-1' };
+
+/** True when the value is a valid service token signed for Rental. */
+function signedByRental(token: unknown): boolean {
+  const jwt = new JwtService({ secret: INTERNAL_JWT_SECRET });
+  return checkServiceToken(jwt, token, ['rental']).ok;
+}
 const booking: BookingView = {
   id: 'b1',
   listingId: 'l1',
@@ -87,7 +95,7 @@ describe('BookingClient', () => {
   });
 
   describe('releaseCalendar', () => {
-    it('releases the dates as the caller', async () => {
+    it('releases the dates as the caller, with the service token', async () => {
       const { client, releaseCalendar } = setup({
         releaseCalendar: of({ ok: true }),
       });
@@ -98,6 +106,7 @@ describe('BookingClient', () => {
       const [request, metadata] = releaseCalendar.mock.calls[0];
       expect(request).toEqual({ bookingId: 'b1' });
       expect(metadata.get('authorization')).toEqual(['Bearer token']);
+      expect(signedByRental(metadata.get('x-service-token')[0])).toBe(true);
     });
 
     it('reports FAILED_PRECONDITION as declined', async () => {

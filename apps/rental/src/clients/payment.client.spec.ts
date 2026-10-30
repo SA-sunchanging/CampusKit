@@ -1,3 +1,5 @@
+import { checkServiceToken, INTERNAL_JWT_SECRET } from '@app/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   type CaptureRequest,
   PaymentClient,
@@ -5,6 +7,12 @@ import {
 } from './payment.client.js';
 
 const call = { authorization: 'Bearer token', correlationId: 'corr-1' };
+
+/** True when the value is a valid service token signed for Rental. */
+function signedByRental(token: unknown): boolean {
+  const jwt = new JwtService({ secret: INTERNAL_JWT_SECRET });
+  return checkServiceToken(jwt, token, ['rental']).ok;
+}
 const capture: CaptureRequest = {
   operationId: 'rental:r1:capture-fee',
   bookingId: 'b1',
@@ -46,7 +54,7 @@ describe('PaymentClient', () => {
   });
 
   describe('capture', () => {
-    it('posts the capture with the correlation ID and no token', async () => {
+    it('posts the capture with the correlation ID and the service token only', async () => {
       fetchMock.mockResolvedValueOnce(reply(200, captured));
       await expect(new PaymentClient().capture(capture, call)).resolves.toEqual(
         { ok: true, value: captured },
@@ -54,10 +62,13 @@ describe('PaymentClient', () => {
       const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
       expect(url).toBe('http://localhost:3004/internal/payments/capture');
       expect(init.method).toBe('POST');
-      expect(init.headers).toEqual({
+      const headers = init.headers as Record<string, string>;
+      expect(headers).toEqual({
         'x-correlation-id': 'corr-1',
+        'x-service-token': expect.any(String),
         'content-type': 'application/json',
       });
+      expect(signedByRental(headers['x-service-token'])).toBe(true);
       expect(JSON.parse(init.body as string)).toEqual(capture);
     });
 
