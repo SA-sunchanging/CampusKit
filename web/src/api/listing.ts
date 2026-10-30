@@ -50,6 +50,9 @@ export interface ListingSummary {
   deposit: number;
   pickupLocations: PickupLocation[];
   ownerName: string;
+  /** The owner's mean rating; null without reviews or while Review is unavailable. */
+  ownerRating: number | null;
+  ownerReviewCount: number;
   thumbnail: string | null;
   publishedAt: string;
 }
@@ -65,6 +68,10 @@ export interface Listing {
   id: string;
   ownerId: string;
   ownerName: string;
+  /** Only from getListing: the owner's mean rating, null without reviews. */
+  ownerRating?: number | null;
+  /** Only from getListing. */
+  ownerReviewCount?: number;
   status: ListingStatus;
   title: string;
   category: Category;
@@ -139,18 +146,30 @@ export interface CreateListingBody {
 export interface SearchParams {
   q?: string;
   category?: Category;
+  /** Only listings with this pickup point. */
+  location?: PickupLocation;
+  /** Only listings free for the whole period, at most 30 days long. */
+  period?: DateRange;
   /** 1-based; page 1 is the default and is left out of the query. */
   page?: number;
   /** At most 50 on the server. */
   pageSize?: number;
 }
 
-/** Builds "?q=...&category=...&page=...", leaving out empty values and page 1. */
+/**
+ * Builds "?q=...&category=...&location=...&start=...&end=...&page=...",
+ * leaving out empty values and page 1.
+ */
 export function searchQuery(params: SearchParams): string {
   const query = new URLSearchParams();
   const q = params.q?.trim();
   if (q) query.set('q', q);
   if (params.category) query.set('category', params.category);
+  if (params.location) query.set('location', params.location);
+  if (params.period) {
+    query.set('start', params.period.start);
+    query.set('end', params.period.end);
+  }
   if (params.page !== undefined && params.page > 1) {
     query.set('page', String(params.page));
   }
@@ -161,7 +180,11 @@ export function searchQuery(params: SearchParams): string {
   return text ? `?${text}` : '';
 }
 
-/** Published listings, newest first. Public: guests can search. */
+/**
+ * Published listings, newest first, each with its owner's rating. Public:
+ * guests can search. With a period, only the first 200 matches are checked
+ * for availability, and the service answers 503 while Booking is down.
+ */
 export function searchListings(params: SearchParams): Promise<ListingPage> {
   return api(`/listing/listings${searchQuery(params)}`);
 }

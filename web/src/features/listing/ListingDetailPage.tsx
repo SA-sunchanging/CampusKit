@@ -12,6 +12,7 @@ import {
   STATUS_LABELS,
   STATUS_TONE,
 } from './options.ts';
+import { ownerLine } from './ownerRating.ts';
 import OwnerStatus from './OwnerStatus.tsx';
 import './listing.css';
 
@@ -105,7 +106,11 @@ function ListingView({
       </p>
       <PageHeader
         title={listing.title}
-        aside={`Listed by ${listing.ownerName}`}
+        aside={ownerLine(
+          listing.ownerName,
+          listing.ownerRating,
+          listing.ownerReviewCount,
+        )}
       />
       <div className="listing-badges">
         <Badge>{CATEGORY_LABELS[listing.category]}</Badge>

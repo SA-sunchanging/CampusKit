@@ -7,6 +7,7 @@ import {
   formatBaht,
 } from '../../ui/index.ts';
 import { CATEGORY_LABELS, CONDITION_LABELS, PICKUP_LABELS } from './options.ts';
+import { ownerRatingLabel } from './ownerRating.ts';
 
 // One search result (role B), following the card pattern at /ui-preview.
 export default function ListingCard({ listing }: { listing: ListingSummary }) {
@@ -45,6 +46,9 @@ export default function ListingCard({ listing }: { listing: ListingSummary }) {
         {firstPickup && PICKUP_LABELS[firstPickup]}
         {otherPickups.length > 0 && ` +${otherPickups.length} more`} -{' '}
         {listing.ownerName}
+      </p>
+      <p>
+        Owner: {ownerRatingLabel(listing.ownerRating, listing.ownerReviewCount)}
       </p>
       <p>
         {CONDITION_LABELS[listing.condition]} - deposit{' '}

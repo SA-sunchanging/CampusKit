@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import {
-  CATEGORIES,
   searchListings,
   searchQuery,
   type ListingPage,
@@ -10,22 +9,15 @@ import {
 import { useAuth } from '../../auth/useAuth.ts';
 import {
   Alert,
-  Button,
   ButtonLink,
   EmptyState,
-  Field,
   Hero,
   PageHeader,
   Panel,
 } from '../../ui/index.ts';
 import ListingCard from './ListingCard.tsx';
-import { CATEGORY_LABELS } from './options.ts';
-import {
-  MAX_KEYWORD_LENGTH,
-  PAGE_SIZE,
-  pageCount,
-  readSearch,
-} from './search.ts';
+import { PAGE_SIZE, pageCount, readSearch } from './search.ts';
+import SearchForm from './SearchForm.tsx';
 import './listing.css';
 
 interface Results {
@@ -58,17 +50,6 @@ export default function ListingsPage() {
     };
   }, [search]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const filters = new URLSearchParams({
-      q: String(form.get('q') ?? ''),
-      category: String(form.get('category') ?? ''),
-    });
-    // A new search starts again at page 1.
-    setParams(searchQuery({ ...readSearch(filters), page: 1 }));
-  }
-
   const current = results?.query === query ? results : null;
 
   return (
@@ -95,35 +76,10 @@ export default function ListingsPage() {
           }
         />
         <Panel>
-          <form
-            key={`${search.q ?? ''}|${search.category ?? ''}`}
-            className="stack"
-            role="search"
-            onSubmit={handleSubmit}
-          >
-            <Field label="Keyword">
-              <input
-                name="q"
-                type="search"
-                maxLength={MAX_KEYWORD_LENGTH}
-                defaultValue={search.q ?? ''}
-                placeholder="Textbook, racket, gown..."
-              />
-            </Field>
-            <Field label="Category">
-              <select name="category" defaultValue={search.category ?? ''}>
-                <option value="">All categories</option>
-                {CATEGORIES.map((category) => (
-                  <option key={category} value={category}>
-                    {CATEGORY_LABELS[category]}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <div className="actions">
-              <Button type="submit">Search</Button>
-            </div>
-          </form>
+          <SearchForm
+            search={search}
+            onSearch={(next) => setParams(searchQuery(next))}
+          />
         </Panel>
         {!current && <p>Loading listings...</p>}
         {current?.error && <Alert tone="danger">{current.error}</Alert>}
@@ -141,7 +97,9 @@ function ResultList({
   search: SearchParams;
 }) {
   const pages = pageCount(page.total, page.pageSize);
-  const filtered = Boolean(search.q || search.category);
+  const filtered = Boolean(
+    search.q || search.category || search.location || search.period,
+  );
   return (
     <>
       <p aria-live="polite">
@@ -157,7 +115,7 @@ function ResultList({
           {page.page > pages
             ? 'This page is past the last result.'
             : filtered
-              ? 'Try another keyword or category.'
+              ? 'Try other filters or dates.'
               : 'Nothing is listed yet. Check back soon.'}
         </EmptyState>
       ) : (

@@ -5,6 +5,7 @@ import {
   getReviewQueue,
   rejectListing,
   reviewQueueQuery,
+  searchListings,
   searchQuery,
   unpublishListing,
 } from './listing.ts';
@@ -52,6 +53,20 @@ describe('searchQuery', () => {
     expect(searchQuery({ pageSize: 20 })).toBe('?pageSize=20');
   });
 
+  it('adds the pickup point and both ends of the period', () => {
+    expect(
+      searchQuery({
+        location: 'ENGINEERING',
+        period: {
+          start: '2026-11-01T17:00:00.000Z',
+          end: '2026-11-03T17:00:00.000Z',
+        },
+      }),
+    ).toBe(
+      '?location=ENGINEERING&start=2026-11-01T17%3A00%3A00.000Z&end=2026-11-03T17%3A00%3A00.000Z',
+    );
+  });
+
   it('encodes special characters in the keyword', () => {
     expect(searchQuery({ q: 'gown & cap' })).toBe('?q=gown+%26+cap');
   });
@@ -64,6 +79,39 @@ describe('reviewQueueQuery', () => {
 
   it('keeps pages after the first', () => {
     expect(reviewQueueQuery('REJECTED', 2)).toBe('?status=REJECTED&page=2');
+  });
+});
+
+describe('searchListings', () => {
+  beforeEach(() => {
+    vi.stubGlobal('localStorage', new MemoryStorage());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('sends the filters and returns the owner ratings', async () => {
+    const fetchMock = mockFetch({
+      items: [{ id, ownerRating: 4.5, ownerReviewCount: 12 }],
+      total: 1,
+      page: 1,
+      pageSize: 12,
+    });
+    const page = await searchListings({
+      location: 'ARTS',
+      period: {
+        start: '2026-11-01T17:00:00.000Z',
+        end: '2026-11-02T17:00:00.000Z',
+      },
+    });
+    expect(page.items[0]).toMatchObject({
+      ownerRating: 4.5,
+      ownerReviewCount: 12,
+    });
+    expect(requestOf(fetchMock).url).toBe(
+      '/api/listing/listings?location=ARTS&start=2026-11-01T17%3A00%3A00.000Z&end=2026-11-02T17%3A00%3A00.000Z',
+    );
   });
 });
 
