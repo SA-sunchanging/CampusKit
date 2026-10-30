@@ -7,3 +7,4 @@ export * from './correlation.interceptor.js';
 export * from './database.js';
 export * from './error.filter.js';
 export * from './health.module.js';
+export * from './service-token.js';
