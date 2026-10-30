@@ -1,7 +1,15 @@
+import { checkServiceToken, INTERNAL_JWT_SECRET } from '@app/common';
+import { JwtService } from '@nestjs/jwt';
 import { ReviewClient } from './review.client.js';
 
 const alice = '00000000-0000-4000-8000-000000000001';
 const bob = '00000000-0000-4000-8000-000000000002';
+
+/** True when the header carries a valid service token signed for Listing. */
+function signedByListing(token: unknown): boolean {
+  const jwt = new JwtService({ secret: INTERNAL_JWT_SECRET });
+  return checkServiceToken(jwt, token, ['listing']).ok;
+}
 
 function reply(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status });
@@ -35,7 +43,9 @@ describe('ReviewClient.reputations', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toContain(`/internal/reputation?userIds=${alice},${bob}`);
-    expect(init.headers).toEqual({ 'x-correlation-id': 'corr-1' });
+    const headers = init.headers as Record<string, string>;
+    expect(headers['x-correlation-id']).toBe('corr-1');
+    expect(signedByListing(headers['x-service-token'])).toBe(true);
     expect(result.get(alice)).toEqual({
       ownerRating: 4.5,
       ownerReviewCount: 12,

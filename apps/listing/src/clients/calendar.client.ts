@@ -1,3 +1,4 @@
+import { SERVICE_TOKEN_HEADER } from '@app/common';
 import { BOOKING_CLIENT } from '@app/contracts';
 import { Metadata, status } from '@grpc/grpc-js';
 import {
@@ -12,6 +13,7 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, type Observable, timeout } from 'rxjs';
 import type { Blackout } from '../listings/listing.entity.js';
 import type { CallContext } from './call-context.js';
+import { serviceTokens } from './service-token.js';
 
 /** Booking answers within this time or counts as unavailable. */
 const TIMEOUT_MS = 5_000;
@@ -44,7 +46,10 @@ export function calendarErrorMessage(error: unknown): string {
   }
 }
 
-/** Calls the calendar of Booking over gRPC: setup as the calling user, and the search filter. */
+/**
+ * Calls the calendar of Booking over gRPC: setup as the calling user, and the search filter. Both
+ * carry Listing's service token, which Booking requires on these methods.
+ */
 @Injectable()
 export class CalendarClient implements OnModuleInit {
   private readonly logger = new Logger(CalendarClient.name);
@@ -65,6 +70,7 @@ export class CalendarClient implements OnModuleInit {
     const metadata = new Metadata();
     metadata.set('authorization', call.authorization);
     metadata.set('x-correlation-id', call.correlationId);
+    metadata.set(SERVICE_TOKEN_HEADER, serviceTokens.token());
     try {
       await firstValueFrom(
         this.booking
@@ -87,6 +93,7 @@ export class CalendarClient implements OnModuleInit {
   ): Promise<string[]> {
     const metadata = new Metadata();
     metadata.set('x-correlation-id', correlationId);
+    metadata.set(SERVICE_TOKEN_HEADER, serviceTokens.token());
     try {
       const reply = await firstValueFrom(
         this.booking

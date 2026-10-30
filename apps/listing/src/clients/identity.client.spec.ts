@@ -1,3 +1,5 @@
+import { checkServiceToken, INTERNAL_JWT_SECRET } from '@app/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   ForbiddenException,
   ServiceUnavailableException,
@@ -5,6 +7,12 @@ import {
 import { IdentityClient } from './identity.client.js';
 
 const userId = '00000000-0000-4000-8000-000000000001';
+
+/** True when the header carries a valid service token signed for Listing. */
+function signedByListing(token: unknown): boolean {
+  const jwt = new JwtService({ secret: INTERNAL_JWT_SECRET });
+  return checkServiceToken(jwt, token, ['listing']).ok;
+}
 
 function reply(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status });
@@ -31,7 +39,9 @@ describe('IdentityClient.requirePublisher', () => {
     ).resolves.toBe('Somchai Jaidee');
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toContain(`/internal/users/${userId}/eligibility`);
-    expect(init.headers).toEqual({ 'x-correlation-id': 'corr-1' });
+    const headers = init.headers as Record<string, string>;
+    expect(headers['x-correlation-id']).toBe('corr-1');
+    expect(signedByListing(headers['x-service-token'])).toBe(true);
   });
 
   it('refuses a user who may not publish, naming the reasons', async () => {

@@ -1,10 +1,11 @@
-import { CORRELATION_HEADER } from '@app/common';
+import { CORRELATION_HEADER, SERVICE_TOKEN_HEADER } from '@app/common';
 import {
   ForbiddenException,
   Injectable,
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { serviceTokens } from './service-token.js';
 
 /** Identity answers within this time or counts as unavailable. */
 const TIMEOUT_MS = 5_000;
@@ -53,7 +54,10 @@ export class IdentityClient {
     let res: Response;
     try {
       res = await fetch(`${this.baseUrl}${path}`, {
-        headers: { [CORRELATION_HEADER]: correlationId },
+        headers: {
+          [CORRELATION_HEADER]: correlationId,
+          [SERVICE_TOKEN_HEADER]: serviceTokens.token(),
+        },
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
     } catch (err) {

@@ -1,5 +1,6 @@
-import { CORRELATION_HEADER } from '@app/common';
+import { CORRELATION_HEADER, SERVICE_TOKEN_HEADER } from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
+import { serviceTokens } from './service-token.js';
 
 /** Review answers within this time, or the listings show no rating. Kept short for search. */
 const TIMEOUT_MS = 1_500;
@@ -43,7 +44,10 @@ export class ReviewClient {
     const path = `/internal/reputation?userIds=${unique.join(',')}`;
     try {
       const res = await fetch(`${this.baseUrl}${path}`, {
-        headers: { [CORRELATION_HEADER]: correlationId },
+        headers: {
+          [CORRELATION_HEADER]: correlationId,
+          [SERVICE_TOKEN_HEADER]: serviceTokens.token(),
+        },
         signal: AbortSignal.timeout(TIMEOUT_MS),
       });
       if (!res.ok) {

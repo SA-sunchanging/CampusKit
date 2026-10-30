@@ -1,3 +1,5 @@
+import { checkServiceToken, INTERNAL_JWT_SECRET } from '@app/common';
+import { JwtService } from '@nestjs/jwt';
 import { status } from '@grpc/grpc-js';
 import {
   BadRequestException,
@@ -14,6 +16,12 @@ import {
 const listingId = '11111111-1111-4111-8111-111111111111';
 const call = { authorization: 'Bearer token', correlationId: 'corr-1' };
 
+/** True when the metadata value is a valid service token signed for Listing. */
+function signedByListing(token: unknown): boolean {
+  const jwt = new JwtService({ secret: INTERNAL_JWT_SECRET });
+  return checkServiceToken(jwt, token, ['listing']).ok;
+}
+
 function setup(result: unknown) {
   const setupCalendar = vi.fn().mockReturnValue(result);
   const filterAvailable = vi.fn().mockReturnValue(result);
@@ -26,13 +34,14 @@ function setup(result: unknown) {
 }
 
 describe('CalendarClient.setupCalendar', () => {
-  it('sends the blackouts with the caller token and correlation ID', async () => {
+  it('sends the blackouts with the caller token, service token and correlation ID', async () => {
     const { calendar, setupCalendar } = setup(of({ ok: true }));
     await calendar.setupCalendar(listingId, [], call);
     const [request, metadata] = setupCalendar.mock.calls[0];
     expect(request).toEqual({ listingId, blackouts: [] });
     expect(metadata.get('authorization')).toEqual(['Bearer token']);
     expect(metadata.get('x-correlation-id')).toEqual(['corr-1']);
+    expect(signedByListing(metadata.get('x-service-token')[0])).toBe(true);
   });
 
   it('turns a gRPC error into a CalendarSetupError', async () => {
@@ -61,7 +70,7 @@ describe('CalendarClient.filterAvailable', () => {
     end: '2026-11-03T17:00:00.000Z',
   };
 
-  it('sends the IDs and period with the correlation ID and returns the free IDs', async () => {
+  it('sends the IDs and period with the service token and correlation ID and returns the free IDs', async () => {
     const { calendar, filterAvailable } = setup(
       of({ listingIds: [listingId] }),
     );
@@ -71,6 +80,7 @@ describe('CalendarClient.filterAvailable', () => {
     const [request, metadata] = filterAvailable.mock.calls[0];
     expect(request).toEqual({ listingIds: [listingId], period });
     expect(metadata.get('x-correlation-id')).toEqual(['corr-1']);
+    expect(signedByListing(metadata.get('x-service-token')[0])).toBe(true);
   });
 
   it('reads an empty reply as no free listings', async () => {
