@@ -3,13 +3,18 @@ import { MemoryStorage } from '../test/memory-storage.ts';
 import {
   approveStudent,
   confirmEmail,
+  getMe,
   getStudentQueue,
   registerAndLogin,
   rejectStudent,
   requestEmailCode,
+  setPayoutProfile,
   studentQueueQuery,
   submitStudentId,
+  type PayoutProfile,
+  type Profile,
 } from './identity.ts';
+import { TOKEN_KEY } from '../auth/token.ts';
 
 const studentId = '11111111-1111-4111-8111-111111111111';
 
@@ -17,6 +22,25 @@ const registration = {
   email: 'somchai@student.chula.ac.th',
   password: 'correct horse',
   displayName: 'Somchai',
+};
+
+const payoutProfile: PayoutProfile = {
+  method: 'PROMPTPAY',
+  promptPayId: '0812345678',
+  accountName: 'Somchai',
+};
+
+const profile: Profile = {
+  id: studentId,
+  email: registration.email,
+  displayName: registration.displayName,
+  role: 'student',
+  emailVerified: true,
+  studentStatus: 'VERIFIED',
+  studentId: '6630012321',
+  studentRejectionReason: null,
+  payoutProfile: null,
+  createdAt: '2026-10-29T05:00:00.000Z',
 };
 
 function mockFetch(...responses: Response[]) {
@@ -135,10 +159,9 @@ describe('verification calls', () => {
   });
 
   it('confirms the code and returns the verified profile', async () => {
-    const fetchMock = mockFetch(Response.json({ emailVerified: true }));
-    await expect(confirmEmail('042917')).resolves.toEqual({
-      emailVerified: true,
-    });
+    const verified = { ...profile, payoutProfile };
+    const fetchMock = mockFetch(Response.json(verified));
+    await expect(confirmEmail('042917')).resolves.toEqual(verified);
     expect(requestOf(fetchMock, 0)).toEqual({
       url: '/api/identity/accounts/me/email-verification/confirm',
       method: 'POST',
@@ -147,15 +170,65 @@ describe('verification calls', () => {
   });
 
   it('submits the student ID for review', async () => {
-    const fetchMock = mockFetch(Response.json({ studentStatus: 'PENDING' }));
-    await expect(submitStudentId('6630012321')).resolves.toEqual({
-      studentStatus: 'PENDING',
-    });
+    const pending = { ...profile, studentStatus: 'PENDING', payoutProfile };
+    const fetchMock = mockFetch(Response.json(pending));
+    await expect(submitStudentId('6630012321')).resolves.toEqual(pending);
     expect(requestOf(fetchMock, 0)).toEqual({
       url: '/api/identity/accounts/me/student-status',
       method: 'POST',
       body: { studentId: '6630012321' },
     });
+  });
+});
+
+describe('payout profile calls', () => {
+  beforeEach(() => {
+    vi.stubGlobal('localStorage', new MemoryStorage());
+    localStorage.setItem(TOKEN_KEY, 'student-token');
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it.each([null, payoutProfile])(
+    'loads the saved payout profile %j',
+    async (saved) => {
+      const ownProfile = { ...profile, payoutProfile: saved };
+      const fetchMock = mockFetch(Response.json(ownProfile));
+      await expect(getMe()).resolves.toEqual(ownProfile);
+      expect(fetchMock.mock.calls[0][0]).toBe('/api/identity/accounts/me');
+      expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({
+        Authorization: 'Bearer student-token',
+      });
+    },
+  );
+
+  it('saves a payout profile with an authenticated PUT and returns the saved values', async () => {
+    const saved = { ...payoutProfile, accountName: 'Somchai Chula' };
+    const fetchMock = mockFetch(Response.json(saved));
+    await expect(setPayoutProfile(saved)).resolves.toEqual(saved);
+    expect(requestOf(fetchMock, 0)).toEqual({
+      url: '/api/identity/accounts/me/payout-profile',
+      method: 'PUT',
+      body: saved,
+    });
+    expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({
+      Authorization: 'Bearer student-token',
+      'Content-Type': 'application/json',
+    });
+  });
+
+  it('propagates a rejected payout update for the form to display', async () => {
+    mockFetch(
+      Response.json(
+        { error: { code: 'BAD_REQUEST', message: 'Invalid PromptPay ID' } },
+        { status: 400 },
+      ),
+    );
+    await expect(setPayoutProfile(payoutProfile)).rejects.toThrow(
+      'Invalid PromptPay ID',
+    );
   });
 });
 

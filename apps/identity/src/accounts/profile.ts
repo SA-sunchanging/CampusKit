@@ -5,6 +5,7 @@ import {
   STUDENT_STATUSES,
   type StudentStatus,
 } from './account.entity.js';
+import { PayoutProfile } from './payout-profile.js';
 
 /** What an account looks like to its owner. Never includes the password hash. */
 export class Profile {
@@ -40,6 +41,9 @@ export class Profile {
   })
   studentRejectionReason: string | null;
 
+  @ApiProperty({ type: PayoutProfile, nullable: true })
+  payoutProfile: PayoutProfile | null;
+
   @ApiProperty()
   createdAt: Date;
 }
@@ -54,6 +58,7 @@ export function toProfile(account: Account): Profile {
     studentStatus: account.studentStatus,
     studentId: account.studentId,
     studentRejectionReason: account.studentRejectionReason,
+    payoutProfile: account.payoutProfile,
     createdAt: account.createdAt,
   });
 }

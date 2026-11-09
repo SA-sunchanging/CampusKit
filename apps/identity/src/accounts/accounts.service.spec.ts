@@ -35,6 +35,9 @@ function setup() {
     save: vi.fn((fields: Partial<Account>) =>
       Promise.resolve(savedAccount(fields)),
     ),
+    update: vi.fn((_criteria: Partial<Account>, _change: Partial<Account>) =>
+      Promise.resolve({ affected: 1 }),
+    ),
     findOneBy: vi.fn().mockResolvedValue(null),
   };
   const hasher = {
@@ -83,6 +86,7 @@ describe('AccountsService.register', () => {
       studentStatus: 'UNSUBMITTED',
       studentId: null,
       studentRejectionReason: null,
+      payoutProfile: null,
       createdAt: new Date('2026-10-26T00:00:00Z'),
     });
     expect(JSON.stringify(profile)).not.toContain('hash');
@@ -124,21 +128,43 @@ describe('AccountsService.findByEmail', () => {
 });
 
 describe('AccountsService.getProfile', () => {
-  it('returns the profile with emailVerified and studentStatus', async () => {
-    const { repo, service } = setup();
-    repo.findOneBy.mockResolvedValue(
-      savedAccount({
-        emailVerifiedAt: new Date(),
+  it.each([
+    null,
+    {
+      method: 'PROMPTPAY' as const,
+      promptPayId: '0812345678',
+      accountName: 'Somchai Jaidee',
+    },
+  ])(
+    'returns the self profile with payout %j and no internal metadata',
+    async (payoutProfile) => {
+      const { repo, service } = setup();
+      repo.findOneBy.mockResolvedValue(
+        savedAccount({
+          emailVerifiedAt: new Date(),
+          studentStatus: 'VERIFIED',
+          studentSubmittedAt: new Date(),
+          studentReviewedBy: 'admin1',
+          studentReviewedAt: new Date(),
+          suspendedAt: new Date(),
+          payoutProfile,
+        }),
+      );
+      await expect(service.getProfile('a1')).resolves.toEqual({
+        id: 'a1',
+        email: 'somchai@student.chula.ac.th',
+        displayName: 'Somchai',
+        role: 'student',
+        emailVerified: true,
         studentStatus: 'VERIFIED',
-      }),
-    );
-    await expect(service.getProfile('a1')).resolves.toMatchObject({
-      id: 'a1',
-      emailVerified: true,
-      studentStatus: 'VERIFIED',
-    });
-    expect(repo.findOneBy).toHaveBeenCalledWith({ id: 'a1' });
-  });
+        studentId: null,
+        studentRejectionReason: null,
+        payoutProfile,
+        createdAt: new Date('2026-10-26T00:00:00Z'),
+      });
+      expect(repo.findOneBy).toHaveBeenCalledWith({ id: 'a1' });
+    },
+  );
 
   it('fails with 404 when the account no longer exists', async () => {
     const { service } = setup();
@@ -223,9 +249,11 @@ describe('AccountsService.setPayoutProfile', () => {
     const { repo, service } = setup();
     repo.findOneBy.mockResolvedValue(savedAccount({}));
     await expect(service.setPayoutProfile('a1', dto)).resolves.toEqual(dto);
-    expect(repo.save).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'a1', payoutProfile: dto }),
+    expect(repo.update).toHaveBeenCalledWith(
+      { id: 'a1' },
+      { payoutProfile: dto },
     );
+    expect(repo.save).not.toHaveBeenCalled();
   });
 
   it('makes a verified student eligible to publish', async () => {
@@ -233,8 +261,10 @@ describe('AccountsService.setPayoutProfile', () => {
     repo.findOneBy.mockResolvedValue(savedAccount(verified));
     expect(checkEligibility(savedAccount(verified)).canPublish).toBe(false);
     await service.setPayoutProfile('a1', dto);
-    const [stored] = repo.save.mock.calls[0] as [Account];
-    expect(checkEligibility(stored)).toMatchObject({
+    const [, change] = repo.update.mock.calls[0];
+    expect(
+      checkEligibility(savedAccount({ ...verified, ...change })),
+    ).toMatchObject({
       canPublish: true,
       reasons: [],
     });
@@ -249,11 +279,30 @@ describe('AccountsService.setPayoutProfile', () => {
       savedAccount({ payoutProfile: replacement }),
     );
     await service.setPayoutProfile('a1', replacement);
-    const [first, second] = repo.save.mock.calls.map(
-      ([account]) => (account as Account).payoutProfile,
+    const [first, second] = repo.update.mock.calls.map(
+      ([, change]) => change.payoutProfile,
     );
     expect(first).toEqual(replacement);
     expect(second).toEqual(first);
+  });
+
+  it('preserves verification completed after the account was read', async () => {
+    const { repo, service } = setup();
+    const current = savedAccount(verified);
+    // The payout request loaded this snapshot before verification finished.
+    repo.findOneBy.mockResolvedValue(savedAccount({}));
+    repo.save.mockImplementation((account) =>
+      Promise.resolve(Object.assign(current, account)),
+    );
+    repo.update.mockImplementation((_criteria, change) => {
+      Object.assign(current, change);
+      return Promise.resolve({ affected: 1 });
+    });
+
+    await service.setPayoutProfile('a1', dto);
+
+    expect(current).toEqual(savedAccount({ ...verified, payoutProfile: dto }));
+    expect(repo.save).not.toHaveBeenCalled();
   });
 
   it('refuses an administrator with 403', async () => {
@@ -263,6 +312,7 @@ describe('AccountsService.setPayoutProfile', () => {
       ForbiddenException,
     );
     expect(repo.save).not.toHaveBeenCalled();
+    expect(repo.update).not.toHaveBeenCalled();
   });
 
   it('fails with 404 when the account does not exist', async () => {

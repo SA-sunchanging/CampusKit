@@ -8,6 +8,12 @@ import { api } from './client.ts';
  */
 export type StudentStatus = 'UNSUBMITTED' | 'PENDING' | 'VERIFIED' | 'REJECTED';
 
+export interface PayoutProfile {
+  method: 'PROMPTPAY';
+  promptPayId: string;
+  accountName: string;
+}
+
 export interface Profile {
   id: string;
   email: string;
@@ -19,6 +25,7 @@ export interface Profile {
   studentId: string | null;
   /** The administrator's reason. Set only on a REJECTED status. */
   studentRejectionReason: string | null;
+  payoutProfile: PayoutProfile | null;
   createdAt: string;
 }
 
@@ -88,6 +95,16 @@ export async function registerAndLogin(
 
 export function getMe(): Promise<Profile> {
   return api('/identity/accounts/me');
+}
+
+/** Saves the student's payout destination; required before publishing a listing. */
+export function setPayoutProfile(
+  profile: PayoutProfile,
+): Promise<PayoutProfile> {
+  return api('/identity/accounts/me/payout-profile', {
+    method: 'PUT',
+    body: JSON.stringify(profile),
+  });
 }
 
 /** Issues a new code; 429 within a minute of the last one, 409 once verified. */

@@ -99,8 +99,8 @@ export class AccountsService {
       promptPayId: dto.promptPayId,
       accountName: dto.accountName,
     };
-    account.payoutProfile = payoutProfile;
-    await this.accounts.save(account);
+    // Verification may change after the read; never write those stale fields back.
+    await this.accounts.update({ id }, { payoutProfile });
     return payoutProfile;
   }
 }

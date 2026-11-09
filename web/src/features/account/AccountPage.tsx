@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { getMe, type Profile } from '../../api/identity.ts';
 import { Alert, Badge, PageHeader, Panel } from '../../ui/index.ts';
 import EmailStep from './EmailStep.tsx';
+import PayoutForm from './PayoutForm.tsx';
 import StudentStep from './StudentStep.tsx';
 import { STUDENT_STATUS_TONE } from './studentStatus.ts';
 
-// The caller's profile and, for a student, the two verification steps (role A).
+// The caller's profile and, for a student, verification and payout settings (role A).
 export default function AccountPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +61,16 @@ export default function AccountPage() {
             <StudentStep profile={profile} onChange={setProfile} />
           </div>
         </Panel>
+      )}
+      {profile?.role === 'student' && (
+        <PayoutForm
+          payoutProfile={profile.payoutProfile}
+          onSaved={(payoutProfile) =>
+            setProfile((current) =>
+              current ? { ...current, payoutProfile } : current,
+            )
+          }
+        />
       )}
     </section>
   );
