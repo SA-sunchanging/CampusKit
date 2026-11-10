@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { listRentals, type Rental, type RentalRole } from '../../api/rental.ts';
 import { useAuth } from '../../auth/useAuth.ts';
 import { Alert, BoxIcon, EmptyState, PageHeader } from '../../ui/index.ts';
+import { readRole, roleParams } from '../booking/role.ts';
 import { useListingTitles } from '../booking/useListingTitles.ts';
 import RentalCard from './RentalCard.tsx';
 import './rental.css';
@@ -14,7 +15,8 @@ const TABS: { role: RentalRole; label: string }[] = [
 
 // The student's rentals (role D): items they rent, and their items that others rent.
 export default function RentalsPage() {
-  const [role, setRole] = useState<RentalRole>('renter');
+  const [params, setParams] = useSearchParams();
+  const role = readRole(params);
   return (
     <section>
       <PageHeader title="Rentals" />
@@ -28,7 +30,7 @@ export default function RentalsPage() {
             aria-selected={tab.role === role}
             aria-controls="rentals-panel"
             className="rental-tab"
-            onClick={() => setRole(tab.role)}
+            onClick={() => setParams(roleParams(params, tab.role))}
           >
             {tab.label}
           </button>

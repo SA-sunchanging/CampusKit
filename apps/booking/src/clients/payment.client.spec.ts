@@ -16,6 +16,7 @@ const request: AuthorizeRequest = {
   payeeId: 'owner-1',
   kind: 'FEE',
   amount: 6000,
+  requiredUntil: '2026-11-04T17:00:00.000Z',
 };
 
 function reply(code: number, body: unknown): Response {

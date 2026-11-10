@@ -1,5 +1,10 @@
 import type { AuthUser } from '@app/common';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import {
@@ -9,9 +14,15 @@ import {
 } from '../ledger/authorization.row.js';
 import {
   type AuthorizationStatusResponse,
+  EarningsResponse,
   PaymentStatusResponse,
   type PayoutResponse,
 } from './payment-status.response.js';
+
+interface EarningsRow {
+  total_earned: string;
+  settled_rentals: number;
+}
 
 interface PayoutRow {
   amount: number;
@@ -34,10 +45,32 @@ function toAuthorization(
   };
 }
 
-/** Read side of Payment for the web app: the holds and payout of one booking. */
+/** Read side of Payment: a booking's payments and the caller's settled earnings. */
 @Injectable()
 export class PaymentStatusService {
   constructor(@InjectDataSource() private readonly db: DataSource) {}
+
+  async earnings(caller: AuthUser): Promise<EarningsResponse> {
+    if (caller.role !== 'student') {
+      throw new ForbiddenException('Only students can view rental earnings');
+    }
+    const [row] = (await this.db.query(
+      `SELECT COALESCE(SUM(amount), 0)::text AS total_earned,
+              COUNT(*)::int AS settled_rentals
+       FROM payouts WHERE payee_id = $1`,
+      [caller.sub],
+    )) as EarningsRow[];
+    const totalEarned = Number(row.total_earned);
+    if (!Number.isSafeInteger(totalEarned) || totalEarned < 0) {
+      throw new InternalServerErrorException(
+        'Earnings total is outside the supported range',
+      );
+    }
+    return EarningsResponse.of({
+      totalEarned,
+      settledRentals: row.settled_rentals,
+    });
+  }
 
   /**
    * The payment status of a booking for its renter (payer) or owner (payee); anyone else gets

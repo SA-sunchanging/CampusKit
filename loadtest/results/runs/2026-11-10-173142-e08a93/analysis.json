@@ -1,0 +1,1981 @@
+{
+  "created_utc": "2026-11-10T15:04:22.529932+00:00",
+  "run_directory": "D:\\sun\\4year\\sa\\CampusKit\\loadtest\\results\\runs\\2026-11-10-173142-e08a93",
+  "limitations": [
+    "Whole-run summaries include ramps and graceful completion, not only peak-load holds.",
+    "Hold windows are approximate, anchored to the first HTTP Point in the raw file. That sample may occur after scheduled execution starts, and concurrent samples may arrive out of timestamp order.",
+    "Hold latency samples belong to the window containing their completion timestamp, including requests that started before the window.",
+    "http_req_failed follows k6 expected-response classification, not exclusively HTTP 5xx. JSON/body checks are separate and have no configured checks threshold.",
+    "In http_req_failed, passes counts TRUE failure observations and fails counts FALSE observations. In checks, passes instead counts successful predicates.",
+    "Zero failed observed checks is reported as a descriptive correctness verdict, not a newly configured k6 threshold.",
+    "Diagnostic timing, transfer, throughput, iteration and VU metrics have no pass/fail acceptance threshold in these scripts.",
+    "All timing values are milliseconds. Counter rates use the handleSummary testRunDurationMs, not first-to-last request time.",
+    "Raw percentiles use linear interpolation at (n-1)*p; authoritative k6 summary values are retained separately for reconciliation.",
+    "Measurements cover public listing reads through the gateway, including downstream calls. They do not establish booking, payment or write performance, nor identify a bottleneck without resource and service evidence."
+  ],
+  "profiles": {
+    "load": {
+      "summary_file": "D:\\sun\\4year\\sa\\CampusKit\\loadtest\\results\\runs\\2026-11-10-173142-e08a93\\load-summary.json",
+      "raw_file": "D:\\sun\\4year\\sa\\CampusKit\\loadtest\\results\\runs\\2026-11-10-173142-e08a93\\load-timeseries.json.gz",
+      "duration_s": 13297.882063216,
+      "first_http_sample_utc": "2026-11-10T11:07:52.314218+00:00",
+      "earliest_http_sample_utc": "2026-11-10T11:07:52.314218+00:00",
+      "last_http_sample_utc": "2026-11-10T14:49:28.239782+00:00",
+      "raw_point_count": 1421623,
+      "metric_series_count": 19,
+      "metrics": [
+        {
+          "name": "iteration_duration",
+          "type": "trend",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "min": 505.539208,
+            "med": 1090.224755,
+            "max": 14838.151309,
+            "p(90)": 1515.9730370000002,
+            "p(95)": 1888.793354900001,
+            "avg": 1188.8548264783064
+          },
+          "raw_values": {
+            "avg": 1188.8548264783064,
+            "min": 505.539208,
+            "med": 1090.224755,
+            "max": 14838.151309,
+            "p(90)": 1515.9730370000002,
+            "p(95)": 1888.793354900001
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_duration{name:detail}",
+          "type": "trend",
+          "raw_sample_count": 28448,
+          "summary_values": {
+            "avg": 35637.972235416084,
+            "min": 0.099103,
+            "med": 16.985463,
+            "max": 11115425.446895,
+            "p(90)": 351.1212236999999,
+            "p(95)": 894.1552896499958
+          },
+          "raw_values": {
+            "avg": 35637.972235416084,
+            "min": 0.099103,
+            "med": 16.985463,
+            "max": 11115425.446895,
+            "p(90)": 351.1212236999999,
+            "p(95)": 894.1552896499958
+          },
+          "criterion": {
+            "criterion": "p95 < 500 ms",
+            "statistic": "p(95)",
+            "limit": 500.0,
+            "operator": "<",
+            "value": 894.1552896499958,
+            "status": "FAIL",
+            "k6_reported_passed": false,
+            "agrees_with_k6": true
+          },
+          "raw_criterion": {
+            "criterion": "p95 < 500 ms",
+            "statistic": "p(95)",
+            "limit": 500.0,
+            "operator": "<",
+            "value": 894.1552896499958,
+            "status": "FAIL"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_failed",
+          "type": "rate",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "rate": 5.278994879374967e-05,
+            "passes": 5,
+            "fails": 94710
+          },
+          "raw_values": {
+            "rate": 5.278994879374967e-05,
+            "passes": 5,
+            "fails": 94710
+          },
+          "criterion": {
+            "criterion": "failure rate < 0.005 (0.5%)",
+            "statistic": "rate",
+            "limit": 0.005,
+            "operator": "<",
+            "value": 5.278994879374967e-05,
+            "status": "PASS",
+            "k6_reported_passed": true,
+            "agrees_with_k6": true
+          },
+          "raw_criterion": {
+            "criterion": "failure rate < 0.005 (0.5%)",
+            "statistic": "rate",
+            "limit": 0.005,
+            "operator": "<",
+            "value": 5.278994879374967e-05,
+            "status": "PASS"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "vus",
+          "type": "gauge",
+          "raw_sample_count": 449,
+          "summary_values": {
+            "value": 8,
+            "min": 3,
+            "max": 300
+          },
+          "raw_values": {
+            "value": 8.0,
+            "min": 3.0,
+            "max": 300.0
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_tls_handshaking",
+          "type": "trend",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0
+          },
+          "raw_values": {
+            "avg": 0.0,
+            "min": 0.0,
+            "med": 0.0,
+            "max": 0.0,
+            "p(90)": 0.0,
+            "p(95)": 0.0
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_duration{name:search}",
+          "type": "trend",
+          "raw_sample_count": 66267,
+          "summary_values": {
+            "min": 0.143189,
+            "med": 20.2638,
+            "max": 11116134.737308,
+            "p(90)": 279.6236910000001,
+            "p(95)": 680.9765215999998,
+            "avg": 35529.029477798875
+          },
+          "raw_values": {
+            "avg": 35529.029477798875,
+            "min": 0.143189,
+            "med": 20.2638,
+            "max": 11116134.737308,
+            "p(90)": 279.6236910000001,
+            "p(95)": 680.9765215999998
+          },
+          "criterion": {
+            "criterion": "p95 < 1000 ms",
+            "statistic": "p(95)",
+            "limit": 1000.0,
+            "operator": "<",
+            "value": 680.9765215999998,
+            "status": "PASS",
+            "k6_reported_passed": true,
+            "agrees_with_k6": true
+          },
+          "raw_criterion": {
+            "criterion": "p95 < 1000 ms",
+            "statistic": "p(95)",
+            "limit": 1000.0,
+            "operator": "<",
+            "value": 680.9765215999998,
+            "status": "PASS"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "vus_max",
+          "type": "gauge",
+          "raw_sample_count": 449,
+          "summary_values": {
+            "max": 300,
+            "value": 300,
+            "min": 300
+          },
+          "raw_values": {
+            "value": 300.0,
+            "min": 300.0,
+            "max": 300.0
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_sending",
+          "type": "trend",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "med": 0.025557,
+            "max": 1912.778108,
+            "p(90)": 0.066107,
+            "p(95)": 0.085852,
+            "avg": 0.09198696512695932,
+            "min": 0.003568
+          },
+          "raw_values": {
+            "avg": 0.09198696512695932,
+            "min": 0.003568,
+            "med": 0.025557,
+            "max": 1912.778108,
+            "p(90)": 0.066107,
+            "p(95)": 0.085852
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "data_received",
+          "type": "counter",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "count": 378952586,
+            "rate": 28497.213631352734
+          },
+          "raw_values": {
+            "count": 378952586.0,
+            "rate": 28497.213631352734
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_waiting",
+          "type": "trend",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "avg": 35560.67157796225,
+            "min": 0,
+            "med": 19.094334,
+            "max": 11116134.593854,
+            "p(90)": 295.39033880000034,
+            "p(95)": 746.841858800001
+          },
+          "raw_values": {
+            "avg": 35560.67157796225,
+            "min": 0.0,
+            "med": 19.094334,
+            "max": 11116134.593854,
+            "p(90)": 295.39033880000034,
+            "p(95)": 746.841858800001
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "iterations",
+          "type": "counter",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "count": 94715,
+            "rate": 7.12256279231084
+          },
+          "raw_values": {
+            "count": 94715.0,
+            "rate": 7.12256279231084
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "data_sent",
+          "type": "counter",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "count": 11500915,
+            "rate": 864.8681756483095
+          },
+          "raw_values": {
+            "count": 11500915.0,
+            "rate": 864.8681756483095
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_duration",
+          "type": "trend",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "med": 19.264247,
+            "max": 11116134.737308,
+            "p(90)": 295.77389000000045,
+            "p(95)": 747.2180913000001,
+            "avg": 35561.75083733752,
+            "min": 0.099103
+          },
+          "raw_values": {
+            "avg": 35561.75083733752,
+            "min": 0.099103,
+            "med": 19.264247,
+            "max": 11116134.737308,
+            "p(90)": 295.77389000000045,
+            "p(95)": 747.2180913000001
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_reqs",
+          "type": "counter",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "rate": 7.12256279231084,
+            "count": 94715
+          },
+          "raw_values": {
+            "count": 94715.0,
+            "rate": 7.12256279231084
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_blocked",
+          "type": "trend",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "avg": 0.07689139942986813,
+            "min": 0.00149,
+            "med": 0.00849,
+            "max": 1919.347363,
+            "p(90)": 0.012691,
+            "p(95)": 0.014962200000000012
+          },
+          "raw_values": {
+            "avg": 0.07689139942986813,
+            "min": 0.00149,
+            "med": 0.00849,
+            "max": 1919.347363,
+            "p(90)": 0.012691,
+            "p(95)": 0.014962200000000012
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_connecting",
+          "type": "trend",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "max": 44.40414,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.0033513869080926996,
+            "min": 0,
+            "med": 0
+          },
+          "raw_values": {
+            "avg": 0.0033513869080926996,
+            "min": 0.0,
+            "med": 0.0,
+            "max": 44.40414,
+            "p(90)": 0.0,
+            "p(95)": 0.0
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "checks",
+          "type": "rate",
+          "raw_sample_count": 189430,
+          "summary_values": {
+            "rate": 0.9999472100512062,
+            "passes": 189420,
+            "fails": 10
+          },
+          "raw_values": {
+            "rate": 0.9999472100512062,
+            "passes": 189420,
+            "fails": 10
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_duration{expected_response:true}",
+          "type": "trend",
+          "raw_sample_count": 94710,
+          "summary_values": {
+            "max": 11116134.737308,
+            "p(90)": 295.8043452,
+            "p(95)": 747.22571155,
+            "avg": 35563.623557571904,
+            "min": 0.099103,
+            "med": 19.263205
+          },
+          "raw_values": {
+            "avg": 35563.623557571904,
+            "min": 0.099103,
+            "med": 19.263205,
+            "max": 11116134.737308,
+            "p(90)": 295.8043452,
+            "p(95)": 747.22571155
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_receiving",
+          "type": "trend",
+          "raw_sample_count": 94715,
+          "summary_values": {
+            "min": 0.011922,
+            "med": 0.110521,
+            "max": 689.110338,
+            "p(90)": 0.21326520000000002,
+            "p(95)": 0.26800460000000026,
+            "avg": 0.9872724094493961
+          },
+          "raw_values": {
+            "avg": 0.9872724094493961,
+            "min": 0.011922,
+            "med": 0.110521,
+            "max": 689.110338,
+            "p(90)": 0.21326520000000002,
+            "p(95)": 0.26800460000000026
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "search status is 200",
+          "passes": 66262,
+          "fails": 5,
+          "success_rate": 0.9999245476632411,
+          "raw_passes": 66262,
+          "raw_fails": 5,
+          "criterion": "All observed predicate evaluations true; descriptive only, no configured checks threshold",
+          "status": "FAIL"
+        },
+        {
+          "name": "search has items array",
+          "passes": 66262,
+          "fails": 5,
+          "success_rate": 0.9999245476632411,
+          "raw_passes": 66262,
+          "raw_fails": 5,
+          "criterion": "All observed predicate evaluations true; descriptive only, no configured checks threshold",
+          "status": "FAIL"
+        },
+        {
+          "name": "detail status is 200",
+          "passes": 28448,
+          "fails": 0,
+          "success_rate": 1.0,
+          "raw_passes": 28448,
+          "raw_fails": 0,
+          "criterion": "All observed predicate evaluations true; descriptive only, no configured checks threshold",
+          "status": "PASS"
+        },
+        {
+          "name": "detail id matches",
+          "passes": 28448,
+          "fails": 0,
+          "success_rate": 1.0,
+          "raw_passes": 28448,
+          "raw_fails": 0,
+          "criterion": "All observed predicate evaluations true; descriptive only, no configured checks threshold",
+          "status": "PASS"
+        }
+      ],
+      "timing_diagnostics": {
+        "scheduled_seconds": 450,
+        "summary_duration_seconds": 13297.882063216,
+        "summary_minus_scheduled_seconds": 12847.882063216,
+        "http_wall_timestamp_span_seconds": 13295.925564050674,
+        "largest_request_completion_gaps": [
+          {
+            "seconds": 11006.73399400711,
+            "before_utc": "2026-11-10T11:43:33.386007+00:00",
+            "after_utc": "2026-11-10T14:47:00.120001+00:00"
+          },
+          {
+            "seconds": 1540.9516627788544,
+            "before_utc": "2026-11-10T11:14:31.872769+00:00",
+            "after_utc": "2026-11-10T11:40:12.824432+00:00"
+          },
+          {
+            "seconds": 160.27447199821472,
+            "before_utc": "2026-11-10T11:11:12.303416+00:00",
+            "after_utc": "2026-11-10T11:13:52.577888+00:00"
+          },
+          {
+            "seconds": 106.23794102668762,
+            "before_utc": "2026-11-10T11:41:47.075574+00:00",
+            "after_utc": "2026-11-10T11:43:33.313515+00:00"
+          },
+          {
+            "seconds": 34.685845136642456,
+            "before_utc": "2026-11-10T11:13:57.077360+00:00",
+            "after_utc": "2026-11-10T11:14:31.763205+00:00"
+          },
+          {
+            "seconds": 2.1315958499908447,
+            "before_utc": "2026-11-10T11:41:42.131602+00:00",
+            "after_utc": "2026-11-10T11:41:44.263198+00:00"
+          },
+          {
+            "seconds": 2.12516188621521,
+            "before_utc": "2026-11-10T14:47:00.203310+00:00",
+            "after_utc": "2026-11-10T14:47:02.328472+00:00"
+          },
+          {
+            "seconds": 2.052238941192627,
+            "before_utc": "2026-11-10T14:47:31.463018+00:00",
+            "after_utc": "2026-11-10T14:47:33.515257+00:00"
+          },
+          {
+            "seconds": 1.9941809177398682,
+            "before_utc": "2026-11-10T14:47:23.722939+00:00",
+            "after_utc": "2026-11-10T14:47:25.717120+00:00"
+          },
+          {
+            "seconds": 1.8950231075286865,
+            "before_utc": "2026-11-10T14:47:27.652982+00:00",
+            "after_utc": "2026-11-10T14:47:29.548005+00:00"
+          }
+        ],
+        "timing_anomaly_detected": true,
+        "diagnostic_rule": "Flag duration >35 seconds away from schedule (allowing ordinary graceful completion), or a >5 second gap in ordered request completions; these are diagnostic flags, not acceptance thresholds.",
+        "controlled_profile_validity": "COMPROMISED"
+      },
+      "automated_thresholds_status": "FAIL",
+      "http": {
+        "requests": 94715,
+        "status_counts": {
+          "200": 94710,
+          "502": 5
+        },
+        "status_classes": {
+          "2xx": 94710,
+          "5xx": 5
+        },
+        "status_counts_by_endpoint": {
+          "search": {
+            "200": 66262,
+            "502": 5
+          },
+          "detail": {
+            "200": 28448
+          }
+        },
+        "server_error_rate_all_attempts": 5.278994879374967e-05,
+        "server_error_criterion": "N/A: no acceptance threshold configured; scripted failure threshold is not a server-only metric",
+        "transport_errors": []
+      },
+      "hold_periods": [
+        {
+          "target_vus": 300,
+          "start_elapsed_s": 120.0,
+          "end_elapsed_s": 420.0,
+          "approximate": true,
+          "window_start_utc": "2026-11-10T11:09:52.314218+00:00",
+          "window_end_utc": "2026-11-10T11:14:52.314218+00:00",
+          "seconds": 300.0,
+          "search_duration_ms": {
+            "avg": 2122.2211591304012,
+            "min": 2.136754,
+            "med": 17.517695,
+            "max": 162367.490222,
+            "p(90)": 107.25409960000006,
+            "p(95)": 164.3741769999999
+          },
+          "detail_duration_ms": {
+            "avg": 1946.9623384882716,
+            "min": 3.572042,
+            "med": 14.584284,
+            "max": 162367.164797,
+            "p(90)": 94.8671356,
+            "p(95)": 167.7575038
+          },
+          "http_reqs": {
+            "count": 23668.0,
+            "rate": 78.89333333333333
+          },
+          "http_req_failed": {
+            "rate": 0.0002112557039040054,
+            "passes": 5,
+            "fails": 23663
+          },
+          "observed_vus": {
+            "value": 300.0,
+            "min": 300.0,
+            "max": 300.0
+          },
+          "status_counts": {
+            "200": 23663,
+            "502": 5
+          },
+          "criteria": {
+            "search": {
+              "criterion": "p95 < 1000 ms",
+              "statistic": "p(95)",
+              "limit": 1000.0,
+              "operator": "<",
+              "value": 164.3741769999999,
+              "status": "N/A",
+              "numeric_comparison_status": "PASS",
+              "validity_note": "Hold timing is unvalidated due to run timing anomalies or observed VUs not matching target. Numeric values are descriptive only."
+            },
+            "detail": {
+              "criterion": "p95 < 500 ms",
+              "statistic": "p(95)",
+              "limit": 500.0,
+              "operator": "<",
+              "value": 167.7575038,
+              "status": "N/A",
+              "numeric_comparison_status": "PASS",
+              "validity_note": "Hold timing is unvalidated due to run timing anomalies or observed VUs not matching target. Numeric values are descriptive only."
+            },
+            "failed": {
+              "criterion": "failure rate < 0.005 (0.5%)",
+              "statistic": "rate",
+              "limit": 0.005,
+              "operator": "<",
+              "value": 0.0002112557039040054,
+              "status": "N/A",
+              "numeric_comparison_status": "PASS",
+              "validity_note": "Hold timing is unvalidated due to run timing anomalies or observed VUs not matching target. Numeric values are descriptive only."
+            }
+          },
+          "vus_samples_match_target": true,
+          "usable_for_stage_acceptance": false
+        }
+      ],
+      "warnings": [
+        "TIMING ANOMALY: this run cannot be treated as an ordinary controlled scheduled profile. Summary rates use the reported duration; timestamp-based holds are not validated. No cause is assumed."
+      ],
+      "resources": {
+        "available": true,
+        "file": "D:\\sun\\4year\\sa\\CampusKit\\loadtest\\results\\runs\\2026-11-10-173142-e08a93\\resources.jsonl",
+        "snapshots": 25,
+        "first_sample_utc": "2026-11-10T11:08:05.670971+00:00",
+        "last_sample_utc": "2026-11-10T14:49:27.694603+00:00",
+        "peak_sample_total_cpu_percent": 791.8399999999999,
+        "peak_sample_total_memory_bytes": 2045740318.72,
+        "containers": [
+          {
+            "name": "campuskitbench8b48b7be9e-booking-1",
+            "samples": 25,
+            "cpu_mean_percent": 0.9723999999999999,
+            "cpu_peak_percent": 7.22,
+            "memory_mean_bytes": 68276977.66399999,
+            "memory_peak_bytes": 71166853.12,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-gateway-1",
+            "samples": 25,
+            "cpu_mean_percent": 29.4344,
+            "cpu_peak_percent": 75.82,
+            "memory_mean_bytes": 140723932.3648,
+            "memory_peak_bytes": 209505484.8,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-identity-1",
+            "samples": 25,
+            "cpu_mean_percent": 1.0872,
+            "cpu_peak_percent": 15.85,
+            "memory_mean_bytes": 65547324.620799996,
+            "memory_peak_bytes": 67161292.8,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-k6-load",
+            "samples": 25,
+            "cpu_mean_percent": 43.2676,
+            "cpu_peak_percent": 110.09,
+            "memory_mean_bytes": 145487822.848,
+            "memory_peak_bytes": 170079027.2,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 22
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-listing-1",
+            "samples": 25,
+            "cpu_mean_percent": 79.17439999999999,
+            "cpu_peak_percent": 130.85,
+            "memory_mean_bytes": 334109868.032,
+            "memory_peak_bytes": 366372454.4,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-mongo-1",
+            "samples": 25,
+            "cpu_mean_percent": 42.6508,
+            "cpu_peak_percent": 142.8,
+            "memory_mean_bytes": 263742029.824,
+            "memory_peak_bytes": 414397235.2,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 105
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-notification-1",
+            "samples": 25,
+            "cpu_mean_percent": 0.40879999999999994,
+            "cpu_peak_percent": 4.52,
+            "memory_mean_bytes": 69315906.7648,
+            "memory_peak_bytes": 69782732.8,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-payment-1",
+            "samples": 25,
+            "cpu_mean_percent": 0.0,
+            "cpu_peak_percent": 0.0,
+            "memory_mean_bytes": 56374801.2032,
+            "memory_peak_bytes": 56381931.52,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-postgres-1",
+            "samples": 25,
+            "cpu_mean_percent": 60.7324,
+            "cpu_peak_percent": 111.27,
+            "memory_mean_bytes": 114743574.528,
+            "memory_peak_bytes": 117440512.0,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 20
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-rabbitmq-1",
+            "samples": 25,
+            "cpu_mean_percent": 73.2972,
+            "cpu_peak_percent": 491.33,
+            "memory_mean_bytes": 136071610.368,
+            "memory_peak_bytes": 203633459.2,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 103
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-rental-1",
+            "samples": 25,
+            "cpu_mean_percent": 2.778,
+            "cpu_peak_percent": 31.86,
+            "memory_mean_bytes": 66033444.454399996,
+            "memory_peak_bytes": 67475865.6,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-review-1",
+            "samples": 25,
+            "cpu_mean_percent": 37.4328,
+            "cpu_peak_percent": 141.82,
+            "memory_mean_bytes": 155440906.24,
+            "memory_peak_bytes": 240857907.2,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-web-1",
+            "samples": 25,
+            "cpu_mean_percent": 0.0,
+            "cpu_peak_percent": 0.0,
+            "memory_mean_bytes": 13222543.36,
+            "memory_peak_bytes": 13222543.36,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 17
+          }
+        ],
+        "limitations": [
+          "CPU 100% means one logical CPU; container percentages may exceed 100%.",
+          "Means are unweighted averages of periodic snapshots, not time-weighted utilization.",
+          "Samples cover the named isolated test stack and generator, not every workload sharing Docker Desktop.",
+          "Sampled peaks can miss shorter spikes and do not by themselves identify a bottleneck."
+        ]
+      }
+    },
+    "stress": {
+      "summary_file": "D:\\sun\\4year\\sa\\CampusKit\\loadtest\\results\\runs\\2026-11-10-173142-e08a93\\stress-summary.json",
+      "raw_file": "D:\\sun\\4year\\sa\\CampusKit\\loadtest\\results\\runs\\2026-11-10-173142-e08a93\\stress-timeseries.json.gz",
+      "duration_s": 781.3037974590001,
+      "first_http_sample_utc": "2026-11-10T14:49:33.360244+00:00",
+      "earliest_http_sample_utc": "2026-11-10T14:49:33.360244+00:00",
+      "last_http_sample_utc": "2026-11-10T15:02:33.202107+00:00",
+      "raw_point_count": 4211207,
+      "metric_series_count": 19,
+      "metrics": [
+        {
+          "name": "http_req_duration",
+          "type": "trend",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "avg": 518.9836630358183,
+            "min": 0.355335,
+            "med": 298.694243,
+            "max": 3633.773622,
+            "p(90)": 1346.2008086,
+            "p(95)": 1618.9583246999982
+          },
+          "raw_values": {
+            "avg": 518.9836630358183,
+            "min": 0.355335,
+            "med": 298.694243,
+            "max": 3633.773622,
+            "p(90)": 1346.2008086,
+            "p(95)": 1618.9583246999982
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_failed",
+          "type": "rate",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "passes": 6,
+            "fails": 280637,
+            "rate": 2.1379474991359128e-05
+          },
+          "raw_values": {
+            "rate": 2.1379474991359128e-05,
+            "passes": 6,
+            "fails": 280637
+          },
+          "criterion": {
+            "criterion": "failure rate < 0.005 (0.5%)",
+            "statistic": "rate",
+            "limit": 0.005,
+            "operator": "<",
+            "value": 2.1379474991359128e-05,
+            "status": "PASS",
+            "k6_reported_passed": true,
+            "agrees_with_k6": true
+          },
+          "raw_criterion": {
+            "criterion": "failure rate < 0.005 (0.5%)",
+            "statistic": "rate",
+            "limit": 0.005,
+            "operator": "<",
+            "value": 2.1379474991359128e-05,
+            "status": "PASS"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_sending",
+          "type": "trend",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "avg": 0.03568182536888566,
+            "min": 0.004123,
+            "med": 0.023532,
+            "max": 27.798208,
+            "p(90)": 0.06070080000000001,
+            "p(95)": 0.08250689999999997
+          },
+          "raw_values": {
+            "avg": 0.03568182536888566,
+            "min": 0.004123,
+            "med": 0.023532,
+            "max": 27.798208,
+            "p(90)": 0.06070080000000001,
+            "p(95)": 0.08250689999999997
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "data_sent",
+          "type": "counter",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "count": 34086918,
+            "rate": 43628.250766039266
+          },
+          "raw_values": {
+            "count": 34086918.0,
+            "rate": 43628.25076603926
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_tls_handshaking",
+          "type": "trend",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0
+          },
+          "raw_values": {
+            "avg": 0.0,
+            "min": 0.0,
+            "med": 0.0,
+            "max": 0.0,
+            "p(90)": 0.0,
+            "p(95)": 0.0
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "vus_max",
+          "type": "gauge",
+          "raw_sample_count": 781,
+          "summary_values": {
+            "value": 1000,
+            "min": 1000,
+            "max": 1000
+          },
+          "raw_values": {
+            "value": 1000.0,
+            "min": 1000.0,
+            "max": 1000.0
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "vus",
+          "type": "gauge",
+          "raw_sample_count": 781,
+          "summary_values": {
+            "value": 2,
+            "min": 2,
+            "max": 1000
+          },
+          "raw_values": {
+            "value": 2.0,
+            "min": 2.0,
+            "max": 1000.0
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_duration{name:detail}",
+          "type": "trend",
+          "raw_sample_count": 83860,
+          "summary_values": {
+            "max": 3633.773622,
+            "p(90)": 1634.2709267,
+            "p(95)": 1829.2638809000002,
+            "avg": 647.1517691615663,
+            "min": 3.04938,
+            "med": 425.00728349999997
+          },
+          "raw_values": {
+            "avg": 647.1517691615663,
+            "min": 3.04938,
+            "med": 425.00728349999997,
+            "max": 3633.773622,
+            "p(90)": 1634.2709267,
+            "p(95)": 1829.2638809000002
+          },
+          "criterion": {
+            "criterion": "p95 < 500 ms",
+            "statistic": "p(95)",
+            "limit": 500.0,
+            "operator": "<",
+            "value": 1829.2638809000002,
+            "status": "FAIL",
+            "k6_reported_passed": false,
+            "agrees_with_k6": true
+          },
+          "raw_criterion": {
+            "criterion": "p95 < 500 ms",
+            "statistic": "p(95)",
+            "limit": 500.0,
+            "operator": "<",
+            "value": 1829.2638809000002,
+            "status": "FAIL"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_reqs",
+          "type": "counter",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "count": 280643,
+            "rate": 359.19830533618665
+          },
+          "raw_values": {
+            "count": 280643.0,
+            "rate": 359.1983053361866
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_duration{name:search}",
+          "type": "trend",
+          "raw_sample_count": 196783,
+          "summary_values": {
+            "p(90)": 1235.9773240000004,
+            "p(95)": 1443.0681998999996,
+            "avg": 464.3642224352232,
+            "min": 0.355335,
+            "med": 264.360757,
+            "max": 3505.669442
+          },
+          "raw_values": {
+            "avg": 464.3642224352232,
+            "min": 0.355335,
+            "med": 264.360757,
+            "max": 3505.669442,
+            "p(90)": 1235.9773240000004,
+            "p(95)": 1443.0681998999996
+          },
+          "criterion": {
+            "criterion": "p95 < 1000 ms",
+            "statistic": "p(95)",
+            "limit": 1000.0,
+            "operator": "<",
+            "value": 1443.0681998999996,
+            "status": "FAIL",
+            "k6_reported_passed": false,
+            "agrees_with_k6": true
+          },
+          "raw_criterion": {
+            "criterion": "p95 < 1000 ms",
+            "statistic": "p(95)",
+            "limit": 1000.0,
+            "operator": "<",
+            "value": 1443.0681998999996,
+            "status": "FAIL"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_blocked",
+          "type": "trend",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "avg": 0.012872165245525693,
+            "min": 0.001914,
+            "med": 0.008334,
+            "max": 94.678673,
+            "p(90)": 0.012681,
+            "p(95)": 0.014937
+          },
+          "raw_values": {
+            "avg": 0.012872165245525693,
+            "min": 0.001914,
+            "med": 0.008334,
+            "max": 94.678673,
+            "p(90)": 0.012681,
+            "p(95)": 0.014937
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "iteration_duration",
+          "type": "trend",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "avg": 1520.1492864054417,
+            "min": 504.760845,
+            "med": 1414.5097,
+            "max": 5064.166451,
+            "p(90)": 2413.7401672000005,
+            "p(95)": 2703.4574671999926
+          },
+          "raw_values": {
+            "avg": 1520.1492864054417,
+            "min": 504.760845,
+            "med": 1414.5097,
+            "max": 5064.166451,
+            "p(90)": 2413.7401672000005,
+            "p(95)": 2703.4574671999926
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_duration{expected_response:true}",
+          "type": "trend",
+          "raw_sample_count": 280637,
+          "summary_values": {
+            "p(90)": 1346.2123315999997,
+            "p(95)": 1618.9676924000003,
+            "avg": 518.9938079092427,
+            "min": 0.355335,
+            "med": 298.711301,
+            "max": 3633.773622
+          },
+          "raw_values": {
+            "avg": 518.9938079092427,
+            "min": 0.355335,
+            "med": 298.711301,
+            "max": 3633.773622,
+            "p(90)": 1346.2123315999997,
+            "p(95)": 1618.9676924000003
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_waiting",
+          "type": "trend",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "avg": 518.8217281535132,
+            "min": 0.237954,
+            "med": 298.501064,
+            "max": 3633.604263,
+            "p(90)": 1346.0339582,
+            "p(95)": 1618.780732099999
+          },
+          "raw_values": {
+            "avg": 518.8217281535132,
+            "min": 0.237954,
+            "med": 298.501064,
+            "max": 3633.604263,
+            "p(90)": 1346.0339582,
+            "p(95)": 1618.780732099999
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "checks",
+          "type": "rate",
+          "raw_sample_count": 561286,
+          "summary_values": {
+            "passes": 561274,
+            "fails": 12,
+            "rate": 0.9999786205250086
+          },
+          "raw_values": {
+            "rate": 0.9999786205250086,
+            "passes": 561274,
+            "fails": 12
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "iterations",
+          "type": "counter",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "count": 280643,
+            "rate": 359.19830533618665
+          },
+          "raw_values": {
+            "count": 280643.0,
+            "rate": 359.1983053361866
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_connecting",
+          "type": "trend",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "max": 94.571953,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0.002104499470857996,
+            "min": 0,
+            "med": 0
+          },
+          "raw_values": {
+            "avg": 0.002104499470857996,
+            "min": 0.0,
+            "med": 0.0,
+            "max": 94.571953,
+            "p(90)": 0.0,
+            "p(95)": 0.0
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "http_req_receiving",
+          "type": "trend",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "avg": 0.12625305692997812,
+            "min": -3.721846,
+            "med": 0.101329,
+            "max": 55.220051,
+            "p(90)": 0.19820000000000007,
+            "p(95)": 0.24904209999999932
+          },
+          "raw_values": {
+            "avg": 0.12625305692997812,
+            "min": -3.721846,
+            "med": 0.101329,
+            "max": 55.220051,
+            "p(90)": 0.19820000000000007,
+            "p(95)": 0.24904209999999932
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        },
+        {
+          "name": "data_received",
+          "type": "counter",
+          "raw_sample_count": 280643,
+          "summary_values": {
+            "count": 1120599231,
+            "rate": 1434268.2508960993
+          },
+          "raw_values": {
+            "count": 1120599231.0,
+            "rate": 1434268.250896099
+          },
+          "criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "raw_criterion": {
+            "criterion": "N/A: no acceptance threshold configured",
+            "status": "N/A"
+          },
+          "reconciliation_differences": {}
+        }
+      ],
+      "checks": [
+        {
+          "name": "search status is 200",
+          "passes": 196778,
+          "fails": 5,
+          "success_rate": 0.9999745913010778,
+          "raw_passes": 196778,
+          "raw_fails": 5,
+          "reconciliation_matches": true,
+          "criterion": "All observed predicate evaluations true; descriptive only, no configured checks threshold",
+          "status": "FAIL"
+        },
+        {
+          "name": "search has items array",
+          "passes": 196778,
+          "fails": 5,
+          "success_rate": 0.9999745913010778,
+          "raw_passes": 196778,
+          "raw_fails": 5,
+          "reconciliation_matches": true,
+          "criterion": "All observed predicate evaluations true; descriptive only, no configured checks threshold",
+          "status": "FAIL"
+        },
+        {
+          "name": "detail status is 200",
+          "passes": 83859,
+          "fails": 1,
+          "success_rate": 0.9999880753637014,
+          "raw_passes": 83859,
+          "raw_fails": 1,
+          "reconciliation_matches": true,
+          "criterion": "All observed predicate evaluations true; descriptive only, no configured checks threshold",
+          "status": "FAIL"
+        },
+        {
+          "name": "detail id matches",
+          "passes": 83859,
+          "fails": 1,
+          "success_rate": 0.9999880753637014,
+          "raw_passes": 83859,
+          "raw_fails": 1,
+          "reconciliation_matches": true,
+          "criterion": "All observed predicate evaluations true; descriptive only, no configured checks threshold",
+          "status": "FAIL"
+        }
+      ],
+      "timing_diagnostics": {
+        "scheduled_seconds": 780,
+        "summary_duration_seconds": 781.3037974590001,
+        "summary_minus_scheduled_seconds": 1.3037974590000658,
+        "http_wall_timestamp_span_seconds": 779.8418629169464,
+        "largest_request_completion_gaps": [
+          {
+            "seconds": 0.3974130153656006,
+            "before_utc": "2026-11-10T14:49:33.738063+00:00",
+            "after_utc": "2026-11-10T14:49:34.135476+00:00"
+          },
+          {
+            "seconds": 0.3778190612792969,
+            "before_utc": "2026-11-10T14:49:33.360244+00:00",
+            "after_utc": "2026-11-10T14:49:33.738063+00:00"
+          },
+          {
+            "seconds": 0.3652470111846924,
+            "before_utc": "2026-11-10T14:49:36.169702+00:00",
+            "after_utc": "2026-11-10T14:49:36.534949+00:00"
+          },
+          {
+            "seconds": 0.36521291732788086,
+            "before_utc": "2026-11-10T14:49:34.135476+00:00",
+            "after_utc": "2026-11-10T14:49:34.500689+00:00"
+          },
+          {
+            "seconds": 0.3118009567260742,
+            "before_utc": "2026-11-10T14:49:35.735909+00:00",
+            "after_utc": "2026-11-10T14:49:36.047710+00:00"
+          },
+          {
+            "seconds": 0.29436612129211426,
+            "before_utc": "2026-11-10T15:02:31.872233+00:00",
+            "after_utc": "2026-11-10T15:02:32.166599+00:00"
+          },
+          {
+            "seconds": 0.28612685203552246,
+            "before_utc": "2026-11-10T14:49:35.397473+00:00",
+            "after_utc": "2026-11-10T14:49:35.683600+00:00"
+          },
+          {
+            "seconds": 0.2632160186767578,
+            "before_utc": "2026-11-10T14:53:38.770919+00:00",
+            "after_utc": "2026-11-10T14:53:39.034135+00:00"
+          },
+          {
+            "seconds": 0.26320910453796387,
+            "before_utc": "2026-11-10T14:49:38.141629+00:00",
+            "after_utc": "2026-11-10T14:49:38.404838+00:00"
+          },
+          {
+            "seconds": 0.2515139579772949,
+            "before_utc": "2026-11-10T14:49:38.552099+00:00",
+            "after_utc": "2026-11-10T14:49:38.803613+00:00"
+          }
+        ],
+        "timing_anomaly_detected": false,
+        "diagnostic_rule": "Flag duration >35 seconds away from schedule (allowing ordinary graceful completion), or a >5 second gap in ordered request completions; these are diagnostic flags, not acceptance thresholds.",
+        "controlled_profile_validity": "No timing anomaly detected by these diagnostics"
+      },
+      "automated_thresholds_status": "FAIL",
+      "http": {
+        "requests": 280643,
+        "status_counts": {
+          "200": 280637,
+          "502": 6
+        },
+        "status_classes": {
+          "2xx": 280637,
+          "5xx": 6
+        },
+        "status_counts_by_endpoint": {
+          "search": {
+            "200": 196778,
+            "502": 5
+          },
+          "detail": {
+            "200": 83859,
+            "502": 1
+          }
+        },
+        "server_error_rate_all_attempts": 2.1379474991359128e-05,
+        "server_error_criterion": "N/A: no acceptance threshold configured; scripted failure threshold is not a server-only metric",
+        "transport_errors": []
+      },
+      "hold_periods": [
+        {
+          "target_vus": 300,
+          "start_elapsed_s": 120.0,
+          "end_elapsed_s": 240.0,
+          "approximate": true,
+          "window_start_utc": "2026-11-10T14:51:33.360244+00:00",
+          "window_end_utc": "2026-11-10T14:53:33.360244+00:00",
+          "seconds": 120.0,
+          "search_duration_ms": {
+            "avg": 66.25083714062033,
+            "min": 0.355335,
+            "med": 17.757033,
+            "max": 2098.087232,
+            "p(90)": 111.59738039999999,
+            "p(95)": 281.68203999999986
+          },
+          "detail_duration_ms": {
+            "avg": 70.78219376253014,
+            "min": 3.04938,
+            "med": 14.7114575,
+            "max": 2117.324853,
+            "p(90)": 96.31767500000001,
+            "p(95)": 353.41684375
+          },
+          "http_reqs": {
+            "count": 33655.0,
+            "rate": 280.4583333333333
+          },
+          "http_req_failed": {
+            "rate": 0.00011885306789481504,
+            "passes": 4,
+            "fails": 33651
+          },
+          "observed_vus": {
+            "value": 300.0,
+            "min": 300.0,
+            "max": 300.0
+          },
+          "status_counts": {
+            "200": 33651,
+            "502": 4
+          },
+          "criteria": {
+            "search": {
+              "criterion": "p95 < 1000 ms",
+              "statistic": "p(95)",
+              "limit": 1000.0,
+              "operator": "<",
+              "value": 281.68203999999986,
+              "status": "PASS"
+            },
+            "detail": {
+              "criterion": "p95 < 500 ms",
+              "statistic": "p(95)",
+              "limit": 500.0,
+              "operator": "<",
+              "value": 353.41684375,
+              "status": "PASS"
+            },
+            "failed": {
+              "criterion": "failure rate < 0.005 (0.5%)",
+              "statistic": "rate",
+              "limit": 0.005,
+              "operator": "<",
+              "value": 0.00011885306789481504,
+              "status": "PASS"
+            }
+          },
+          "vus_samples_match_target": true,
+          "usable_for_stage_acceptance": true
+        },
+        {
+          "target_vus": 600,
+          "start_elapsed_s": 360.0,
+          "end_elapsed_s": 480.0,
+          "approximate": true,
+          "window_start_utc": "2026-11-10T14:55:33.360244+00:00",
+          "window_end_utc": "2026-11-10T14:57:33.360244+00:00",
+          "seconds": 120.0,
+          "search_duration_ms": {
+            "avg": 273.0983820683438,
+            "min": 2.182672,
+            "med": 146.845943,
+            "max": 3244.472979,
+            "p(90)": 571.4731278000006,
+            "p(95)": 860.8966223999998
+          },
+          "detail_duration_ms": {
+            "avg": 386.5948600601241,
+            "min": 3.963022,
+            "med": 224.174983,
+            "max": 3446.612606,
+            "p(90)": 893.6775954000005,
+            "p(95)": 1141.6731729999992
+          },
+          "http_reqs": {
+            "count": 55266.0,
+            "rate": 460.55
+          },
+          "http_req_failed": {
+            "rate": 0.0,
+            "passes": 0,
+            "fails": 55266
+          },
+          "observed_vus": {
+            "value": 600.0,
+            "min": 600.0,
+            "max": 600.0
+          },
+          "status_counts": {
+            "200": 55266
+          },
+          "criteria": {
+            "search": {
+              "criterion": "p95 < 1000 ms",
+              "statistic": "p(95)",
+              "limit": 1000.0,
+              "operator": "<",
+              "value": 860.8966223999998,
+              "status": "PASS"
+            },
+            "detail": {
+              "criterion": "p95 < 500 ms",
+              "statistic": "p(95)",
+              "limit": 500.0,
+              "operator": "<",
+              "value": 1141.6731729999992,
+              "status": "FAIL"
+            },
+            "failed": {
+              "criterion": "failure rate < 0.005 (0.5%)",
+              "statistic": "rate",
+              "limit": 0.005,
+              "operator": "<",
+              "value": 0.0,
+              "status": "PASS"
+            }
+          },
+          "vus_samples_match_target": true,
+          "usable_for_stage_acceptance": true
+        },
+        {
+          "target_vus": 1000,
+          "start_elapsed_s": 600.0,
+          "end_elapsed_s": 720.0,
+          "approximate": true,
+          "window_start_utc": "2026-11-10T14:59:33.360244+00:00",
+          "window_end_utc": "2026-11-10T15:01:33.360244+00:00",
+          "seconds": 120.0,
+          "search_duration_ms": {
+            "avg": 987.3017089466174,
+            "min": 489.882166,
+            "med": 867.25546,
+            "max": 2321.897592,
+            "p(90)": 1507.2119874000002,
+            "p(95)": 1645.2625199999998
+          },
+          "detail_duration_ms": {
+            "avg": 1346.4072167953248,
+            "min": 770.532372,
+            "med": 1242.553101,
+            "max": 2801.481329,
+            "p(90)": 1877.8555182,
+            "p(95)": 2033.7429829999999
+          },
+          "http_reqs": {
+            "count": 57579.0,
+            "rate": 479.825
+          },
+          "http_req_failed": {
+            "rate": 0.0,
+            "passes": 0,
+            "fails": 57579
+          },
+          "observed_vus": {
+            "value": 1000.0,
+            "min": 1000.0,
+            "max": 1000.0
+          },
+          "status_counts": {
+            "200": 57579
+          },
+          "criteria": {
+            "search": {
+              "criterion": "p95 < 1000 ms",
+              "statistic": "p(95)",
+              "limit": 1000.0,
+              "operator": "<",
+              "value": 1645.2625199999998,
+              "status": "FAIL"
+            },
+            "detail": {
+              "criterion": "p95 < 500 ms",
+              "statistic": "p(95)",
+              "limit": 500.0,
+              "operator": "<",
+              "value": 2033.7429829999999,
+              "status": "FAIL"
+            },
+            "failed": {
+              "criterion": "failure rate < 0.005 (0.5%)",
+              "statistic": "rate",
+              "limit": 0.005,
+              "operator": "<",
+              "value": 0.0,
+              "status": "PASS"
+            }
+          },
+          "vus_samples_match_target": true,
+          "usable_for_stage_acceptance": true
+        }
+      ],
+      "warnings": [
+        "NEGATIVE TIMING: http_req_receiving minimum is -3.721846 ms. Retained as recorded; this is a measurement artifact, not physically meaningful elapsed time."
+      ],
+      "resources": {
+        "available": true,
+        "file": "D:\\sun\\4year\\sa\\CampusKit\\loadtest\\results\\runs\\2026-11-10-173142-e08a93\\resources.jsonl",
+        "snapshots": 45,
+        "first_sample_utc": "2026-11-10T14:49:44.290469+00:00",
+        "last_sample_utc": "2026-11-10T15:02:22.304001+00:00",
+        "peak_sample_total_cpu_percent": 869.2400000000001,
+        "peak_sample_total_memory_bytes": 2367506350.08,
+        "containers": [
+          {
+            "name": "campuskitbench8b48b7be9e-booking-1",
+            "samples": 45,
+            "cpu_mean_percent": 0.14400000000000002,
+            "cpu_peak_percent": 0.42,
+            "memory_mean_bytes": 69976602.85155556,
+            "memory_peak_bytes": 72236400.64,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-gateway-1",
+            "samples": 45,
+            "cpu_mean_percent": 35.467333333333336,
+            "cpu_peak_percent": 76.44,
+            "memory_mean_bytes": 172152411.47733334,
+            "memory_peak_bytes": 230791577.6,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-identity-1",
+            "samples": 45,
+            "cpu_mean_percent": 0.25177777777777777,
+            "cpu_peak_percent": 4.86,
+            "memory_mean_bytes": 68179576.60444444,
+            "memory_peak_bytes": 70390906.88,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-k6-stress",
+            "samples": 45,
+            "cpu_mean_percent": 60.74733333333334,
+            "cpu_peak_percent": 131.72,
+            "memory_mean_bytes": 400246119.5377778,
+            "memory_peak_bytes": 512334233.6,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 23
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-listing-1",
+            "samples": 45,
+            "cpu_mean_percent": 86.93355555555556,
+            "cpu_peak_percent": 119.56,
+            "memory_mean_bytes": 390352222.4355555,
+            "memory_peak_bytes": 419640115.2,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-mongo-1",
+            "samples": 45,
+            "cpu_mean_percent": 42.922444444444444,
+            "cpu_peak_percent": 144.37,
+            "memory_mean_bytes": 253412857.17333332,
+            "memory_peak_bytes": 404226048.0,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 103
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-notification-1",
+            "samples": 45,
+            "cpu_mean_percent": 0.39355555555555555,
+            "cpu_peak_percent": 4.7,
+            "memory_mean_bytes": 69661331.00088888,
+            "memory_peak_bytes": 70086819.84,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-payment-1",
+            "samples": 45,
+            "cpu_mean_percent": 0.0006666666666666666,
+            "cpu_peak_percent": 0.03,
+            "memory_mean_bytes": 56381931.52,
+            "memory_peak_bytes": 56381931.52,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-postgres-1",
+            "samples": 45,
+            "cpu_mean_percent": 84.13511111111112,
+            "cpu_peak_percent": 117.68,
+            "memory_mean_bytes": 114079010.36088888,
+            "memory_peak_bytes": 115762790.4,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 25
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-rabbitmq-1",
+            "samples": 45,
+            "cpu_mean_percent": 81.276,
+            "cpu_peak_percent": 382.99,
+            "memory_mean_bytes": 139190308.40888888,
+            "memory_peak_bytes": 207093760.0,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 103
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-rental-1",
+            "samples": 45,
+            "cpu_mean_percent": 0.27155555555555555,
+            "cpu_peak_percent": 5.29,
+            "memory_mean_bytes": 68697340.13155556,
+            "memory_peak_bytes": 70799851.52,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-review-1",
+            "samples": 45,
+            "cpu_mean_percent": 41.809111111111115,
+            "cpu_peak_percent": 55.16,
+            "memory_mean_bytes": 233478495.34577778,
+            "memory_peak_bytes": 322122547.2,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 11
+          },
+          {
+            "name": "campuskitbench8b48b7be9e-web-1",
+            "samples": 45,
+            "cpu_mean_percent": 0.0,
+            "cpu_peak_percent": 0.0,
+            "memory_mean_bytes": 13222543.359999998,
+            "memory_peak_bytes": 13222543.36,
+            "memory_limit_bytes": 7136088162.304,
+            "pids_peak": 17
+          }
+        ],
+        "limitations": [
+          "CPU 100% means one logical CPU; container percentages may exceed 100%.",
+          "Means are unweighted averages of periodic snapshots, not time-weighted utilization.",
+          "Samples cover the named isolated test stack and generator, not every workload sharing Docker Desktop.",
+          "Sampled peaks can miss shorter spikes and do not by themselves identify a bottleneck."
+        ]
+      }
+    }
+  }
+}

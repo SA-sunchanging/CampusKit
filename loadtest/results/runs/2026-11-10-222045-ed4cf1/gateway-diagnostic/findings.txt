@@ -1,0 +1,67 @@
+CampusKit isolated diagnostics, 2026-11-10
+
+Four separate, sequential test-only runs used the project's read-only Listing
+search/detail request mix and the same threshold rules. Each ramped to 600
+virtual users over 30 seconds, held 75 seconds and ramped down over 15 seconds.
+The three main comparison phases used the same isolated Listing and databases.
+The fourth phase used a Listing clone with aggregate timing instrumentation.
+Sequential runs, randomized request mixes, changing system conditions, changed
+connection strategies, and instrumentation overhead prevent a precise causal
+latency comparison or subtraction between rows.
+
+Phase                   Requests  Request/s  Search p95 ms  Detail p95 ms  HTTP failures
+Default gateway         35,354    292.02     2,177.30 FAIL  3,175.75 FAIL  0
+No keepalive gateway    33,317    275.55     1,835.29 FAIL  1,839.80 FAIL  0
+Direct Listing          35,003    289.30     1,778.70 FAIL  3,095.82 FAIL  0
+Listing clone/profile   17,645    145.53     3,115.40 FAIL  5,620.54 FAIL  0
+
+Acceptance thresholds: search p95 strictly below 1,000 ms; detail p95 strictly
+below 500 ms; HTTP failure rate strictly below 0.5%. All four HTTP failure
+rates passed. All four runs' response checks passed, but those checks do not
+verify the completeness of owner ratings.
+
+Default gateway's final periodic counter sample, before the run finished:
+34,309 observed outbound Listing requests; 11,128 encountered a nonempty
+httpxy agent queue at request creation; maximum queue length 241; maximum
+active sockets 256. A socket was assigned after at least 100 ms for 7,486
+requests, maximum 1,866 ms. Socket-assignment elapsed time includes Node event
+loop scheduling, so it is not solely queue wait time. This proves gateway
+queueing occurred in this diagnostic, not that it was the sole cause of slow
+responses. Direct Listing also exceeded the targets.
+
+No-keepalive was a test-only proxy setting using agent=false and Connection:
+close. It removed the shared agent queue but both latency thresholds still
+failed and its throughput was lower in this one sequential run. Its request
+setup incurred different TCP connection costs. It is not a validated fix.
+
+The final periodic sample in the instrumented Listing clone, before the run
+finished: 20,675 completed pool acquisitions averaging 1,709 ms with p95 in
+the 2,000-5,000 ms histogram bucket and 508 maximum observed pool waiters;
+31,077 client-observed PostgreSQL query calls averaging 32.2 ms with p95 in
+the 50-100 ms bucket; 13,547 Review fetches averaging 204 ms with p95 in the
+1,000-2,000 ms bucket; Node event-loop utilization 96.1%, p95 event-loop delay
+66.8 ms. The clone logged 713 Review timeout warnings and fell back to empty
+reputation values. Pool acquisition includes asynchronous scheduling; query
+includes network and scheduling; Review timing ends when response headers
+arrive. These spans may overlap and cannot be summed. Sample and log counts
+cover different intervals and include background work.
+
+The profiler run's 145.53 requests/s was much lower than the earlier direct
+comparison (289.30/s). Profiler overhead and run-to-run conditions are not
+controlled, so its queue lengths and delays establish what happened in that
+specific run but cannot be assigned directly to the main stress test. A
+controlled repeat with lower-overhead tracing is needed before choosing a fix.
+The PostgreSQL pool defaults to 10 connections; changing its size could shift
+load to the database and requires controlled testing, rather than assuming an
+increase will solve this problem.
+
+The main benchmark gateway logs separately identified HTTP 502 responses as
+`read ECONNRESET` forwarding to Listing. No 502 occurred in these short
+diagnostic phases; therefore their results neither prove nor rule out stale
+keepalive sockets as the trigger for those resets.
+
+Evidence: *-summary.json, *-timeseries.json.gz, default-gateway.log,
+no-keepalive-gateway.log, listing-inspection/listing-summary.json and
+listing-inspection/listing-service.log. The preload logs aggregate timings,
+not SQL, database credentials, or JWTs. Temporary gateway and Listing clones
+were removed after use.

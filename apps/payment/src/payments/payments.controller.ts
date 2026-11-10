@@ -7,7 +7,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { PaymentStatusResponse } from './payment-status.response.js';
+import {
+  EarningsResponse,
+  PaymentStatusResponse,
+} from './payment-status.response.js';
 import { PaymentStatusService } from './payment-status.service.js';
 
 /**
@@ -22,6 +25,12 @@ import { PaymentStatusService } from './payment-status.service.js';
 @ApiBearerAuth()
 export class PaymentsController {
   constructor(private readonly status: PaymentStatusService) {}
+
+  @Get('me/earnings')
+  @ApiOkResponse({ type: EarningsResponse })
+  earnings(@CurrentUser() user: AuthUser): Promise<EarningsResponse> {
+    return this.status.earnings(user);
+  }
 
   /** The holds and payout of a booking, for its renter or owner. */
   @Get('bookings/:bookingId')

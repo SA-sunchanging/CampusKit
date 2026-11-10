@@ -1,5 +1,13 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsInt, IsUUID, Max, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsIn,
+  IsInt,
+  IsISO8601,
+  IsOptional,
+  IsUUID,
+  Max,
+  Min,
+} from 'class-validator';
 import {
   AUTHORIZATION_KINDS,
   type AuthorizationKind,
@@ -26,4 +34,12 @@ export class AuthorizeDto extends OperationDto implements AuthorizeRequest {
   @Min(1)
   @Max(MAX_SATANG)
   amount: number;
+
+  @ApiPropertyOptional({
+    format: 'date-time',
+    description: 'The planned return, strictly before hold expiry.',
+  })
+  @IsOptional()
+  @IsISO8601({ strict: true })
+  requiredUntil?: string;
 }

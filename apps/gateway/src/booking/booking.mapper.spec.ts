@@ -20,6 +20,7 @@ const reply = {
   expiresAt: '2026-10-30T08:00:00.000Z',
   createdAt: '2026-10-29T08:00:00.000Z',
   updatedAt: '2026-10-29T09:00:00.000Z',
+  failureReason: '',
 };
 
 describe('toBookingResponse', () => {
@@ -40,15 +41,27 @@ describe('toBookingResponse', () => {
       period: { start: '', end: '' },
       terms: { rentalFee: 6000, deposit: 0, lateFeePerDay: 0 },
       declineReason: '',
+      failureReason: '',
     });
+  });
+
+  it('passes the public authorization failure reason to REST', () => {
+    const booking = toBookingResponse({
+      ...reply,
+      status: 'FAILED',
+      failureReason: 'AUTHORIZATION_EXPIRES_BEFORE_RETURN',
+    });
+    expect(booking.failureReason).toBe('AUTHORIZATION_EXPIRES_BEFORE_RETURN');
   });
 
   it('copies no extra fields', () => {
     const booking = toBookingResponse({
       ...reply,
       lastError: 'secret',
+      last_error: 'private database message',
     } as never);
     expect(booking).not.toHaveProperty('lastError');
+    expect(booking).not.toHaveProperty('last_error');
   });
 });
 

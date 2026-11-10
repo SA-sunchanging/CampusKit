@@ -27,7 +27,7 @@ const reply = {
   createdAt: '2026-10-29T08:00:00.000Z',
   updatedAt: '2026-10-29T08:00:00.000Z',
 };
-const booking = { ...reply, declineReason: '' };
+const booking = { ...reply, declineReason: '', failureReason: '' };
 
 const grpc = {
   requestBooking: vi.fn(),
@@ -161,6 +161,24 @@ describe('POST /api/booking/bookings/:id/approve and /decline', () => {
       .expect(200);
     expect(res.body.status).toBe('CONFIRMED');
     expect(sent('approveBooking')[0]).toEqual({ id });
+  });
+
+  it('returns a safe expiry reason for a failed approval without leaking internal errors', async () => {
+    grpc.approveBooking.mockReturnValue(
+      of({
+        ...reply,
+        status: 'FAILED',
+        failureReason: 'AUTHORIZATION_EXPIRES_BEFORE_RETURN',
+        lastError: 'private payment details',
+      }),
+    );
+    const res = await http()
+      .post(`/api/booking/bookings/${id}/approve`)
+      .expect(200);
+    expect(res.body.status).toBe('FAILED');
+    expect(res.body.failureReason).toBe('AUTHORIZATION_EXPIRES_BEFORE_RETURN');
+    expect(res.body).not.toHaveProperty('lastError');
+    expect(JSON.stringify(res.body)).not.toContain('private payment details');
   });
 
   it('declines with a trimmed reason and answers 200', async () => {

@@ -1,0 +1,8 @@
+gateway: healthy
+identity: healthy
+listing: healthy
+booking: healthy
+review: healthy
+rental: healthy
+payment: healthy
+notification: healthy

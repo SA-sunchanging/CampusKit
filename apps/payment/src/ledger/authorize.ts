@@ -7,7 +7,11 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, type EntityManager } from 'typeorm';
 import { AuthorizeResponse } from '../internal/authorize.response.js';
 import type { AuthorizationKind } from './authorization.entity.js';
-import { type AuthorizationRow, kindLabel } from './authorization.row.js';
+import {
+  type AuthorizationRow,
+  findAuthorizations,
+  kindLabel,
+} from './authorization.row.js';
 import { authorizationTtlDays, expiresAt } from './authorization-ttl.js';
 import { type OperationRequest, runOperation } from './operations.js';
 
@@ -20,11 +24,28 @@ export interface AuthorizeRequest extends OperationRequest {
   kind: AuthorizationKind;
   /** Integer satang, more than zero. */
   amount: number;
+  /** The hold must remain valid strictly beyond this planned return time. */
+  requiredUntil?: string;
 }
 
 interface Created {
   id: string;
   status: string;
+}
+
+function checkLifetime(
+  expiry: Date,
+  requiredUntil: Date | undefined,
+  now: Date,
+): void {
+  if (expiry <= now) {
+    throw new ConflictException('The authorization has expired');
+  }
+  if (requiredUntil && expiry <= requiredUntil) {
+    throw new ConflictException(
+      'The authorization must last beyond the rental return; choose earlier dates',
+    );
+  }
 }
 
 /** Refuses a second hold of the same kind, or one between other people than the first. */
@@ -69,13 +90,40 @@ export class AuthorizeService {
         'The payer and the payee must be different people',
       );
     }
+    const requiredUntil =
+      request.requiredUntil === undefined
+        ? undefined
+        : new Date(request.requiredUntil);
+    if (requiredUntil && !Number.isFinite(requiredUntil.getTime())) {
+      throw new BadRequestException('requiredUntil must be an ISO-8601 time');
+    }
     const created = await runOperation(
       this.db,
       'AUTHORIZE',
       request,
-      (tx, rows) => {
+      async (tx, rows) => {
+        const voided = (await tx.query(
+          `SELECT 1 FROM ledger_entries WHERE booking_id = $1 AND operation = 'VOID' LIMIT 1`,
+          [request.bookingId],
+        )) as unknown[];
+        if (voided.length > 0) {
+          throw new ConflictException('The booking has already been voided');
+        }
+        checkLifetime(expiresAt(now, this.ttlDays), requiredUntil, now);
         checkExisting(request, rows);
         return this.insert(tx, request, now);
+      },
+      async (tx, result) => {
+        // A retry must not turn an expired or voided original hold into a new success.
+        if (!requiredUntil) return;
+        const rows = await findAuthorizations(tx, request.bookingId, true);
+        const hold = rows.find((row) => row.id === result.id);
+        if (!hold || hold.status !== 'AUTHORIZED') {
+          throw new ConflictException(
+            'The original authorization is no longer open',
+          );
+        }
+        checkLifetime(hold.expires_at, requiredUntil, now);
       },
     );
     return AuthorizeResponse.of(created);

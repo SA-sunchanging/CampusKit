@@ -25,6 +25,7 @@ export interface BookingReply {
   expiresAt?: string;
   createdAt?: string;
   updatedAt?: string;
+  failureReason?: string;
 }
 
 export interface ListBookingsReply {

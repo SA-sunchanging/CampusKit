@@ -14,6 +14,8 @@ export interface AuthorizeRequest {
   kind: 'FEE' | 'DEPOSIT';
   /** Integer satang. */
   amount: number;
+  /** The authorization must remain valid beyond the planned return. */
+  requiredUntil: string;
 }
 
 export interface Authorization {

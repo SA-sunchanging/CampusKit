@@ -1,0 +1,54 @@
+Read-only EXPLAIN (ANALYZE, BUFFERS), isolated seeded listing_db, before benchmark started.
+Queries approximate search page and count operations for a 1,500-listing dataset. They do not measure application queuing or concurrent load.
+
+EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM listings WHERE status = 'PUBLISHED' AND (title ILIKE '%calculator%' OR description ILIKE '%calculator%') ORDER BY published_at DESC, id ASC LIMIT 20 OFFSET 20;
+ Limit  (cost=19.11..37.08 rows=20 width=398) (actual time=0.709..0.871 rows=20 loops=1)
+   Buffers: shared hit=39
+   ->  Incremental Sort  (cost=1.14..225.72 rows=250 width=398) (actual time=0.706..0.867 rows=40 loops=1)
+         Sort Key: published_at DESC, id
+         Presorted Key: published_at
+         Full-sort Groups: 2  Sort Method: quicksort  Average Memory: 41kB  Peak Memory: 41kB
+         Buffers: shared hit=39
+         ->  Index Scan using listings_search_idx on listings  (cost=0.28..214.47 rows=250 width=398) (actual time=0.067..0.736 rows=41 loops=1)
+               Index Cond: (status = 'PUBLISHED'::text)
+               Filter: ((title ~~* '%calculator%'::text) OR (description ~~* '%calculator%'::text))
+               Rows Removed by Filter: 440
+               Buffers: shared hit=30
+ Planning: Buffers: shared hit=221
+ Planning Time: 2.546 ms
+ Execution Time: 0.980 ms
+
+EXPLAIN (ANALYZE, BUFFERS) SELECT count(*) FROM listings WHERE status = 'PUBLISHED' AND (title ILIKE '%calculator%' OR description ILIKE '%calculator%');
+ Aggregate  (cost=86.88..86.89 rows=1 width=8) (actual time=1.875..1.876 rows=1 loops=1)
+   Buffers: shared hit=60
+   ->  Seq Scan on listings  (cost=0.00..86.25 rows=250 width=0) (actual time=0.010..1.866 rows=125 loops=1)
+         Filter: ((status = 'PUBLISHED'::text) AND ((title ~~* '%calculator%'::text) OR (description ~~* '%calculator%'::text)))
+         Rows Removed by Filter: 1375
+         Buffers: shared hit=60
+ Planning: Buffers: shared hit=3
+ Planning Time: 0.211 ms
+ Execution Time: 1.918 ms
+
+EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM listings WHERE status = 'PUBLISHED' AND category = 'ELECTRONICS' ORDER BY published_at DESC, id ASC LIMIT 20 OFFSET 20;
+ Limit  (cost=8.93..17.20 rows=20 width=398) (actual time=0.150..0.171 rows=20 loops=1)
+   Buffers: shared hit=9
+   ->  Incremental Sort  (cost=0.66..155.78 rows=375 width=398) (actual time=0.148..0.168 rows=40 loops=1)
+         Sort Key: published_at DESC, id
+         Presorted Key: published_at
+         Full-sort Groups: 2  Sort Method: quicksort  Average Memory: 41kB  Peak Memory: 41kB
+         Buffers: shared hit=9
+         ->  Index Scan using listings_category_idx on listings  (cost=0.28..138.90 rows=375 width=398) (actual time=0.076..0.093 rows=41 loops=1)
+               Index Cond: ((status = 'PUBLISHED'::text) AND (category = 'ELECTRONICS'::text))
+               Buffers: shared hit=9
+ Planning Time: 0.067 ms
+ Execution Time: 0.205 ms
+
+EXPLAIN (ANALYZE, BUFFERS) SELECT count(*) FROM listings WHERE status = 'PUBLISHED' AND category = 'ELECTRONICS';
+ Aggregate  (cost=24.71..24.73 rows=1 width=8) (actual time=0.282..0.283 rows=1 loops=1)
+   Buffers: shared hit=6
+   ->  Index Only Scan using listings_category_idx on listings  (cost=0.28..23.78 rows=375 width=0) (actual time=0.047..0.263 rows=375 loops=1)
+         Index Cond: ((status = 'PUBLISHED'::text) AND (category = 'ELECTRONICS'::text))
+         Heap Fetches: 0
+         Buffers: shared hit=6
+ Planning Time: 0.040 ms
+ Execution Time: 0.315 ms

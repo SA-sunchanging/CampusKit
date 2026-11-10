@@ -37,6 +37,7 @@ export function toBookingResponse(reply: BookingReply): BookingResponse {
     expiresAt: reply.expiresAt ?? '',
     createdAt: reply.createdAt ?? '',
     updatedAt: reply.updatedAt ?? '',
+    failureReason: reply.failureReason ?? '',
   });
 }
 

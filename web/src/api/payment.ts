@@ -50,6 +50,17 @@ export function getBookingPayments(bookingId: string): Promise<PaymentStatus> {
   return api(`/payment/payments/bookings/${encodeURIComponent(bookingId)}`);
 }
 
+/** The signed-in owner's settled earnings; pending payments are excluded. */
+export interface EarningsSummary {
+  /** Integer satang, including settled late fees. */
+  totalEarned: number;
+  settledRentals: number;
+}
+
+export function getMyEarnings(): Promise<EarningsSummary> {
+  return api('/payment/payments/me/earnings');
+}
+
 export interface FeeLine {
   amount: number;
   status: AuthorizationStatus;

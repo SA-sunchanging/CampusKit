@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import {
   type Booking,
   type BookingRole,
@@ -7,6 +7,7 @@ import {
 } from '../../api/booking.ts';
 import { Alert, CalendarIcon, EmptyState, PageHeader } from '../../ui/index.ts';
 import BookingCard from './BookingCard.tsx';
+import { readRole, roleParams } from './role.ts';
 import { useListingTitles } from './useListingTitles.ts';
 import './booking.css';
 
@@ -17,7 +18,8 @@ const TABS: { role: BookingRole; label: string }[] = [
 
 // The student's bookings (role C): their own requests, and requests on their items.
 export default function BookingsPage() {
-  const [role, setRole] = useState<BookingRole>('renter');
+  const [params, setParams] = useSearchParams();
+  const role = readRole(params);
   return (
     <section>
       <PageHeader title="Bookings" />
@@ -31,7 +33,7 @@ export default function BookingsPage() {
             aria-selected={tab.role === role}
             aria-controls="bookings-panel"
             className="booking-tab"
-            onClick={() => setRole(tab.role)}
+            onClick={() => setParams(roleParams(params, tab.role))}
           >
             {tab.label}
           </button>

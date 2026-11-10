@@ -12,6 +12,7 @@ describe('navFor', () => {
   it('offers a student every student page and no admin page', () => {
     expect(labels('student')).toEqual([
       'Listings',
+      'My listings',
       'Bookings',
       'Rentals',
       'Inbox',
@@ -22,6 +23,19 @@ describe('navFor', () => {
 
   it('offers an admin only admin, listings, and account', () => {
     expect(labels('admin')).toEqual(['Admin', 'Listings', 'Account']);
+  });
+
+  it('links only students to their own listings', () => {
+    expect(navFor('student')).toContainEqual({
+      to: '/listings/mine',
+      label: 'My listings',
+    });
+    expect(navFor('guest').some((item) => item.to === '/listings/mine')).toBe(
+      false,
+    );
+    expect(navFor('admin').some((item) => item.to === '/listings/mine')).toBe(
+      false,
+    );
   });
 });
 

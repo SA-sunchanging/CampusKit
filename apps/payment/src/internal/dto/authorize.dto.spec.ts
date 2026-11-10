@@ -20,6 +20,9 @@ describe('AuthorizeDto', () => {
   it('accepts a valid body', () => {
     expect(errorsFor({})).toEqual([]);
     expect(errorsFor({ amount: 2_147_483_647, kind: 'DEPOSIT' })).toEqual([]);
+    expect(errorsFor({ requiredUntil: '2026-11-04T17:00:00.000Z' })).toEqual(
+      [],
+    );
   });
 
   it.each([
@@ -34,6 +37,9 @@ describe('AuthorizeDto', () => {
     ['amount', 1.5],
     ['amount', 2_147_483_648],
     ['amount', '6000'],
+    ['requiredUntil', 'not-a-date'],
+    ['requiredUntil', '2026-02-30T17:00:00Z'],
+    ['requiredUntil', 123],
   ])('rejects an invalid %s', (field, value) => {
     expect(errorsFor({ [field]: value })).toContain(field);
   });

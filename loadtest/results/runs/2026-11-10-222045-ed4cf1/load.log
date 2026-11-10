@@ -1,0 +1,31 @@
+time="2026-11-10T15:28:13Z" level=error msg="{\"test_failure\":true,\"name\":\"detail\",\"status\":502,\"url\":\"http://gateway:3000/api/listing/listings/00000000-0000-4000-9000-000000001162\",\"correlationId\":\"2c9272d3-4ef8-4f2d-9878-e2cfd49cc667\",\"body\":\"{\\\"error\\\":{\\\"code\\\":\\\"BAD_GATEWAY\\\",\\\"message\\\":\\\"The listing service is unavailable\\\"}}\"}" source=console
+time="2026-11-10T15:28:13Z" level=error msg="{\"test_failure\":true,\"name\":\"search\",\"status\":502,\"url\":\"http://gateway:3000/api/listing/listings?q=tent&page=2&pageSize=20\",\"correlationId\":\"01707c06-a214-4819-9ce9-c573a68e1aae\",\"body\":\"{\\\"error\\\":{\\\"code\\\":\\\"BAD_GATEWAY\\\",\\\"message\\\":\\\"The listing service is unavailable\\\"}}\"}" source=console
+time="2026-11-10T15:30:52Z" level=error msg="{\"test_failure\":true,\"name\":\"search\",\"status\":502,\"url\":\"http://gateway:3000/api/listing/listings?category=TOOLS&page=2&pageSize=20\",\"correlationId\":\"f368d321-2662-4072-9bf3-15b2765fd301\",\"body\":\"{\\\"error\\\":{\\\"code\\\":\\\"BAD_GATEWAY\\\",\\\"message\\\":\\\"The listing service is unavailable\\\"}}\"}" source=console
+[31m     ✗ search status is 200
+      ↳  99% — ✓ 72469 / ✗ 2[0m
+[31m     ✗ search has items array
+      ↳  99% — ✓ 72469 / ✗ 2[0m
+[31m     ✗ detail status is 200
+      ↳  99% — ✓ 31060 / ✗ 1[0m
+[31m     ✗ detail id matches
+      ↳  99% — ✓ 31060 / ✗ 1[0m
+
+     checks[2m.........................:[0m [36m99.99%[0m [36;2m✓ 207058[0m     [36;2m✗ 6[0m     
+     data_received[2m..................:[0m [36m413 MB[0m [36;2m916 kB/s[0m
+     data_sent[2m......................:[0m [36m13 MB[0m  [36;2m28 kB/s[0m
+     http_req_blocked[2m...............:[0m avg=[36m14.51µs[0m  min=[36m1.67µs[0m   med=[36m9.25µs[0m   max=[36m33.97ms[0m p(90)=[36m13.78µs[0m  p(95)=[36m16.12µs[0m 
+     http_req_connecting[2m............:[0m avg=[36m2.49µs[0m   min=[36m0s[0m       med=[36m0s[0m       max=[36m33.89ms[0m p(90)=[36m0s[0m       p(95)=[36m0s[0m      
+     http_req_duration[2m..............:[0m avg=[36m86.22ms[0m  min=[36m1.81ms[0m   med=[36m22.57ms[0m  max=[36m3.39s[0m   p(90)=[36m230.19ms[0m p(95)=[36m359.18ms[0m
+       { expected_response:true }[2m...:[0m avg=[36m86.22ms[0m  min=[36m1.81ms[0m   med=[36m22.57ms[0m  max=[36m3.39s[0m   p(90)=[36m230.19ms[0m p(95)=[36m359.19ms[0m
+     [32m✓[0m { name:detail }[2m..............:[0m avg=[36m92.83ms[0m  min=[36m2.82ms[0m   med=[36m20.2ms[0m   max=[36m3.39s[0m   p(90)=[36m268.93ms[0m p(95)=[36m438.84ms[0m
+     [32m✓[0m { name:search }[2m..............:[0m avg=[36m83.39ms[0m  min=[36m1.81ms[0m   med=[36m23.57ms[0m  max=[36m3.2s[0m    p(90)=[36m219.01ms[0m p(95)=[36m328.41ms[0m
+   [32m✓[0m http_req_failed[2m................:[0m [36m0.00%[0m  [36;2m✓ 3[0m          [36;2m✗ 103529[0m
+     http_req_receiving[2m.............:[0m avg=[36m167.28µs[0m min=[36m11.23µs[0m  med=[36m129.55µs[0m max=[36m22.26ms[0m p(90)=[36m266.76µs[0m p(95)=[36m322.07µs[0m
+     http_req_sending[2m...............:[0m avg=[36m43.06µs[0m  min=[36m4.58µs[0m   med=[36m26.53µs[0m  max=[36m10.82ms[0m p(90)=[36m87.1µs[0m   p(95)=[36m105.23µs[0m
+     http_req_tls_handshaking[2m.......:[0m avg=[36m0s[0m       min=[36m0s[0m       med=[36m0s[0m       max=[36m0s[0m      p(90)=[36m0s[0m       p(95)=[36m0s[0m      
+     http_req_waiting[2m...............:[0m avg=[36m86.01ms[0m  min=[36m1.75ms[0m   med=[36m22.35ms[0m  max=[36m3.39s[0m   p(90)=[36m229.88ms[0m p(95)=[36m358.94ms[0m
+     http_reqs[2m......................:[0m [36m103532[0m [36;2m229.626843/s[0m
+     iteration_duration[2m.............:[0m avg=[36m1.08s[0m    min=[36m504.37ms[0m med=[36m1.07s[0m    max=[36m4.83s[0m   p(90)=[36m1.48s[0m    p(95)=[36m1.56s[0m   
+     iterations[2m.....................:[0m [36m103532[0m [36;2m229.626843/s[0m
+     vus[2m............................:[0m [36m1[0m      [36;2mmin=1[0m        [36;2mmax=300[0m 
+     vus_max[2m........................:[0m [36m300[0m    [36;2mmin=300[0m      [36;2mmax=300[0m 

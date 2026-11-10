@@ -1,0 +1,28 @@
+[31m     ✗ search status is 200
+      ↳  99% — ✓ 196778 / ✗ 5[0m
+[31m     ✗ search has items array
+      ↳  99% — ✓ 196778 / ✗ 5[0m
+[31m     ✗ detail status is 200
+      ↳  99% — ✓ 83859 / ✗ 1[0m
+[31m     ✗ detail id matches
+      ↳  99% — ✓ 83859 / ✗ 1[0m
+
+     checks[2m.........................:[0m [36m99.99%[0m [36;2m✓ 561274[0m     [36;2m✗ 12[0m    
+     data_received[2m..................:[0m [36m1.1 GB[0m [36;2m1.4 MB/s[0m
+     data_sent[2m......................:[0m [36m34 MB[0m  [36;2m44 kB/s[0m
+     http_req_blocked[2m...............:[0m avg=[36m12.87µs[0m  min=[36m1.91µs[0m     med=[36m8.33µs[0m   max=[36m94.67ms[0m p(90)=[36m12.68µs[0m p(95)=[36m14.93µs[0m 
+     http_req_connecting[2m............:[0m avg=[36m2.1µs[0m    min=[36m0s[0m         med=[36m0s[0m       max=[36m94.57ms[0m p(90)=[36m0s[0m      p(95)=[36m0s[0m      
+     http_req_duration[2m..............:[0m avg=[36m518.98ms[0m min=[36m355.33µs[0m   med=[36m298.69ms[0m max=[36m3.63s[0m   p(90)=[36m1.34s[0m   p(95)=[36m1.61s[0m   
+       { expected_response:true }[2m...:[0m avg=[36m518.99ms[0m min=[36m355.33µs[0m   med=[36m298.71ms[0m max=[36m3.63s[0m   p(90)=[36m1.34s[0m   p(95)=[36m1.61s[0m   
+     [31m✗[0m { name:detail }[2m..............:[0m avg=[36m647.15ms[0m min=[36m3.04ms[0m     med=[36m425ms[0m    max=[36m3.63s[0m   p(90)=[36m1.63s[0m   p(95)=[36m1.82s[0m   
+     [31m✗[0m { name:search }[2m..............:[0m avg=[36m464.36ms[0m min=[36m355.33µs[0m   med=[36m264.36ms[0m max=[36m3.5s[0m    p(90)=[36m1.23s[0m   p(95)=[36m1.44s[0m   
+   [32m✓[0m http_req_failed[2m................:[0m [36m0.00%[0m  [36;2m✓ 6[0m          [36;2m✗ 280637[0m
+     http_req_receiving[2m.............:[0m avg=[36m126.25µs[0m min=[36m-3721846ns[0m med=[36m101.32µs[0m max=[36m55.22ms[0m p(90)=[36m198.2µs[0m p(95)=[36m249.04µs[0m
+     http_req_sending[2m...............:[0m avg=[36m35.68µs[0m  min=[36m4.12µs[0m     med=[36m23.53µs[0m  max=[36m27.79ms[0m p(90)=[36m60.7µs[0m  p(95)=[36m82.5µs[0m  
+     http_req_tls_handshaking[2m.......:[0m avg=[36m0s[0m       min=[36m0s[0m         med=[36m0s[0m       max=[36m0s[0m      p(90)=[36m0s[0m      p(95)=[36m0s[0m      
+     http_req_waiting[2m...............:[0m avg=[36m518.82ms[0m min=[36m237.95µs[0m   med=[36m298.5ms[0m  max=[36m3.63s[0m   p(90)=[36m1.34s[0m   p(95)=[36m1.61s[0m   
+     http_reqs[2m......................:[0m [36m280643[0m [36;2m359.198305/s[0m
+     iteration_duration[2m.............:[0m avg=[36m1.52s[0m    min=[36m504.76ms[0m   med=[36m1.41s[0m    max=[36m5.06s[0m   p(90)=[36m2.41s[0m   p(95)=[36m2.7s[0m    
+     iterations[2m.....................:[0m [36m280643[0m [36;2m359.198305/s[0m
+     vus[2m............................:[0m [36m2[0m      [36;2mmin=2[0m        [36;2mmax=1000[0m
+     vus_max[2m........................:[0m [36m1000[0m   [36;2mmin=1000[0m     [36;2mmax=1000[0mtime="2026-11-10T15:02:35Z" level=error msg="thresholds on metrics 'http_req_duration{name:detail}, http_req_duration{name:search}' have been crossed"

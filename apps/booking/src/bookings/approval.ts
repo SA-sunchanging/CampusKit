@@ -50,6 +50,7 @@ export async function authorizeAndCreateRental(
         payeeId: booking.owner_id,
         kind,
         amount,
+        requiredUntil: new Date(booking.period_end).toISOString(),
       },
       call,
     );

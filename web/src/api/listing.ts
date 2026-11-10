@@ -101,6 +101,27 @@ export interface Listing {
   unpublishedAt: string | null;
 }
 
+/** A student's own listing, including statuses hidden from public search. */
+export type OwnerListingSummary = Pick<
+  Listing,
+  | 'id'
+  | 'title'
+  | 'category'
+  | 'status'
+  | 'dailyRate'
+  | 'thumbnail'
+  | 'publishError'
+  | 'rejectionReason'
+  | 'createdAt'
+>;
+
+export interface OwnerListingPage {
+  items: OwnerListingSummary[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 /** A listing in the administrator's review queue. */
 export interface ReviewItem {
   id: string;
@@ -187,6 +208,14 @@ export function searchQuery(params: SearchParams): string {
  */
 export function searchListings(params: SearchParams): Promise<ListingPage> {
   return api(`/listing/listings${searchQuery(params)}`);
+}
+
+/** All of the signed-in student's listings, newest first; the server determines ownership. */
+export function getMyListings(
+  page = 1,
+  pageSize?: number,
+): Promise<OwnerListingPage> {
+  return api(`/listing/listings/mine${searchQuery({ page, pageSize })}`);
 }
 
 /**

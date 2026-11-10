@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryStorage } from '../test/memory-storage.ts';
+import { TOKEN_KEY } from '../auth/token.ts';
 import {
   approveListing,
+  getMyListings,
   getReviewQueue,
   rejectListing,
   reviewQueueQuery,
@@ -122,6 +124,39 @@ describe('owner and moderation calls', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it('loads only the authenticated student owner catalogue with pagination', async () => {
+    localStorage.setItem(TOKEN_KEY, 'owner-token');
+    const saved = {
+      items: [
+        {
+          id,
+          title: 'Camera',
+          status: 'DRAFT',
+          publishError: 'Booking unavailable',
+        },
+      ],
+      total: 21,
+      page: 2,
+      pageSize: 20,
+    };
+    const fetchMock = mockFetch(saved);
+    await expect(getMyListings(2, 20)).resolves.toEqual(saved);
+    expect(requestOf(fetchMock)).toEqual({
+      url: '/api/listing/listings/mine?page=2&pageSize=20',
+      method: undefined,
+      body: undefined,
+    });
+    expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({
+      Authorization: 'Bearer owner-token',
+    });
+  });
+
+  it('leaves out default pagination when loading the owner catalogue', async () => {
+    const fetchMock = mockFetch({ items: [], total: 0, page: 1, pageSize: 20 });
+    await getMyListings();
+    expect(requestOf(fetchMock).url).toBe('/api/listing/listings/mine');
   });
 
   it('asks for the listings waiting for review by default', async () => {

@@ -1,0 +1,29 @@
+listing-1  | 2026-11-10T15:22:15.497565478Z [33m[Nest] 1  - [39m11/10/2026, 3:22:15 PM [33m   WARN[39m [38;5;3m[DataSourceNameRegistry] [39m[33mA data source with the default name is already registered. Multiple data sources must be registered with unique names; otherwise, they will override each other. Please assign a unique "name" property to each TypeOrmModule.forRoot()/forRootAsync() registration.[39m
+listing-1  | 2026-11-10T15:22:16.234029070Z [32m[Nest] 1  - [39m11/10/2026, 3:22:16 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+listing-1  | 2026-11-10T15:22:16.500209046Z [32m[Nest] 1  - [39m11/10/2026, 3:22:16 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mListingModule dependencies initialized[39m
+listing-1  | 2026-11-10T15:22:16.500241031Z [32m[Nest] 1  - [39m11/10/2026, 3:22:16 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m
+listing-1  | 2026-11-10T15:22:16.500244397Z [32m[Nest] 1  - [39m11/10/2026, 3:22:16 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mClientsModule dependencies initialized[39m
+listing-1  | 2026-11-10T15:22:16.500246689Z [32m[Nest] 1  - [39m11/10/2026, 3:22:16 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m
+listing-1  | 2026-11-10T15:22:16.500520161Z [32m[Nest] 1  - [39m11/10/2026, 3:22:16 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHealthModule dependencies initialized[39m
+listing-1  | 2026-11-10T15:22:16.501479537Z [32m[Nest] 1  - [39m11/10/2026, 3:22:16 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m
+listing-1  | 2026-11-10T15:22:17.528126635Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmCoreModule dependencies initialized[39m
+listing-1  | 2026-11-10T15:22:17.528154199Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m
+listing-1  | 2026-11-10T15:22:17.528157264Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mOutboxModule dependencies initialized[39m
+listing-1  | 2026-11-10T15:22:17.530002292Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mListingsModule dependencies initialized[39m
+listing-1  | 2026-11-10T15:22:17.567881574Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHealthController {/health}:[39m
+listing-1  | 2026-11-10T15:22:17.583953462Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/health, GET} route[39m
+listing-1  | 2026-11-10T15:22:17.583996166Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mListingsController {/listings}:[39m
+listing-1  | 2026-11-10T15:22:17.585919451Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/listings, GET} route[39m
+listing-1  | 2026-11-10T15:22:17.587100333Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/listings/mine, GET} route[39m
+listing-1  | 2026-11-10T15:22:17.588943526Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/listings/:id, GET} route[39m
+listing-1  | 2026-11-10T15:22:17.589661691Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/listings, POST} route[39m
+listing-1  | 2026-11-10T15:22:17.590331082Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/listings/:id/publish, POST} route[39m
+listing-1  | 2026-11-10T15:22:17.591943139Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/listings/:id/unpublish, POST} route[39m
+listing-1  | 2026-11-10T15:22:17.591982293Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mInternalListingsController {/internal/listings}:[39m
+listing-1  | 2026-11-10T15:22:17.594628817Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/internal/listings/:id/quote, GET} route[39m
+listing-1  | 2026-11-10T15:22:17.594904806Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mModerationController {/admin/listings}:[39m
+listing-1  | 2026-11-10T15:22:17.596968510Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/admin/listings, GET} route[39m
+listing-1  | 2026-11-10T15:22:17.598537959Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/admin/listings/:id/approve, POST} route[39m
+listing-1  | 2026-11-10T15:22:17.598883698Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/admin/listings/:id/reject, POST} route[39m
+listing-1  | 2026-11-10T15:22:17.613602246Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m
+listing-1  | 2026-11-10T15:22:17.618531402Z [32m[Nest] 1  - [39m11/10/2026, 3:22:17 PM [32m    LOG[39m [38;5;3m[Bootstrap] [39m[32mlisting listening on http://localhost:3002 (docs at /docs)[39m

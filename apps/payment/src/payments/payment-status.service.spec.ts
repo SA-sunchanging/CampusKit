@@ -1,4 +1,8 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import type { DataSource } from 'typeorm';
 import type { AuthorizationRow } from '../ledger/authorization.row.js';
 import {
@@ -97,5 +101,40 @@ describe('PaymentStatusService', () => {
     await expect(
       service.forBooking(stranger, BOOKING_ID, NOW),
     ).rejects.toBeInstanceOf(NotFoundException);
+  });
+});
+
+describe('PaymentStatusService.earnings', () => {
+  it.each([
+    { total_earned: '0', settled_rentals: 0 },
+    { total_earned: '12550', settled_rentals: 2 },
+  ])('returns settled earnings %j scoped to the caller', async (row) => {
+    const { service, db } = setup([], [row]);
+    await expect(service.earnings(owner)).resolves.toEqual({
+      totalEarned: Number(row.total_earned),
+      settledRentals: row.settled_rentals,
+    });
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('FROM payouts WHERE payee_id = $1'),
+      [OWNER_ID],
+    );
+  });
+
+  it('refuses totals that cannot be represented accurately', async () => {
+    const { service } = setup(
+      [],
+      [{ total_earned: '9007199254740992', settled_rentals: 2 }],
+    );
+    await expect(service.earnings(owner)).rejects.toBeInstanceOf(
+      InternalServerErrorException,
+    );
+  });
+
+  it('rejects administrators before querying payments', async () => {
+    const { service, db } = setup([]);
+    await expect(
+      service.earnings({ ...owner, role: 'admin' }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(db.query).not.toHaveBeenCalled();
   });
 });

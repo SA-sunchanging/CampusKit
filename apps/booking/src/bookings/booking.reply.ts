@@ -13,7 +13,11 @@ export interface BookingReply {
   expiresAt: string;
   createdAt: string;
   updatedAt: string;
+  failureReason: string;
 }
+
+const AUTHORIZATION_TOO_SHORT =
+  'The authorization must last beyond the rental return; choose earlier dates';
 
 function iso(value: Date | string): string {
   return new Date(value).toISOString();
@@ -37,5 +41,11 @@ export function toBookingReply(row: BookingRow): BookingReply {
     expiresAt: iso(row.expires_at),
     createdAt: iso(row.created_at),
     updatedAt: iso(row.updated_at),
+    // Expose only a known public code; internal errors may contain private service details.
+    failureReason:
+      row.status === 'FAILED' &&
+      row.last_error?.includes(AUTHORIZATION_TOO_SHORT)
+        ? 'AUTHORIZATION_EXPIRES_BEFORE_RETURN'
+        : '',
   };
 }
