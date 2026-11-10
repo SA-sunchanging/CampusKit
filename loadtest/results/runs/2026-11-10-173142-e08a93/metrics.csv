@@ -1,0 +1,553 @@
+﻿profile,scope,metric,statistic,value,unit,source,criterion,status
+load,whole_run,iteration_duration,min,505.539208,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,med,1090.224755,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,max,14838.151309,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,p(90),1515.9730370000002,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,p(95),1888.793354900001,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,avg,1188.8548264783064,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,avg,1188.8548264783064,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,min,505.539208,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,med,1090.224755,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,max,14838.151309,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,p(90),1515.9730370000002,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,iteration_duration,p(95),1888.793354900001,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{name:detail},avg,35637.972235416084,ms,k6_summary,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},min,0.099103,ms,k6_summary,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},med,16.985463,ms,k6_summary,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},max,11115425.446895,ms,k6_summary,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},p(90),351.1212236999999,ms,k6_summary,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},p(95),894.1552896499958,ms,k6_summary,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},avg,35637.972235416084,ms,raw_recomputed,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},min,0.099103,ms,raw_recomputed,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},med,16.985463,ms,raw_recomputed,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},max,11115425.446895,ms,raw_recomputed,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},p(90),351.1212236999999,ms,raw_recomputed,p95 < 500 ms,FAIL
+load,whole_run,http_req_duration{name:detail},p(95),894.1552896499958,ms,raw_recomputed,p95 < 500 ms,FAIL
+load,whole_run,http_req_failed,rate,5.278994879374967e-05,fraction,k6_summary,failure rate < 0.005 (0.5%),PASS
+load,whole_run,http_req_failed,passes,5,observations,k6_summary,failure rate < 0.005 (0.5%),PASS
+load,whole_run,http_req_failed,fails,94710,observations,k6_summary,failure rate < 0.005 (0.5%),PASS
+load,whole_run,http_req_failed,rate,5.278994879374967e-05,fraction,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+load,whole_run,http_req_failed,passes,5,observations,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+load,whole_run,http_req_failed,fails,94710,observations,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+load,whole_run,vus,value,8,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,vus,min,3,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,vus,max,300,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,vus,value,8.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,vus,min,3.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,vus,max,300.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,p(90),0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,p(95),0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,avg,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,min,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,med,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,max,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,avg,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,min,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,med,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,max,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,p(90),0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_tls_handshaking,p(95),0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{name:search},min,0.143189,ms,k6_summary,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},med,20.2638,ms,k6_summary,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},max,11116134.737308,ms,k6_summary,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},p(90),279.6236910000001,ms,k6_summary,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},p(95),680.9765215999998,ms,k6_summary,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},avg,35529.029477798875,ms,k6_summary,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},avg,35529.029477798875,ms,raw_recomputed,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},min,0.143189,ms,raw_recomputed,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},med,20.2638,ms,raw_recomputed,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},max,11116134.737308,ms,raw_recomputed,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},p(90),279.6236910000001,ms,raw_recomputed,p95 < 1000 ms,PASS
+load,whole_run,http_req_duration{name:search},p(95),680.9765215999998,ms,raw_recomputed,p95 < 1000 ms,PASS
+load,whole_run,vus_max,max,300,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,vus_max,value,300,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,vus_max,min,300,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,vus_max,value,300.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,vus_max,min,300.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,vus_max,max,300.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,med,0.025557,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,max,1912.778108,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,p(90),0.066107,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,p(95),0.085852,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,avg,0.09198696512695932,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,min,0.003568,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,avg,0.09198696512695932,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,min,0.003568,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,med,0.025557,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,max,1912.778108,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,p(90),0.066107,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_sending,p(95),0.085852,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,data_received,count,378952586,bytes,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,data_received,rate,28497.213631352734,bytes/s,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,data_received,count,378952586.0,bytes,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,data_received,rate,28497.213631352734,bytes/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,avg,35560.67157796225,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,min,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,med,19.094334,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,max,11116134.593854,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,p(90),295.39033880000034,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,p(95),746.841858800001,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,avg,35560.67157796225,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,min,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,med,19.094334,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,max,11116134.593854,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,p(90),295.39033880000034,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_waiting,p(95),746.841858800001,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,iterations,count,94715,events,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,iterations,rate,7.12256279231084,events/s,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,iterations,count,94715.0,events,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,iterations,rate,7.12256279231084,events/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,data_sent,count,11500915,bytes,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,data_sent,rate,864.8681756483095,bytes/s,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,data_sent,count,11500915.0,bytes,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,data_sent,rate,864.8681756483095,bytes/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,med,19.264247,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,max,11116134.737308,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,p(90),295.77389000000045,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,p(95),747.2180913000001,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,avg,35561.75083733752,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,min,0.099103,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,avg,35561.75083733752,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,min,0.099103,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,med,19.264247,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,max,11116134.737308,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,p(90),295.77389000000045,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration,p(95),747.2180913000001,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_reqs,rate,7.12256279231084,events/s,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_reqs,count,94715,events,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_reqs,count,94715.0,events,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_reqs,rate,7.12256279231084,events/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,avg,0.07689139942986813,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,min,0.00149,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,med,0.00849,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,max,1919.347363,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,p(90),0.012691,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,p(95),0.014962200000000012,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,avg,0.07689139942986813,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,min,0.00149,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,med,0.00849,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,max,1919.347363,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,p(90),0.012691,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_blocked,p(95),0.014962200000000012,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,max,44.40414,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,p(90),0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,p(95),0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,avg,0.0033513869080926996,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,min,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,med,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,avg,0.0033513869080926996,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,min,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,med,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,max,44.40414,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,p(90),0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_connecting,p(95),0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,checks,rate,0.9999472100512062,fraction,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,checks,passes,189420,observations,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,checks,fails,10,observations,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,checks,rate,0.9999472100512062,fraction,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,checks,passes,189420,observations,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,checks,fails,10,observations,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},max,11116134.737308,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},p(90),295.8043452,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},p(95),747.22571155,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},avg,35563.623557571904,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},min,0.099103,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},med,19.263205,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},avg,35563.623557571904,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},min,0.099103,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},med,19.263205,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},max,11116134.737308,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},p(90),295.8043452,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_duration{expected_response:true},p(95),747.22571155,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,min,0.011922,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,med,0.110521,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,max,689.110338,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,p(90),0.21326520000000002,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,p(95),0.26800460000000026,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,avg,0.9872724094493961,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,avg,0.9872724094493961,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,min,0.011922,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,med,0.110521,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,max,689.110338,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,p(90),0.21326520000000002,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,http_req_receiving,p(95),0.26800460000000026,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,check:search status is 200,passes,66262,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+load,whole_run,check:search status is 200,fails,5,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+load,whole_run,check:search status is 200,success_rate,0.9999245476632411,fraction,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+load,whole_run,check:search status is 200,raw_passes,66262,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+load,whole_run,check:search status is 200,raw_fails,5,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+load,whole_run,check:search has items array,passes,66262,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+load,whole_run,check:search has items array,fails,5,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+load,whole_run,check:search has items array,success_rate,0.9999245476632411,fraction,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+load,whole_run,check:search has items array,raw_passes,66262,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+load,whole_run,check:search has items array,raw_fails,5,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+load,whole_run,check:detail status is 200,passes,28448,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",PASS
+load,whole_run,check:detail status is 200,fails,0,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",PASS
+load,whole_run,check:detail status is 200,success_rate,1.0,fraction,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",PASS
+load,whole_run,check:detail status is 200,raw_passes,28448,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",PASS
+load,whole_run,check:detail status is 200,raw_fails,0,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",PASS
+load,whole_run,check:detail id matches,passes,28448,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",PASS
+load,whole_run,check:detail id matches,fails,0,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",PASS
+load,whole_run,check:detail id matches,success_rate,1.0,fraction,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",PASS
+load,whole_run,check:detail id matches,raw_passes,28448,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",PASS
+load,whole_run,check:detail id matches,raw_fails,0,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",PASS
+load,whole_run,HTTP status 200,count,94710,requests,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,HTTP status 502,count,5,requests,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,HTTP class 2xx,count,94710,requests,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,HTTP class 5xx,count,5,requests,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,whole_run,HTTP 5xx server errors,rate_all_attempts,5.278994879374967e-05,fraction,raw_recomputed,N/A: no acceptance threshold configured; scripted failure threshold is not a server-only metric,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:search},avg,2122.2211591304012,ms,raw_recomputed,p95 < 1000 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:search},min,2.136754,ms,raw_recomputed,p95 < 1000 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:search},med,17.517695,ms,raw_recomputed,p95 < 1000 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:search},max,162367.490222,ms,raw_recomputed,p95 < 1000 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:search},p(90),107.25409960000006,ms,raw_recomputed,p95 < 1000 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:search},p(95),164.3741769999999,ms,raw_recomputed,p95 < 1000 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:detail},avg,1946.9623384882716,ms,raw_recomputed,p95 < 500 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:detail},min,3.572042,ms,raw_recomputed,p95 < 500 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:detail},med,14.584284,ms,raw_recomputed,p95 < 500 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:detail},max,162367.164797,ms,raw_recomputed,p95 < 500 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:detail},p(90),94.8671356,ms,raw_recomputed,p95 < 500 ms,N/A
+load,approx_hold_300VUs_120-420s,http_req_duration{name:detail},p(95),167.7575038,ms,raw_recomputed,p95 < 500 ms,N/A
+load,approx_hold_300VUs_120-420s,http_reqs,count,23668.0,events,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,approx_hold_300VUs_120-420s,http_reqs,rate,78.89333333333333,events/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,approx_hold_300VUs_120-420s,http_req_failed,rate,0.0002112557039040054,fraction,raw_recomputed,failure rate < 0.005 (0.5%),N/A
+load,approx_hold_300VUs_120-420s,http_req_failed,passes,5,observations,raw_recomputed,failure rate < 0.005 (0.5%),N/A
+load,approx_hold_300VUs_120-420s,http_req_failed,fails,23663,observations,raw_recomputed,failure rate < 0.005 (0.5%),N/A
+load,approx_hold_300VUs_120-420s,vus,value,300.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,approx_hold_300VUs_120-420s,vus,min,300.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+load,approx_hold_300VUs_120-420s,vus,max,300.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,avg,518.9836630358183,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,min,0.355335,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,med,298.694243,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,max,3633.773622,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,p(90),1346.2008086,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,p(95),1618.9583246999982,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,avg,518.9836630358183,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,min,0.355335,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,med,298.694243,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,max,3633.773622,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,p(90),1346.2008086,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration,p(95),1618.9583246999982,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_failed,passes,6,observations,k6_summary,failure rate < 0.005 (0.5%),PASS
+stress,whole_run,http_req_failed,fails,280637,observations,k6_summary,failure rate < 0.005 (0.5%),PASS
+stress,whole_run,http_req_failed,rate,2.1379474991359128e-05,fraction,k6_summary,failure rate < 0.005 (0.5%),PASS
+stress,whole_run,http_req_failed,rate,2.1379474991359128e-05,fraction,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,whole_run,http_req_failed,passes,6,observations,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,whole_run,http_req_failed,fails,280637,observations,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,whole_run,http_req_sending,avg,0.03568182536888566,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,min,0.004123,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,med,0.023532,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,max,27.798208,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,p(90),0.06070080000000001,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,p(95),0.08250689999999997,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,avg,0.03568182536888566,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,min,0.004123,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,med,0.023532,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,max,27.798208,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,p(90),0.06070080000000001,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_sending,p(95),0.08250689999999997,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,data_sent,count,34086918,bytes,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,data_sent,rate,43628.250766039266,bytes/s,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,data_sent,count,34086918.0,bytes,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,data_sent,rate,43628.25076603926,bytes/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,min,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,med,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,max,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,p(90),0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,p(95),0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,avg,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,avg,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,min,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,med,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,max,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,p(90),0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_tls_handshaking,p(95),0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus_max,value,1000,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus_max,min,1000,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus_max,max,1000,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus_max,value,1000.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus_max,min,1000.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus_max,max,1000.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus,value,2,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus,min,2,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus,max,1000,VUs,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus,value,2.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus,min,2.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,vus,max,1000.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{name:detail},max,3633.773622,ms,k6_summary,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},p(90),1634.2709267,ms,k6_summary,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},p(95),1829.2638809000002,ms,k6_summary,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},avg,647.1517691615663,ms,k6_summary,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},min,3.04938,ms,k6_summary,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},med,425.00728349999997,ms,k6_summary,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},avg,647.1517691615663,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},min,3.04938,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},med,425.00728349999997,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},max,3633.773622,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},p(90),1634.2709267,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,whole_run,http_req_duration{name:detail},p(95),1829.2638809000002,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,whole_run,http_reqs,count,280643,events,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_reqs,rate,359.19830533618665,events/s,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_reqs,count,280643.0,events,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_reqs,rate,359.1983053361866,events/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{name:search},p(90),1235.9773240000004,ms,k6_summary,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},p(95),1443.0681998999996,ms,k6_summary,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},avg,464.3642224352232,ms,k6_summary,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},min,0.355335,ms,k6_summary,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},med,264.360757,ms,k6_summary,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},max,3505.669442,ms,k6_summary,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},avg,464.3642224352232,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},min,0.355335,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},med,264.360757,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},max,3505.669442,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},p(90),1235.9773240000004,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_duration{name:search},p(95),1443.0681998999996,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,whole_run,http_req_blocked,avg,0.012872165245525693,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,min,0.001914,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,med,0.008334,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,max,94.678673,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,p(90),0.012681,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,p(95),0.014937,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,avg,0.012872165245525693,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,min,0.001914,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,med,0.008334,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,max,94.678673,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,p(90),0.012681,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_blocked,p(95),0.014937,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,avg,1520.1492864054417,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,min,504.760845,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,med,1414.5097,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,max,5064.166451,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,p(90),2413.7401672000005,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,p(95),2703.4574671999926,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,avg,1520.1492864054417,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,min,504.760845,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,med,1414.5097,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,max,5064.166451,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,p(90),2413.7401672000005,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iteration_duration,p(95),2703.4574671999926,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},p(90),1346.2123315999997,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},p(95),1618.9676924000003,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},avg,518.9938079092427,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},min,0.355335,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},med,298.711301,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},max,3633.773622,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},avg,518.9938079092427,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},min,0.355335,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},med,298.711301,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},max,3633.773622,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},p(90),1346.2123315999997,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_duration{expected_response:true},p(95),1618.9676924000003,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,avg,518.8217281535132,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,min,0.237954,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,med,298.501064,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,max,3633.604263,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,p(90),1346.0339582,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,p(95),1618.780732099999,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,avg,518.8217281535132,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,min,0.237954,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,med,298.501064,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,max,3633.604263,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,p(90),1346.0339582,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_waiting,p(95),1618.780732099999,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,checks,passes,561274,observations,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,checks,fails,12,observations,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,checks,rate,0.9999786205250086,fraction,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,checks,rate,0.9999786205250086,fraction,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,checks,passes,561274,observations,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,checks,fails,12,observations,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iterations,count,280643,events,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iterations,rate,359.19830533618665,events/s,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iterations,count,280643.0,events,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,iterations,rate,359.1983053361866,events/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,max,94.571953,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,p(90),0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,p(95),0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,avg,0.002104499470857996,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,min,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,med,0,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,avg,0.002104499470857996,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,min,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,med,0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,max,94.571953,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,p(90),0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_connecting,p(95),0.0,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,avg,0.12625305692997812,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,min,-3.721846,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,med,0.101329,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,max,55.220051,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,p(90),0.19820000000000007,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,p(95),0.24904209999999932,ms,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,avg,0.12625305692997812,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,min,-3.721846,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,med,0.101329,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,max,55.220051,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,p(90),0.19820000000000007,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,http_req_receiving,p(95),0.24904209999999932,ms,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,data_received,count,1120599231,bytes,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,data_received,rate,1434268.2508960993,bytes/s,k6_summary,N/A: no acceptance threshold configured,N/A
+stress,whole_run,data_received,count,1120599231.0,bytes,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,data_received,rate,1434268.250896099,bytes/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,check:search status is 200,passes,196778,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:search status is 200,fails,5,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:search status is 200,success_rate,0.9999745913010778,fraction,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:search status is 200,raw_passes,196778,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:search status is 200,raw_fails,5,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:search has items array,passes,196778,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:search has items array,fails,5,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:search has items array,success_rate,0.9999745913010778,fraction,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:search has items array,raw_passes,196778,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:search has items array,raw_fails,5,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:detail status is 200,passes,83859,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:detail status is 200,fails,1,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:detail status is 200,success_rate,0.9999880753637014,fraction,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:detail status is 200,raw_passes,83859,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:detail status is 200,raw_fails,1,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:detail id matches,passes,83859,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:detail id matches,fails,1,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:detail id matches,success_rate,0.9999880753637014,fraction,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:detail id matches,raw_passes,83859,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,check:detail id matches,raw_fails,1,checks,k6_summary_and_raw,"All observed predicate evaluations true; descriptive only, no configured checks threshold",FAIL
+stress,whole_run,HTTP status 200,count,280637,requests,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,HTTP status 502,count,6,requests,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,HTTP class 2xx,count,280637,requests,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,HTTP class 5xx,count,6,requests,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,whole_run,HTTP 5xx server errors,rate_all_attempts,2.1379474991359128e-05,fraction,raw_recomputed,N/A: no acceptance threshold configured; scripted failure threshold is not a server-only metric,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-booking-1,cpu_mean_percent,0.14400000000000002,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-booking-1,cpu_peak_percent,0.42,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-booking-1,memory_mean_bytes,69976602.85155556,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-booking-1,memory_peak_bytes,72236400.64,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-booking-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-booking-1,pids_peak,11,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-gateway-1,cpu_mean_percent,35.467333333333336,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-gateway-1,cpu_peak_percent,76.44,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-gateway-1,memory_mean_bytes,172152411.47733334,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-gateway-1,memory_peak_bytes,230791577.6,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-gateway-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-gateway-1,pids_peak,11,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-identity-1,cpu_mean_percent,0.25177777777777777,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-identity-1,cpu_peak_percent,4.86,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-identity-1,memory_mean_bytes,68179576.60444444,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-identity-1,memory_peak_bytes,70390906.88,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-identity-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-identity-1,pids_peak,11,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-k6-stress,cpu_mean_percent,60.74733333333334,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-k6-stress,cpu_peak_percent,131.72,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-k6-stress,memory_mean_bytes,400246119.5377778,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-k6-stress,memory_peak_bytes,512334233.6,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-k6-stress,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-k6-stress,pids_peak,23,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-listing-1,cpu_mean_percent,86.93355555555556,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-listing-1,cpu_peak_percent,119.56,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-listing-1,memory_mean_bytes,390352222.4355555,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-listing-1,memory_peak_bytes,419640115.2,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-listing-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-listing-1,pids_peak,11,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-mongo-1,cpu_mean_percent,42.922444444444444,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-mongo-1,cpu_peak_percent,144.37,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-mongo-1,memory_mean_bytes,253412857.17333332,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-mongo-1,memory_peak_bytes,404226048.0,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-mongo-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-mongo-1,pids_peak,103,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-notification-1,cpu_mean_percent,0.39355555555555555,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-notification-1,cpu_peak_percent,4.7,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-notification-1,memory_mean_bytes,69661331.00088888,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-notification-1,memory_peak_bytes,70086819.84,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-notification-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-notification-1,pids_peak,11,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-payment-1,cpu_mean_percent,0.0006666666666666666,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-payment-1,cpu_peak_percent,0.03,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-payment-1,memory_mean_bytes,56381931.52,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-payment-1,memory_peak_bytes,56381931.52,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-payment-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-payment-1,pids_peak,11,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-postgres-1,cpu_mean_percent,84.13511111111112,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-postgres-1,cpu_peak_percent,117.68,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-postgres-1,memory_mean_bytes,114079010.36088888,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-postgres-1,memory_peak_bytes,115762790.4,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-postgres-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-postgres-1,pids_peak,25,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rabbitmq-1,cpu_mean_percent,81.276,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rabbitmq-1,cpu_peak_percent,382.99,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rabbitmq-1,memory_mean_bytes,139190308.40888888,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rabbitmq-1,memory_peak_bytes,207093760.0,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rabbitmq-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rabbitmq-1,pids_peak,103,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rental-1,cpu_mean_percent,0.27155555555555555,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rental-1,cpu_peak_percent,5.29,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rental-1,memory_mean_bytes,68697340.13155556,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rental-1,memory_peak_bytes,70799851.52,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rental-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-rental-1,pids_peak,11,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-review-1,cpu_mean_percent,41.809111111111115,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-review-1,cpu_peak_percent,55.16,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-review-1,memory_mean_bytes,233478495.34577778,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-review-1,memory_peak_bytes,322122547.2,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-review-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-review-1,pids_peak,11,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-web-1,cpu_mean_percent,0.0,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-web-1,cpu_peak_percent,0.0,percent_of_one_CPU,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-web-1,memory_mean_bytes,13222543.359999998,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-web-1,memory_peak_bytes,13222543.36,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-web-1,memory_limit_bytes,7136088162.304,bytes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,resource_snapshots,campuskitbench8b48b7be9e-web-1,pids_peak,17,processes,docker_stats,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:search},avg,66.25083714062033,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:search},min,0.355335,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:search},med,17.757033,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:search},max,2098.087232,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:search},p(90),111.59738039999999,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:search},p(95),281.68203999999986,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:detail},avg,70.78219376253014,ms,raw_recomputed,p95 < 500 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:detail},min,3.04938,ms,raw_recomputed,p95 < 500 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:detail},med,14.7114575,ms,raw_recomputed,p95 < 500 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:detail},max,2117.324853,ms,raw_recomputed,p95 < 500 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:detail},p(90),96.31767500000001,ms,raw_recomputed,p95 < 500 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_req_duration{name:detail},p(95),353.41684375,ms,raw_recomputed,p95 < 500 ms,PASS
+stress,approx_hold_300VUs_120-240s,http_reqs,count,33655.0,events,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_300VUs_120-240s,http_reqs,rate,280.4583333333333,events/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_300VUs_120-240s,http_req_failed,rate,0.00011885306789481504,fraction,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,approx_hold_300VUs_120-240s,http_req_failed,passes,4,observations,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,approx_hold_300VUs_120-240s,http_req_failed,fails,33651,observations,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,approx_hold_300VUs_120-240s,vus,value,300.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_300VUs_120-240s,vus,min,300.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_300VUs_120-240s,vus,max,300.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:search},avg,273.0983820683438,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:search},min,2.182672,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:search},med,146.845943,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:search},max,3244.472979,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:search},p(90),571.4731278000006,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:search},p(95),860.8966223999998,ms,raw_recomputed,p95 < 1000 ms,PASS
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:detail},avg,386.5948600601241,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:detail},min,3.963022,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:detail},med,224.174983,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:detail},max,3446.612606,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:detail},p(90),893.6775954000005,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_600VUs_360-480s,http_req_duration{name:detail},p(95),1141.6731729999992,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_600VUs_360-480s,http_reqs,count,55266.0,events,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_600VUs_360-480s,http_reqs,rate,460.55,events/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_600VUs_360-480s,http_req_failed,rate,0.0,fraction,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,approx_hold_600VUs_360-480s,http_req_failed,passes,0,observations,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,approx_hold_600VUs_360-480s,http_req_failed,fails,55266,observations,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,approx_hold_600VUs_360-480s,vus,value,600.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_600VUs_360-480s,vus,min,600.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_600VUs_360-480s,vus,max,600.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:search},avg,987.3017089466174,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:search},min,489.882166,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:search},med,867.25546,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:search},max,2321.897592,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:search},p(90),1507.2119874000002,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:search},p(95),1645.2625199999998,ms,raw_recomputed,p95 < 1000 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:detail},avg,1346.4072167953248,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:detail},min,770.532372,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:detail},med,1242.553101,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:detail},max,2801.481329,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:detail},p(90),1877.8555182,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_req_duration{name:detail},p(95),2033.7429829999999,ms,raw_recomputed,p95 < 500 ms,FAIL
+stress,approx_hold_1000VUs_600-720s,http_reqs,count,57579.0,events,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_1000VUs_600-720s,http_reqs,rate,479.825,events/s,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_1000VUs_600-720s,http_req_failed,rate,0.0,fraction,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,approx_hold_1000VUs_600-720s,http_req_failed,passes,0,observations,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,approx_hold_1000VUs_600-720s,http_req_failed,fails,57579,observations,raw_recomputed,failure rate < 0.005 (0.5%),PASS
+stress,approx_hold_1000VUs_600-720s,vus,value,1000.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_1000VUs_600-720s,vus,min,1000.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A
+stress,approx_hold_1000VUs_600-720s,vus,max,1000.0,VUs,raw_recomputed,N/A: no acceptance threshold configured,N/A

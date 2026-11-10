@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { Call, type CallContext } from '../clients/call-context.js';
 import { CreateListingDto } from './dto/create-listing.dto.js';
+import { OwnerListingsQuery } from './dto/owner-listings.query.js';
 import { SearchListingsQuery } from './dto/search-listings.query.js';
 import { ListingQueriesService } from './listing-queries.service.js';
 import { ListingSearchService } from './listing-search.service.js';
@@ -27,6 +28,7 @@ import { SearchResultResponse } from './listing-summary.response.js';
 import { ListingResponse } from './listing.response.js';
 import { ListingsService } from './listings.service.js';
 import { optionalViewer } from './optional-viewer.js';
+import { OwnerListingsResponse } from './owner-listing.response.js';
 
 /**
  * REST endpoints of the listing service, reached through the gateway at /api/listing/listings.
@@ -50,6 +52,18 @@ export class ListingsController {
     @Call() call: CallContext,
   ): Promise<SearchResultResponse> {
     return this.searches.search(query, call.correlationId);
+  }
+
+  /** Student only. The JWT identifies the owner; no owner ID is accepted from the caller. */
+  @Get('mine')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: OwnerListingsResponse })
+  mine(
+    @CurrentUser() user: AuthUser,
+    @Query() query: OwnerListingsQuery,
+  ): Promise<OwnerListingsResponse> {
+    return this.queries.mine(user, query);
   }
 
   /** Public. Any status but PUBLISHED is shown only to its owner and administrators. */

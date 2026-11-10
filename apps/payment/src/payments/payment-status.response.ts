@@ -6,6 +6,22 @@ import {
   type ReportedStatus,
 } from '../ledger/authorization.entity.js';
 
+/** All settled payouts to the caller, including rental fees and charged late fees. */
+export class EarningsResponse {
+  @ApiProperty({ description: 'All-time settled earnings, in integer satang.' })
+  totalEarned: number;
+
+  @ApiProperty({ description: 'Number of settled payouts to the caller.' })
+  settledRentals: number;
+
+  static of(value: {
+    totalEarned: number;
+    settledRentals: number;
+  }): EarningsResponse {
+    return Object.assign(new EarningsResponse(), value);
+  }
+}
+
 /** One hold of a booking. Money is integer satang; times are ISO-8601 UTC. */
 export class AuthorizationStatusResponse {
   @ApiProperty({ format: 'uuid' })

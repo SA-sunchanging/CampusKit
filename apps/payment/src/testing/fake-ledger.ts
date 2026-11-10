@@ -79,6 +79,12 @@ export function fakeLedger(
       return [];
     }
     if (sql.includes('FROM ledger_entries')) {
+      if (sql.includes("operation = 'VOID'")) {
+        return [...state.entries.values()].filter(
+          (entry) =>
+            entry.booking_id === params[0] && entry.operation === 'VOID',
+        );
+      }
       const entry = state.entries.get(params[0] as string);
       return entry ? [entry] : [];
     }

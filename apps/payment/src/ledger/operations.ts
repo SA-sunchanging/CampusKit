@@ -53,8 +53,7 @@ interface StoredEntry {
 
 /**
  * Runs one ledger operation exactly once per operation ID, in one transaction:
- * 1. take a transaction-scoped advisory lock on the operation ID, so a concurrent duplicate
- *    waits here until this transaction ends;
+ * 1. lock the booking, including when it has no authorization rows yet, then the operation ID;
  * 2. if a ledger entry with this ID exists, return its stored result when the request is the
  *    same, or answer 409 when the ID was used for another request;
  * 3. otherwise lock the booking's authorizations, apply the change and store the entry with
@@ -67,11 +66,15 @@ export function runOperation<T, R extends OperationRequest>(
   operation: LedgerOperation,
   request: R,
   apply: ApplyOperation<T>,
+  validateReplay?: (tx: EntityManager, result: T) => Promise<void>,
 ): Promise<T> {
   const hash = requestHash(operation, request);
   return db.transaction(async (tx) => {
     await tx.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [
-      request.operationId,
+      `payment:booking:${request.bookingId.toLowerCase()}`,
+    ]);
+    await tx.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [
+      `payment:operation:${request.operationId}`,
     ]);
     const [stored] = (await tx.query(
       `SELECT request_hash, result FROM ledger_entries WHERE operation_id = $1`,
@@ -83,6 +86,7 @@ export function runOperation<T, R extends OperationRequest>(
           'operationId was already used for a different request',
         );
       }
+      await validateReplay?.(tx, stored.result as T);
       logger.log(`${operation} ${request.operationId} replayed`);
       return stored.result as T;
     }

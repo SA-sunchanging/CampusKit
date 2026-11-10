@@ -20,6 +20,7 @@ const NAV: Record<Viewer, NavItem[]> = {
   ],
   student: [
     { to: '/', label: 'Listings' },
+    { to: '/listings/mine', label: 'My listings' },
     { to: '/bookings', label: 'Bookings' },
     { to: '/rentals', label: 'Rentals' },
     { to: '/inbox', label: 'Inbox' },

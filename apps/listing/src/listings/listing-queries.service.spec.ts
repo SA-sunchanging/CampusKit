@@ -1,9 +1,14 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import type { Repository } from 'typeorm';
 import type { ReviewClient } from '../clients/review.client.js';
 import { ListingQueriesService } from './listing-queries.service.js';
 import type { Listing } from './listing.entity.js';
 import type { ListingsService } from './listings.service.js';
+import { LISTING_STATUSES } from './listing-options.js';
 
 const owner = {
   sub: '00000000-0000-4000-8000-000000000001',
@@ -36,6 +41,7 @@ const listing = (fields: Partial<Listing> = {}) =>
 function setup() {
   const repo = {
     findOneBy: vi.fn(),
+    findAndCount: vi.fn().mockResolvedValue([[], 0]),
   };
   const listingsService = {
     photoUrls: vi.fn().mockResolvedValue(['data:image/jpeg;base64,AAAA']),
@@ -46,8 +52,77 @@ function setup() {
     listingsService as unknown as ListingsService,
     reviews as unknown as ReviewClient,
   );
-  return { service, repo, reviews };
+  return { service, repo, reviews, listingsService };
 }
+
+describe('ListingQueriesService.mine', () => {
+  it('uses the caller as the owner across all statuses and returns summaries without photos', async () => {
+    const { service, repo, reviews, listingsService } = setup();
+    const rows = LISTING_STATUSES.map((status) =>
+      listing({ status, reviewedBy: admin.sub }),
+    );
+    repo.findAndCount.mockResolvedValue([rows, rows.length]);
+    const result = await service.mine(owner, { page: 1, pageSize: 20 });
+    expect(repo.findAndCount.mock.calls[0][0].where).toEqual({
+      ownerId: owner.sub,
+    });
+    expect(result.items.map((item) => item.status)).toEqual(LISTING_STATUSES);
+    expect(result.items[0]).not.toHaveProperty('photos');
+    expect(result.items[0]).not.toHaveProperty('reviewedBy');
+    expect(result.items[0]).not.toHaveProperty('ownerId');
+    expect(listingsService.photoUrls).not.toHaveBeenCalled();
+    expect(reviews.reputations).not.toHaveBeenCalled();
+    await service.mine(other, { page: 1, pageSize: 20 });
+    expect(repo.findAndCount.mock.calls[1][0].where).toEqual({
+      ownerId: other.sub,
+    });
+  });
+
+  it('paginates by creation time with a stable ID tiebreaker and keeps the total', async () => {
+    const { service, repo } = setup();
+    repo.findAndCount.mockResolvedValue([[listing()], 25]);
+    const result = await service.mine(owner, { page: 3, pageSize: 10 });
+    expect(repo.findAndCount).toHaveBeenCalledWith({
+      where: { ownerId: owner.sub },
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        status: true,
+        dailyRate: true,
+        thumbnail: true,
+        publishError: true,
+        rejectionReason: true,
+        createdAt: true,
+      },
+      order: { createdAt: 'DESC', id: 'ASC' },
+      skip: 20,
+      take: 10,
+    });
+    expect(result).toMatchObject({ total: 25, page: 3, pageSize: 10 });
+    expect(result.items).toHaveLength(1);
+  });
+
+  it('returns an empty page for a student without listings', async () => {
+    const { service } = setup();
+    await expect(
+      service.mine(owner, { page: 1, pageSize: 20 }),
+    ).resolves.toEqual({
+      items: [],
+      total: 0,
+      page: 1,
+      pageSize: 20,
+    });
+  });
+
+  it('refuses an administrator before querying listings', async () => {
+    const { service, repo } = setup();
+    await expect(
+      service.mine(admin, { page: 1, pageSize: 20 }),
+    ).rejects.toThrow(ForbiddenException);
+    expect(repo.findAndCount).not.toHaveBeenCalled();
+  });
+});
 
 describe('ListingQueriesService.detail', () => {
   it('shows the owner rating on the detail page, or none when Review has nothing', async () => {

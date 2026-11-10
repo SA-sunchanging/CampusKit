@@ -219,6 +219,8 @@ Identity runs email and student verification in `apps/identity`. The eligibility
 
 ## Listing rules and endpoints
 
+The student-only My Listings page uses `GET /api/listing/listings/mine?page=1&pageSize=20`. The service derives the owner from the JWT and returns thumbnail summaries for all of that owner's statuses, newest first. Pagination is limited to 50 items per page. Public search continues to show only published items.
+
 Listing runs the publication step of the publish sequence above in `apps/listing`. Money is integer satang, times are ISO-8601 UTC, and date ranges are half-open whole Bangkok days.
 
 ### Listing status
@@ -337,6 +339,8 @@ An authorization expires `PAYMENT_AUTHORIZATION_TTL_DAYS` days after it is made:
 
 ### Idempotency
 
+Payment first locks the booking, including when no authorization exists yet, then the operation ID. A completed void is terminal for new authorizations: a delayed authorization cannot recreate a hold after cancellation. Booking supplies the planned return as `requiredUntil` when authorizing. Payment refuses a hold that expires at or before that time; period-aware retries check the original hold without extending its expiry. An unexpectedly late return can still outlast the hold and needs separate recovery.
+
 Every internal call carries an `operationId` of 1 to 200 characters that the caller keeps stable across retries. Payment runs each call in one transaction: it takes an advisory lock on the `operationId`, so a concurrent duplicate waits, and then looks for a ledger entry with that ID.
 
 - No entry: Payment locks the booking's authorizations, applies the change, and stores the entry with a SHA-256 hash of the request body (keys in sorted order) and the reply.
@@ -367,6 +371,8 @@ The gateway refuses `/internal/` paths from outside. Every internal route requir
 For example, a fee of 6000, a deposit of 30000 and a late fee of 8000 give `lateFeeCharged` 8000, `depositReleased` 22000 and `payout` 14000.
 
 ### Payment status
+
+The student Account page loads `GET /api/payment/payments/me/earnings`, returning `{ totalEarned, settledRentals }` for the JWT caller. The total is integer satang from settled payouts, including charged late fees; held deposits and unfinished bookings are excluded. The count is the number of payout records. A repeated settlement does not increase either value. These remain demo-ledger totals with no real transfers.
 
 `GET /api/payment/payments/bookings/{bookingId}` (needs a token; the service serves it at `/payments/bookings/{bookingId}`) answers `200` with `{ bookingId, authorizations, payout }`:
 
@@ -525,6 +531,8 @@ Every service log line carries `[cid=<id>]` while it handles a request, a gRPC c
 `apps/notification/e2e/broker-outage.mjs` measures delivery through a broker outage (see `docs/architecture/quality-resilience.md`).
 
 ## Gateway rules
+
+Booking responses include `failureReason`, empty by default. Only a known expiry refusal on a failed approval maps to `AUTHORIZATION_EXPIRES_BEFORE_RETURN`; the UI asks the student to choose earlier dates and send a new request. Internal booking error text is not exposed. Booking and Rental list pages preserve the owner/renter tab in the `role` URL query; inbox links select the relevant role.
 
 The gateway checks every request under `/api`, both the proxied REST services and its own Booking routes, in this order:
 

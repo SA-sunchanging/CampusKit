@@ -11,6 +11,7 @@ import {
 } from '../testing/fake-ledger.js';
 import type { AuthorizationRow } from './authorization.row.js';
 import { type AuthorizeRequest, AuthorizeService } from './authorize.js';
+import { runOperation } from './operations.js';
 
 const request: AuthorizeRequest = {
   operationId: `booking:${BOOKING_ID}:authorize-fee`,
@@ -87,6 +88,71 @@ describe('AuthorizeService', () => {
       first,
     );
     expect(state.authorizations).toHaveLength(1);
+  });
+
+  it.each(['2026-11-28T05:00:00Z', '2026-12-01T17:00:00Z'])(
+    'refuses a return at or beyond hold expiry: %s',
+    async (requiredUntil) => {
+      const { service, state } = setup();
+      await expect(
+        service.authorize({ ...request, requiredUntil }, NOW),
+      ).rejects.toThrow('The authorization must last beyond the rental return');
+      expect(state.authorizations).toHaveLength(0);
+      expect(state.entries.size).toBe(0);
+    },
+  );
+
+  it('replays a period-aware authorization without extending its expiry', async () => {
+    const { service, state } = setup();
+    const body = { ...request, requiredUntil: '2026-11-04T17:00:00Z' };
+    const first = await service.authorize(body, NOW);
+    await expect(
+      service.authorize(body, new Date('2026-11-01T05:00:00Z')),
+    ).resolves.toEqual(first);
+    expect(state.authorizations).toHaveLength(1);
+    expect(state.authorizations[0].expires_at).toEqual(
+      new Date('2026-11-28T05:00:00Z'),
+    );
+  });
+
+  it('refuses an expired cached authorization instead of renewing it', async () => {
+    const { service, state } = setup();
+    const body = { ...request, requiredUntil: '2026-11-04T17:00:00Z' };
+    await service.authorize(body, NOW);
+    await expect(
+      service.authorize(body, new Date('2026-11-28T05:00:00Z')),
+    ).rejects.toThrow('The authorization has expired');
+    expect(state.authorizations).toHaveLength(1);
+    expect(state.authorizations[0].expires_at).toEqual(
+      new Date('2026-11-28T05:00:00Z'),
+    );
+    expect(state.entries.size).toBe(1);
+  });
+
+  it('refuses a voided cached hold on a period-aware retry', async () => {
+    const { service, state } = setup();
+    const body = { ...request, requiredUntil: '2026-11-04T17:00:00Z' };
+    await service.authorize(body, NOW);
+    state.authorizations[0].status = 'VOIDED';
+    await expect(service.authorize(body, NOW)).rejects.toThrow(
+      'The original authorization is no longer open',
+    );
+    expect(state.authorizations).toHaveLength(1);
+  });
+
+  it('refuses new authorizations after a successful empty void', async () => {
+    const { service, state, db } = setup();
+    await runOperation(
+      db,
+      'VOID',
+      { operationId: 'void', bookingId: BOOKING_ID },
+      () => Promise.resolve({ bookingId: BOOKING_ID, voided: [] }),
+    );
+    await expect(service.authorize(request, NOW)).rejects.toThrow(
+      'The booking has already been voided',
+    );
+    expect(state.authorizations).toHaveLength(0);
+    expect(state.entries.size).toBe(1);
   });
 
   it('refuses a payer who is also the payee', async () => {

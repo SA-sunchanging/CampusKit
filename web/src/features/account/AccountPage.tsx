@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getMe, type Profile } from '../../api/identity.ts';
 import { Alert, Badge, PageHeader, Panel } from '../../ui/index.ts';
 import EmailStep from './EmailStep.tsx';
+import EarningsPanel from './EarningsPanel.tsx';
 import PayoutForm from './PayoutForm.tsx';
 import StudentStep from './StudentStep.tsx';
 import { STUDENT_STATUS_TONE } from './studentStatus.ts';
@@ -72,6 +73,7 @@ export default function AccountPage() {
           }
         />
       )}
+      {profile?.role === 'student' && <EarningsPanel key={profile.id} />}
     </section>
   );
 }

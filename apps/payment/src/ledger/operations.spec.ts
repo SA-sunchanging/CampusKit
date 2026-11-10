@@ -28,7 +28,7 @@ describe('requestHash', () => {
 });
 
 describe('runOperation', () => {
-  it('locks the operation ID, applies the change and stores the result', async () => {
+  it('locks the booking before the operation ID, applies the change and stores the result', async () => {
     const { db, state } = fakeLedger();
     const apply = vi.fn().mockResolvedValue({ done: true });
     await expect(runOperation(db, 'CAPTURE', request, apply)).resolves.toEqual({
@@ -36,15 +36,27 @@ describe('runOperation', () => {
     });
     expect(state.queries[0]).toEqual({
       sql: 'SELECT pg_advisory_xact_lock(hashtext($1))',
-      params: ['op-1'],
+      params: [`payment:booking:${BOOKING_ID}`],
     });
-    expect(state.queries[2].sql).toContain('FOR UPDATE');
+    expect(state.queries[1].params).toEqual(['payment:operation:op-1']);
+    expect(state.queries[3].sql).toContain('FOR UPDATE');
     expect(state.entries.get('op-1')).toEqual({
       operation: 'CAPTURE',
       booking_id: BOOKING_ID,
       request_hash: requestHash('CAPTURE', request),
       result: { done: true },
     });
+  });
+
+  it('uses one booking lock for UUIDs with different letter case', async () => {
+    const { db, state } = fakeLedger();
+    const bookingId = 'ABCDEFAB-ABCD-4ABC-8ABC-ABCDEFABCDEF';
+    await runOperation(db, 'VOID', { ...request, bookingId }, () =>
+      Promise.resolve({}),
+    );
+    expect(state.queries[0].params).toEqual([
+      `payment:booking:${bookingId.toLowerCase()}`,
+    ]);
   });
 
   it('returns the stored result for a repeated request without applying it again', async () => {

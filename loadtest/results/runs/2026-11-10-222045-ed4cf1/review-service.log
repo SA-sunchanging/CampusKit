@@ -1,0 +1,22 @@
+review-1  | 2026-11-10T15:22:18.831198284Z [32m[Nest] 1  - [39m11/10/2026, 3:22:18 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+review-1  | 2026-11-10T15:22:18.959017822Z [32m[Nest] 1  - [39m11/10/2026, 3:22:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mReviewModule dependencies initialized[39m
+review-1  | 2026-11-10T15:22:18.959049983Z [32m[Nest] 1  - [39m11/10/2026, 3:22:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMongooseModule dependencies initialized[39m
+review-1  | 2026-11-10T15:22:18.959873720Z [32m[Nest] 1  - [39m11/10/2026, 3:22:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m
+review-1  | 2026-11-10T15:22:18.959900237Z [32m[Nest] 1  - [39m11/10/2026, 3:22:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHealthModule dependencies initialized[39m
+review-1  | 2026-11-10T15:22:18.959903369Z [32m[Nest] 1  - [39m11/10/2026, 3:22:18 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m
+review-1  | 2026-11-10T15:22:19.079851121Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMongooseCoreModule dependencies initialized[39m
+review-1  | 2026-11-10T15:22:19.084926013Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMongooseModule dependencies initialized[39m
+review-1  | 2026-11-10T15:22:19.084955905Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMongooseModule dependencies initialized[39m
+review-1  | 2026-11-10T15:22:19.086890337Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mReputationModule dependencies initialized[39m
+review-1  | 2026-11-10T15:22:19.087063092Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mReviewsModule dependencies initialized[39m
+review-1  | 2026-11-10T15:22:19.291252252Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHealthController {/health}:[39m
+review-1  | 2026-11-10T15:22:19.302090195Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/health, GET} route[39m
+review-1  | 2026-11-10T15:22:19.302125642Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mReviewsController {/reviews}:[39m
+review-1  | 2026-11-10T15:22:19.302946674Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/reviews, POST} route[39m
+review-1  | 2026-11-10T15:22:19.303822641Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/reviews, GET} route[39m
+review-1  | 2026-11-10T15:22:19.305458274Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/reviews/rentals/:rentalId, GET} route[39m
+review-1  | 2026-11-10T15:22:19.305786826Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mInternalReputationController {/internal}:[39m
+review-1  | 2026-11-10T15:22:19.306395129Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/internal/users/:id/reputation, GET} route[39m
+review-1  | 2026-11-10T15:22:19.306422913Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/internal/reputation, GET} route[39m
+review-1  | 2026-11-10T15:22:19.312575217Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m
+review-1  | 2026-11-10T15:22:19.321595809Z [32m[Nest] 1  - [39m11/10/2026, 3:22:19 PM [32m    LOG[39m [38;5;3m[Bootstrap] [39m[32mreview listening on http://localhost:3005 (docs at /docs)[39m

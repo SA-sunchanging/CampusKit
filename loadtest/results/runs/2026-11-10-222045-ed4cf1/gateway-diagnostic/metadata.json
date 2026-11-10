@@ -1,0 +1,30 @@
+{
+  "default": {
+    "startUtc": "2026-11-10T15:46:17.622066+00:00",
+    "scheduledSeconds": 120,
+    "targetVus": 600,
+    "agent": "httpxy default",
+    "elapsedSeconds": 122.53,
+    "exitCode": 99,
+    "endUtc": "2026-11-10T15:48:28.672182+00:00"
+  },
+  "no-keepalive": {
+    "startUtc": "2026-11-10T15:48:28.674510+00:00",
+    "scheduledSeconds": 120,
+    "targetVus": 600,
+    "agent": "agent=false; connection=close",
+    "elapsedSeconds": 122.93,
+    "exitCode": 99,
+    "endUtc": "2026-11-10T15:50:36.421256+00:00"
+  },
+  "direct": {
+    "startUtc": "2026-11-10T15:50:36.434591+00:00",
+    "scheduledSeconds": 120,
+    "targetVus": 600,
+    "target": "direct Listing service; no API gateway",
+    "note": "Sequential runs and different connection strategies are not perfectly controlled.",
+    "elapsedSeconds": 122.37,
+    "exitCode": 99,
+    "endUtc": "2026-11-10T15:52:38.804563+00:00"
+  }
+}

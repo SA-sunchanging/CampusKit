@@ -1,0 +1,1 @@
+time="2026-11-10T15:59:22Z" level=error msg="thresholds on metrics 'http_req_duration{name:detail}, http_req_duration{name:search}' have been crossed"

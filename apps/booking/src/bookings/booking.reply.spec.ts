@@ -37,6 +37,7 @@ describe('toBookingReply', () => {
       expiresAt: '2026-10-30T05:00:00.000Z',
       createdAt: '2026-10-29T05:00:00.000Z',
       updatedAt: '2026-10-29T05:00:00.000Z',
+      failureReason: '',
     });
   });
 
@@ -48,6 +49,47 @@ describe('toBookingReply', () => {
     expect(
       toBookingReply({ ...row, status: 'EXPIRED', decline_reason: 'Busy' })
         .declineReason,
+    ).toBe('');
+  });
+
+  it.each(['Fee authorization', 'Deposit authorization'])(
+    'exposes a public reason for %s expiring before return',
+    (step) => {
+      const result = toBookingReply({
+        ...row,
+        status: 'FAILED',
+        last_error: `${step} was declined: The authorization must last beyond the rental return; choose earlier dates`,
+      });
+      expect(result.failureReason).toBe('AUTHORIZATION_EXPIRES_BEFORE_RETURN');
+      expect(result).not.toHaveProperty('lastError');
+      expect(result).not.toHaveProperty('last_error');
+    },
+  );
+
+  it.each([
+    null,
+    'Payment host secret.internal:5432 failed',
+    'The authorization has expired',
+  ])('keeps an unknown failure private: %j', (lastError) => {
+    const result = toBookingReply({
+      ...row,
+      status: 'FAILED',
+      last_error: lastError,
+    });
+    expect(result.failureReason).toBe('');
+    expect(result).not.toHaveProperty('lastError');
+    expect(result).not.toHaveProperty('last_error');
+    if (lastError) expect(JSON.stringify(result)).not.toContain(lastError);
+  });
+
+  it('does not report a failure for a booking that has not failed', () => {
+    expect(
+      toBookingReply({
+        ...row,
+        status: 'AUTHORIZING',
+        last_error:
+          'The authorization must last beyond the rental return; choose earlier dates',
+      }).failureReason,
     ).toBe('');
   });
 });

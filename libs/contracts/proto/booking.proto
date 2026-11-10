@@ -94,6 +94,9 @@ message Booking {
   string created_at = 10;
   // ISO-8601 UTC.
   string updated_at = 11;
+  // Public reason code, never a raw internal error. Empty unless a known FAILED reason applies.
+  // AUTHORIZATION_EXPIRES_BEFORE_RETURN: choose earlier dates and send a new booking request.
+  string failure_reason = 12;
 }
 
 message SetupCalendarRequest {

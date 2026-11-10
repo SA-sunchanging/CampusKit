@@ -1,0 +1,11 @@
+{
+  "startUtc": "2026-11-10T15:57:05.659349+00:00",
+  "scheduledSeconds": 120,
+  "targetVus": 600,
+  "target": "isolated Listing clone, shared test database and Review service",
+  "measurement": "Aggregate pg pool acquisition, client query, Review fetch headers and Node event loop; asynchronous timings can overlap.",
+  "limits": "Sequential comparison with other runs; preload overhead; pool wait includes scheduling, query includes PostgreSQL network, Review duration ends at headers.",
+  "elapsedSeconds": 123.74,
+  "exitCode": 99,
+  "endUtc": "2026-11-10T15:59:24.745298+00:00"
+}

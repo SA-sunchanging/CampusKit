@@ -1,0 +1,58 @@
+{
+  "createdUtc": "2026-11-10T15:20:48.315060+00:00",
+  "project": "campuskitbench7dbc5cfbfd",
+  "resultDirectory": "D:\\sun\\4year\\sa\\CampusKit\\loadtest\\results\\runs\\2026-11-10-222045-ed4cf1",
+  "temporaryDirectory": "C:\\Users\\User\\AppData\\Local\\Temp\\campuskitbench7dbc5cfbfd-pglv5t7t",
+  "manifest": "C:\\Users\\User\\AppData\\Local\\Temp\\campuskitbench7dbc5cfbfd-pglv5t7t\\compose.json",
+  "network": "campuskitbench7dbc5cfbfd_default",
+  "gitHead": "365924b850935e539265ee0dadf0fde62c25ac1d",
+  "trackedFilesDirty": true,
+  "gitDiffSha256": "6c5cf926ecc7dcb84b235b760db5d5c40457d57899dc1e12c4d695396a45b436",
+  "dataset": "1,500 deterministic published listings with booking calendars",
+  "target": "separate Compose project; no published host ports; existing project remains running",
+  "generator": "grafana/k6 in the same Docker Desktop VM as the test stack",
+  "preflightUtc": "2026-11-10T15:23:13.701758+00:00",
+  "serviceHealth": [
+    "gateway: healthy",
+    "identity: healthy",
+    "listing: healthy",
+    "booking: healthy",
+    "review: healthy",
+    "rental: healthy",
+    "payment: healthy",
+    "notification: healthy"
+  ],
+  "publishedSeedIds": 1500,
+  "calendars": 1500,
+  "publicSearchTotal": 1500,
+  "smokeChecksPassed": 5,
+  "smokeChecksFailed": 0,
+  "nativeTimeseriesGzip": true,
+  "dockerCpus": 16,
+  "dockerMemoryBytes": 7136505856,
+  "dockerServerVersion": "29.7.2",
+  "k6Version": "k6 v2.3.0 (commit/e088784614, go1.27.1, linux/amd64)",
+  "instrumentation": "Copied lib.js logs only non-200 response status, URL, correlation ID and first 512 body characters; request workload is unchanged.",
+  "scriptSha256": {
+    "lib.js": "510d08eeb77daed86c188271dc195df1c5d3b23280764c46b495af2ba2d9d873",
+    "load.js": "160876931c0c1966bf21de34255bf901076fb7ea46bef2246aa141628048730e",
+    "smoke.js": "34488c78573e64216054c23043c6a084b2b86eddf107a0db29cbf62903f49660",
+    "stress.js": "2e670ffec3369cddb3258e4a602614e11cb81d6ab078e11da07110f60aceeeec"
+  },
+  "profiles": {
+    "load": {
+      "startRequestedUtc": "2026-11-10T15:25:14.530867+00:00",
+      "scheduledSeconds": 450,
+      "endUtc": "2026-11-10T15:32:47.481862+00:00",
+      "elapsedSeconds": 452.96,
+      "exitCode": 0
+    },
+    "stress": {
+      "startRequestedUtc": "2026-11-10T15:32:47.487111+00:00",
+      "scheduledSeconds": 780,
+      "endUtc": "2026-11-10T15:45:50.668876+00:00",
+      "elapsedSeconds": 783.19,
+      "exitCode": 99
+    }
+  }
+}

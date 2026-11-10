@@ -54,6 +54,7 @@ describe('authorizeAndCreateRental', () => {
         payeeId: 'owner-1',
         kind: 'FEE',
         amount: 6000,
+        requiredUntil: '2026-11-04T17:00:00.000Z',
       },
       {
         operationId: 'booking:b1:authorize-deposit',
@@ -62,6 +63,7 @@ describe('authorizeAndCreateRental', () => {
         payeeId: 'owner-1',
         kind: 'DEPOSIT',
         amount: 30000,
+        requiredUntil: '2026-11-04T17:00:00.000Z',
       },
     ]);
     expect(rental.create).toHaveBeenCalledWith(
@@ -107,6 +109,18 @@ describe('authorizeAndCreateRental', () => {
       error: 'Deposit authorization was declined: Insufficient balance',
       final: true,
     });
+  });
+
+  it('does not create a rental when Payment says the hold cannot cover the return', async () => {
+    const { payment, rental, run } = setup();
+    payment.authorize.mockResolvedValueOnce({
+      ok: false,
+      reason: 'declined',
+      message:
+        'The authorization must last beyond the rental return; choose earlier dates',
+    });
+    await expect(run()).resolves.toMatchObject({ ok: false, final: true });
+    expect(rental.create).not.toHaveBeenCalled();
   });
 
   it('reports a failed rental creation', async () => {

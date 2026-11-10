@@ -35,6 +35,19 @@ export function statusTone(status: string): Tone {
   return isKnown(status) ? STATUS_TONES[status] : 'neutral';
 }
 
+/** Recognized failure codes get guidance without displaying internal service errors. */
+export function failureHint(
+  booking: Pick<Booking, 'status' | 'failureReason'>,
+): string | null {
+  if (
+    booking.status === 'FAILED' &&
+    booking.failureReason === 'AUTHORIZATION_EXPIRES_BEFORE_RETURN'
+  ) {
+    return 'The payment hold does not last beyond the return date. Choose earlier dates and send a new booking request.';
+  }
+  return null;
+}
+
 /** decide: approve or decline; retry: approve again after payment authorization failed. */
 export type OwnerAction = 'decide' | 'retry' | null;
 

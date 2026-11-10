@@ -35,6 +35,8 @@ export interface Booking {
   terms: Terms;
   /** Empty unless DECLINED. */
   declineReason: string;
+  /** A safe failure code; absent on older responses. */
+  failureReason?: string;
   /** A PENDING request expires at this time. */
   expiresAt: string;
   createdAt: string;

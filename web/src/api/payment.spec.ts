@@ -1,6 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { TOKEN_KEY } from '../auth/token.ts';
+import { MemoryStorage } from '../test/memory-storage.ts';
 import {
   type Authorization,
+  getMyEarnings,
   type PaymentStatus,
   summarizePayments,
 } from './payment.ts';
@@ -26,6 +29,69 @@ function status(
 ): PaymentStatus {
   return { bookingId: 'b1', authorizations, payout };
 }
+
+describe('getMyEarnings', () => {
+  beforeEach(() => {
+    vi.stubGlobal('localStorage', new MemoryStorage());
+    localStorage.setItem(TOKEN_KEY, 'owner-token');
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('loads settled earnings for the authenticated owner through the gateway', async () => {
+    const summary = { totalEarned: 28050, settledRentals: 3 };
+    const fetchMock = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json(summary));
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(getMyEarnings()).resolves.toEqual(summary);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      '/api/payment/payments/me/earnings',
+    );
+    expect(fetchMock.mock.calls[0][1]?.headers).toMatchObject({
+      Authorization: 'Bearer owner-token',
+    });
+    expect(fetchMock.mock.calls[0][1]?.body).toBeUndefined();
+  });
+
+  it('returns zero earnings when no rentals have settled', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn<typeof fetch>()
+        .mockResolvedValue(
+          Response.json({ totalEarned: 0, settledRentals: 0 }),
+        ),
+    );
+    await expect(getMyEarnings()).resolves.toEqual({
+      totalEarned: 0,
+      settledRentals: 0,
+    });
+  });
+
+  it('propagates the service error for the earnings panel to display', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>().mockResolvedValue(
+        Response.json(
+          {
+            error: {
+              code: 'SERVICE_UNAVAILABLE',
+              message: 'Payment service unavailable',
+            },
+          },
+          { status: 503 },
+        ),
+      ),
+    );
+    await expect(getMyEarnings()).rejects.toThrow(
+      'Payment service unavailable',
+    );
+  });
+});
 
 describe('summarizePayments', () => {
   it('has no lines when nothing is authorized', () => {

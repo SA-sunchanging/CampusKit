@@ -1,0 +1,393 @@
+ Image campuskitbench7dbc5cfbfd-payment:local Building 
+ Image campuskitbench7dbc5cfbfd-review:local Building 
+ Image campuskitbench7dbc5cfbfd-booking:local Building 
+ Image campuskitbench7dbc5cfbfd-web:local Building 
+ Image campuskitbench7dbc5cfbfd-gateway:local Building 
+ Image campuskitbench7dbc5cfbfd-identity:local Building 
+ Image campuskitbench7dbc5cfbfd-rental:local Building 
+ Image campuskitbench7dbc5cfbfd-listing:local Building 
+ Image campuskitbench7dbc5cfbfd-notification:local Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 5.63kB done
+#1 DONE 0.0s
+
+#2 [review internal] load build definition from Dockerfile
+#2 transferring dockerfile: 864B 0.0s done
+#2 DONE 0.1s
+
+#3 [web internal] load build definition from Dockerfile
+#3 transferring dockerfile: 398B 0.0s done
+#3 DONE 0.1s
+
+#4 [review internal] load metadata for docker.io/library/node:24-alpine
+#4 DONE 2.2s
+
+#5 [payment internal] load .dockerignore
+#5 transferring context: 111B 0.0s done
+#5 DONE 0.0s
+
+#6 [web internal] load metadata for docker.io/library/nginx:1.29-alpine
+#6 ...
+
+#7 [booking build 1/6] FROM docker.io/library/node:24-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8
+#7 resolve docker.io/library/node:24-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8 0.0s done
+#7 DONE 0.1s
+
+#8 [review internal] load build context
+#8 transferring context: 23.97kB 0.1s done
+#8 DONE 0.1s
+
+#9 [booking build 3/6] COPY package.json package-lock.json ./
+#9 CACHED
+
+#10 [booking build 4/6] RUN npm install --no-audit --no-fund
+#10 CACHED
+
+#11 [booking build 5/6] COPY . .
+#11 CACHED
+
+#12 [booking stage-1 5/6] COPY --from=build /app/dist/apps/booking ./dist/apps/booking
+#12 CACHED
+
+#13 [booking build 2/6] WORKDIR /app
+#13 CACHED
+
+#14 [booking build 6/6] RUN npx nest build booking
+#14 CACHED
+
+#15 [booking stage-1 4/6] RUN npm install --omit=dev --ignore-scripts --no-audit --no-fund
+#15 CACHED
+
+#16 [payment build 6/6] RUN npx nest build payment
+#16 CACHED
+
+#17 [payment stage-1 5/6] COPY --from=build /app/dist/apps/payment ./dist/apps/payment
+#17 CACHED
+
+#18 [rental build 6/6] RUN npx nest build rental
+#18 CACHED
+
+#19 [rental stage-1 5/6] COPY --from=build /app/dist/apps/rental ./dist/apps/rental
+#19 CACHED
+
+#20 [identity build 6/6] RUN npx nest build identity
+#20 CACHED
+
+#21 [identity stage-1 5/6] COPY --from=build /app/dist/apps/identity ./dist/apps/identity
+#21 CACHED
+
+#22 [gateway build 6/6] RUN npx nest build gateway
+#22 CACHED
+
+#23 [gateway stage-1 5/6] COPY --from=build /app/dist/apps/gateway ./dist/apps/gateway
+#23 CACHED
+
+#24 [notification stage-1 5/6] COPY --from=build /app/dist/apps/notification ./dist/apps/notification
+#24 CACHED
+
+#25 [notification build 6/6] RUN npx nest build notification
+#25 CACHED
+
+#26 [review stage-1 5/6] COPY --from=build /app/dist/apps/review ./dist/apps/review
+#26 CACHED
+
+#27 [review build 6/6] RUN npx nest build review
+#27 CACHED
+
+#15 [notification stage-1 4/6] RUN npm install --omit=dev --ignore-scripts --no-audit --no-fund
+#15 CACHED
+
+#28 [listing stage-1 5/6] COPY --from=build /app/dist/apps/listing ./dist/apps/listing
+#28 CACHED
+
+#29 [listing build 6/6] RUN npx nest build listing
+#29 CACHED
+
+#9 [notification build 3/6] COPY package.json package-lock.json ./
+#9 CACHED
+
+#10 [notification build 4/6] RUN npm install --no-audit --no-fund
+#10 CACHED
+
+#11 [notification build 5/6] COPY . .
+#11 CACHED
+
+#13 [notification build 2/6] WORKDIR /app
+#13 CACHED
+
+#30 [gateway stage-1 6/6] COPY libs/contracts/proto ./libs/contracts/proto
+#30 CACHED
+
+#31 [payment stage-1 6/6] COPY libs/contracts/proto ./libs/contracts/proto
+#31 CACHED
+
+#32 [rental stage-1 6/6] COPY libs/contracts/proto ./libs/contracts/proto
+#32 CACHED
+
+#33 [booking stage-1 6/6] COPY libs/contracts/proto ./libs/contracts/proto
+#33 CACHED
+
+#34 [notification stage-1 6/6] COPY libs/contracts/proto ./libs/contracts/proto
+#34 CACHED
+
+#35 [review stage-1 6/6] COPY libs/contracts/proto ./libs/contracts/proto
+#35 CACHED
+
+#36 [identity stage-1 6/6] COPY libs/contracts/proto ./libs/contracts/proto
+#36 CACHED
+
+#37 [listing stage-1 6/6] COPY libs/contracts/proto ./libs/contracts/proto
+#37 CACHED
+
+#38 [booking] exporting to image
+#38 exporting layers done
+#38 exporting manifest sha256:c670d05564d464bbe69cbfcf35abb9591fb9dff3ee2ee5118ae8d812efd03408 0.1s done
+#38 exporting config sha256:333a1fcca47024894e85e314490bfc14490775c1416bf1e88a5d0d0f955b9033
+#38 exporting config sha256:333a1fcca47024894e85e314490bfc14490775c1416bf1e88a5d0d0f955b9033 0.1s done
+#38 exporting attestation manifest sha256:0ced91f6b1f13ce3abc02b5d72b9867820d43286f45a575a3131f3dcfa3de155
+#38 exporting attestation manifest sha256:0ced91f6b1f13ce3abc02b5d72b9867820d43286f45a575a3131f3dcfa3de155 0.2s done
+#38 exporting manifest list sha256:18dc4c823d620a2b85c7673c5ca9f88e90e674e14d37e08b7acfd062450b4ccf
+#38 ...
+
+#6 [web internal] load metadata for docker.io/library/nginx:1.29-alpine
+#6 DONE 3.1s
+
+#39 [web internal] load .dockerignore
+#39 transferring context: 58B 0.0s done
+#39 DONE 0.0s
+
+#7 [web build 1/6] FROM docker.io/library/node:24-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8
+#7 resolve docker.io/library/node:24-alpine@sha256:a34ab6d7f6f4813f4d0c5469d74685604b962fbdbf5793a7bc7b4998ecb867c8 0.0s done
+#7 DONE 0.1s
+
+#40 [web internal] load build context
+#40 transferring context: 9.24kB 0.0s done
+#40 DONE 0.1s
+
+#38 [booking] exporting to image
+#38 exporting manifest list sha256:18dc4c823d620a2b85c7673c5ca9f88e90e674e14d37e08b7acfd062450b4ccf 0.1s done
+#38 naming to docker.io/library/campuskitbench7dbc5cfbfd-booking:local 0.1s done
+#38 unpacking to docker.io/library/campuskitbench7dbc5cfbfd-booking:local 0.0s done
+#38 DONE 0.8s
+
+#41 [gateway] exporting to image
+#41 exporting layers done
+#41 exporting manifest sha256:4736a66ecbe1fc1ba0cf020729ce8d00571d7eee7f3127d5b3c37dc9c74c568e 0.1s done
+#41 exporting config sha256:3017349aabe3aa3b6c531d8c46aafbcdea5a8c26720d543147429fdea1ab6ad3 0.1s done
+#41 exporting attestation manifest sha256:2e6b75d57828f5fd7ab1703d7e839fbfeaa4f2bb20aa32406835c33781a84921 0.2s done
+#41 exporting manifest list sha256:f6526e81be58a972295c6971af5c42bb7603c3b410b2dfa4146fd6b433936bff 0.1s done
+#41 naming to docker.io/library/campuskitbench7dbc5cfbfd-gateway:local 0.0s done
+#41 unpacking to docker.io/library/campuskitbench7dbc5cfbfd-gateway:local 0.0s done
+#41 DONE 0.8s
+
+#42 [web stage-1 1/3] FROM docker.io/library/nginx:1.29-alpine@sha256:5616878291a2eed594aee8db4dade5878cf7edcb475e59193904b198d9b830de
+#42 resolve docker.io/library/nginx:1.29-alpine@sha256:5616878291a2eed594aee8db4dade5878cf7edcb475e59193904b198d9b830de 0.1s done
+#42 DONE 0.2s
+
+#43 [rental] exporting to image
+#43 exporting layers 0.0s done
+#43 exporting manifest sha256:1b9cd68cad101be37f9d5ae22773e93e5c4a4b9c3d604305aabf4946bbe792fb 0.1s done
+#43 exporting config sha256:0cc1155cb0f4f7689f2a976e2094d867b6e97f6ae7053d350bad4ddf26c38886 0.1s done
+#43 exporting attestation manifest sha256:177a148969ed5d1979cb29c755763d769501361eedf4118bdaa45731521e64d8 0.2s done
+#43 exporting manifest list sha256:9e2e96500bc03836e5dc797dd2f2f99402b59db3a0cd5019bfe4b5b9e42860ab 0.1s done
+#43 naming to docker.io/library/campuskitbench7dbc5cfbfd-rental:local 0.1s done
+#43 unpacking to docker.io/library/campuskitbench7dbc5cfbfd-rental:local 0.0s done
+#43 DONE 0.8s
+
+#44 [web stage-1 2/3] COPY nginx.conf /etc/nginx/conf.d/default.conf
+#44 CACHED
+
+#13 [web build 2/6] WORKDIR /app
+#13 CACHED
+
+#45 [web build 3/6] COPY package.json package-lock.json ./
+#45 CACHED
+
+#46 [web build 4/6] RUN npm install --no-audit --no-fund
+#46 CACHED
+
+#47 [web build 5/6] COPY . .
+#47 CACHED
+
+#48 [web build 6/6] RUN npm run build
+#48 CACHED
+
+#49 [web stage-1 3/3] COPY --from=build /app/dist /usr/share/nginx/html
+#49 CACHED
+
+#50 [payment] exporting to image
+#50 exporting layers done
+#50 exporting manifest sha256:2c6b8db82331a30ae93afa1a725510e6b57262ac0ec1089c6cae7a1791ba8706 0.1s done
+#50 exporting config sha256:4d06af847407352951e60d95577e4a030f286cd2e24c16cc2a1d5e076a759a8d 0.1s done
+#50 exporting attestation manifest sha256:1969f97bdebc19d09b4055e0a493481e33bc9c21dfb2f7ea878638f16da465ff 0.2s done
+#50 exporting manifest list sha256:b34988d16e5a26a97471ef6d8482e3b118947712a13b90c2ada6b513a533c421 0.1s done
+#50 naming to docker.io/library/campuskitbench7dbc5cfbfd-payment:local 0.0s done
+#50 unpacking to docker.io/library/campuskitbench7dbc5cfbfd-payment:local 0.0s done
+#50 DONE 0.8s
+
+#51 [listing] exporting to image
+#51 exporting layers done
+#51 exporting manifest sha256:af67aadd494d9ad334ee5de9fc6585f93022f0a9f8d4f5db29c6a29df8095a4a 0.1s done
+#51 exporting config sha256:b175e44fc3144f2e25baf6e82677c1e85e61edb2185078e36aa74d1dc8779c56 0.1s done
+#51 exporting attestation manifest sha256:4dd77b3789903c93716207d00eb2daeb1b6ba7a7c64f5e060e842642f050f8a4 0.1s done
+#51 exporting manifest list sha256:4ce79a042e276e790d96ab7f22d7fda0229aff4bf916c836417509601e8e608a 0.1s done
+#51 naming to docker.io/library/campuskitbench7dbc5cfbfd-listing:local 0.0s done
+#51 unpacking to docker.io/library/campuskitbench7dbc5cfbfd-listing:local 0.0s done
+#51 DONE 0.9s
+
+#52 [identity] exporting to image
+#52 exporting layers done
+#52 exporting manifest sha256:fd22cc6feb3ad36643fd52f695332dcf9a33f7da6f47916a6d348cd007b7922f 0.1s done
+#52 exporting config sha256:fb01645903ab72a9f04ce92c242ac78c7bb1674ee0312d761ba09795b7bbf12f 0.1s done
+#52 exporting attestation manifest sha256:25a79aa226aedcf7cf6ec1e136cc729338c698e6fb91c7af861015a7610e8c0b 0.1s done
+#52 exporting manifest list sha256:b155fb4b6d224422ebf6831d044d4aa2661949cc775c34e05f2ce31cc8904893 0.1s done
+#52 naming to docker.io/library/campuskitbench7dbc5cfbfd-identity:local 0.0s done
+#52 unpacking to docker.io/library/campuskitbench7dbc5cfbfd-identity:local 0.0s done
+#52 DONE 0.8s
+
+#53 [notification] exporting to image
+#53 exporting layers done
+#53 exporting manifest sha256:dc82f80ceb04b49bfd999fa2b2f09cb31b712bcce5c25395f11b5d2c11958ef4 0.1s done
+#53 exporting config sha256:66959d4b0339b146f9dcad497f1d26bea66d7fbc33f9f4e5140c1eb1909bb73d 0.1s done
+#53 exporting attestation manifest sha256:febbee2b5ad6f4db0e5d199d2577fb9352dc2e57dd707786bd94fc3517314bf1 0.2s done
+#53 exporting manifest list sha256:5e681e998beb2b190e3c64be67b7d46b988717b8ab73d18f057af70fbf5d2cd4 0.1s done
+#53 naming to docker.io/library/campuskitbench7dbc5cfbfd-notification:local 0.0s done
+#53 unpacking to docker.io/library/campuskitbench7dbc5cfbfd-notification:local 0.0s done
+#53 DONE 0.8s
+
+#54 [review] exporting to image
+#54 exporting layers done
+#54 exporting manifest sha256:a094ce93c7bd44eaf3d196d7e94302851314c54128cc7a6432290428390dda0b 0.1s done
+#54 exporting config sha256:31ff46f9da1539eaf63f26b879b5b248d6a940383726547480fbfe5f5999c2d3 0.1s done
+#54 exporting attestation manifest sha256:db750bf313ce52adc5ace462c9ec783f28f197a820ae814c0caa19d948c75e67 0.2s done
+#54 exporting manifest list sha256:7a59a09769839573cadbe69dcfc06938ed5ac52054df3065c40d0a055ab22fd9 0.1s done
+#54 naming to docker.io/library/campuskitbench7dbc5cfbfd-review:local 0.0s done
+#54 unpacking to docker.io/library/campuskitbench7dbc5cfbfd-review:local 0.0s done
+#54 DONE 0.8s
+
+#55 [web] exporting to image
+#55 exporting layers 0.0s done
+#55 exporting manifest sha256:dcf3dd30f572f99e6fc4d2c5201a5142e8252d25fc488efb51aca83da59eb614
+#55 exporting manifest sha256:dcf3dd30f572f99e6fc4d2c5201a5142e8252d25fc488efb51aca83da59eb614 0.2s done
+#55 exporting config sha256:ac79c47d6f3756164a746ea2ddd5b736b7bed32b3216d9b467aa88f991517375
+#55 exporting config sha256:ac79c47d6f3756164a746ea2ddd5b736b7bed32b3216d9b467aa88f991517375 0.2s done
+#55 exporting attestation manifest sha256:43b40ae81dedd4b5cdc1d1c10a668aa48a39a17e6fcbca9a7a6f6fc19215941b 0.0s done
+#55 exporting manifest list sha256:c53488b5218fc33d48c12acba14ca9ac9670c8fc87994afcac6489c49f4f553a 0.0s done
+#55 naming to docker.io/library/campuskitbench7dbc5cfbfd-web:local
+#55 naming to docker.io/library/campuskitbench7dbc5cfbfd-web:local 0.0s done
+#55 unpacking to docker.io/library/campuskitbench7dbc5cfbfd-web:local 0.0s done
+#55 DONE 0.7s
+
+#56 [identity] resolving provenance for metadata file
+#56 DONE 0.6s
+
+#57 [rental] resolving provenance for metadata file
+#57 DONE 0.3s
+
+#58 [notification] resolving provenance for metadata file
+#58 DONE 0.4s
+
+#59 [booking] resolving provenance for metadata file
+#59 DONE 0.7s
+
+#60 [payment] resolving provenance for metadata file
+#60 DONE 0.2s
+
+#61 [review] resolving provenance for metadata file
+#61 DONE 0.5s
+
+#62 [gateway] resolving provenance for metadata file
+#62 DONE 0.7s
+
+#63 [listing] resolving provenance for metadata file
+#63 DONE 0.5s
+
+#64 [web] resolving provenance for metadata file
+#64 DONE 0.0s
+ Image campuskitbench7dbc5cfbfd-review:local Built 
+ Image campuskitbench7dbc5cfbfd-identity:local Built 
+ Image campuskitbench7dbc5cfbfd-listing:local Built 
+ Image campuskitbench7dbc5cfbfd-gateway:local Built 
+ Image campuskitbench7dbc5cfbfd-rental:local Built 
+ Image campuskitbench7dbc5cfbfd-booking:local Built 
+ Image campuskitbench7dbc5cfbfd-web:local Built 
+ Image campuskitbench7dbc5cfbfd-notification:local Built 
+ Image campuskitbench7dbc5cfbfd-payment:local Built 
+ Network campuskitbench7dbc5cfbfd_default Creating 
+ Network campuskitbench7dbc5cfbfd_default Created 
+ Volume campuskitbench7dbc5cfbfd_mongo-data Creating 
+ Volume campuskitbench7dbc5cfbfd_mongo-data Created 
+ Volume campuskitbench7dbc5cfbfd_postgres-data Creating 
+ Volume campuskitbench7dbc5cfbfd_postgres-data Created 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Creating 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Creating 
+ Container campuskitbench7dbc5cfbfd-mongo-1 Creating 
+ Container campuskitbench7dbc5cfbfd-mongo-1 Created 
+ Container campuskitbench7dbc5cfbfd-review-1 Creating 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Created 
+ Container campuskitbench7dbc5cfbfd-payment-1 Creating 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Created 
+ Container campuskitbench7dbc5cfbfd-notification-1 Creating 
+ Container campuskitbench7dbc5cfbfd-rental-1 Creating 
+ Container campuskitbench7dbc5cfbfd-listing-1 Creating 
+ Container campuskitbench7dbc5cfbfd-booking-1 Creating 
+ Container campuskitbench7dbc5cfbfd-identity-1 Creating 
+ Container campuskitbench7dbc5cfbfd-review-1 Created 
+ Container campuskitbench7dbc5cfbfd-rental-1 Created 
+ Container campuskitbench7dbc5cfbfd-payment-1 Created 
+ Container campuskitbench7dbc5cfbfd-listing-1 Created 
+ Container campuskitbench7dbc5cfbfd-notification-1 Created 
+ Container campuskitbench7dbc5cfbfd-booking-1 Created 
+ Container campuskitbench7dbc5cfbfd-identity-1 Created 
+ Container campuskitbench7dbc5cfbfd-gateway-1 Creating 
+ Container campuskitbench7dbc5cfbfd-gateway-1 Created 
+ Container campuskitbench7dbc5cfbfd-web-1 Creating 
+ Container campuskitbench7dbc5cfbfd-web-1 Created 
+ Container campuskitbench7dbc5cfbfd-mongo-1 Starting 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Starting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Starting 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Started 
+ Container campuskitbench7dbc5cfbfd-mongo-1 Started 
+ Container campuskitbench7dbc5cfbfd-mongo-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-mongo-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Started 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Waiting 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-rabbitmq-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-payment-1 Starting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-listing-1 Starting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-identity-1 Starting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-rental-1 Starting 
+ Container campuskitbench7dbc5cfbfd-postgres-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-booking-1 Starting 
+ Container campuskitbench7dbc5cfbfd-rental-1 Started 
+ Container campuskitbench7dbc5cfbfd-booking-1 Started 
+ Container campuskitbench7dbc5cfbfd-listing-1 Started 
+ Container campuskitbench7dbc5cfbfd-payment-1 Started 
+ Container campuskitbench7dbc5cfbfd-identity-1 Started 
+ Container campuskitbench7dbc5cfbfd-mongo-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-review-1 Starting 
+ Container campuskitbench7dbc5cfbfd-mongo-1 Healthy 
+ Container campuskitbench7dbc5cfbfd-notification-1 Starting 
+ Container campuskitbench7dbc5cfbfd-notification-1 Started 
+ Container campuskitbench7dbc5cfbfd-review-1 Started 
+ Container campuskitbench7dbc5cfbfd-gateway-1 Starting 
+ Container campuskitbench7dbc5cfbfd-gateway-1 Started 
+ Container campuskitbench7dbc5cfbfd-web-1 Starting 
+ Container campuskitbench7dbc5cfbfd-web-1 Started 

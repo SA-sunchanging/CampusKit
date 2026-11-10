@@ -57,6 +57,13 @@ export class BookingResponse {
 
   @ApiProperty({ description: 'ISO-8601 UTC.' })
   updatedAt: string;
+
+  @ApiProperty({
+    description:
+      'Public failure reason code; empty when no known reason applies. Internal errors are never returned.',
+    enum: ['', 'AUTHORIZATION_EXPIRES_BEFORE_RETURN'],
+  })
+  failureReason: string;
 }
 
 export class BookingListResponse {

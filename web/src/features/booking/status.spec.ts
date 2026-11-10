@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { BOOKING_STATUSES, type BookingStatus } from '../../api/booking.ts';
 import {
   canCancel,
+  failureHint,
   ownerAction,
   STATUS_LABELS,
   STATUS_TONES,
@@ -17,6 +18,32 @@ const period = {
 const booking = (status: BookingStatus, start = period.start) => ({
   status,
   period: { ...period, start },
+});
+
+describe('failureHint', () => {
+  const failureReason = 'AUTHORIZATION_EXPIRES_BEFORE_RETURN';
+
+  it('explains an expiry failure with earlier dates and a new request', () => {
+    const hint = failureHint({ status: 'FAILED', failureReason });
+    expect(hint).toContain('earlier dates');
+    expect(hint).toContain('new booking request');
+  });
+
+  it.each([undefined, '', 'UNKNOWN_FAILURE', 'Internal database credentials'])(
+    'suppresses absent or unknown failure reason %s',
+    (reason) => {
+      expect(
+        failureHint({ status: 'FAILED', failureReason: reason }),
+      ).toBeNull();
+    },
+  );
+
+  it.each(BOOKING_STATUSES.filter((status) => status !== 'FAILED'))(
+    'suppresses the hint on %s bookings',
+    (status) => {
+      expect(failureHint({ status, failureReason })).toBeNull();
+    },
+  );
 });
 
 describe('status labels', () => {

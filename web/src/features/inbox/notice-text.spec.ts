@@ -36,14 +36,14 @@ describe('describeNotice for booking events', () => {
     const text = notice('booking.requested', booking, OWNER);
     expect(text.title).toBe('New booking request');
     expect(text.body).toContain(RANGE);
-    expect(text.link).toBe('/bookings');
+    expect(text.link).toBe('/bookings?role=owner');
   });
 
   it('tells the renter that the owner declined', () => {
     const text = notice('booking.declined', booking, RENTER);
     expect(text.title).toBe('Booking declined');
     expect(text.body).toBe(`The owner declined your request for ${RANGE}.`);
-    expect(text.link).toBe('/bookings');
+    expect(text.link).toBe('/bookings?role=renter');
   });
 
   it('words a confirmed booking for each side', () => {
@@ -54,8 +54,8 @@ describe('describeNotice for booking events', () => {
     expect(renter.body).toMatch(/^The owner approved your booking for /);
     expect(owner.body).toContain(RANGE);
     expect(renter.body).toContain(RANGE);
-    expect(owner.link).toBe('/rentals');
-    expect(renter.link).toBe('/rentals');
+    expect(owner.link).toBe('/rentals?role=owner');
+    expect(renter.link).toBe('/rentals?role=renter');
   });
 
   it('words a failed booking for each side', () => {
@@ -65,8 +65,8 @@ describe('describeNotice for booking events', () => {
     expect(owner.body).toMatch(/^Your approval of the booking for /);
     expect(renter.body).toMatch(/^Your booking for /);
     expect(renter.body).toContain('request the item again');
-    expect(owner.link).toBe('/bookings');
-    expect(renter.link).toBe('/bookings');
+    expect(owner.link).toBe('/bookings?role=owner');
+    expect(renter.link).toBe('/bookings?role=renter');
   });
 
   it('words an expired request for each side', () => {
@@ -75,7 +75,8 @@ describe('describeNotice for booking events', () => {
     expect(owner.title).toBe('Booking request expired');
     expect(owner.body).toMatch(/^A request for .* expired before you answered/);
     expect(renter.body).toContain('request the item again');
-    expect(renter.link).toBe('/bookings');
+    expect(owner.link).toBe('/bookings?role=owner');
+    expect(renter.link).toBe('/bookings?role=renter');
   });
 
   it('words a cancelled booking with and without a reason', () => {
@@ -84,9 +85,13 @@ describe('describeNotice for booking events', () => {
     expect(plain.body).toBe(
       `The booking for ${RANGE} was cancelled before pickup, so the dates are free again.`,
     );
+    expect(plain.link).toBe('/bookings?role=owner');
     const withReason = { ...booking, reason: 'Plans changed' };
     expect(notice('booking.cancelled', withReason, RENTER).body).toMatch(
       / Reason: Plans changed$/,
+    );
+    expect(notice('booking.cancelled', withReason, RENTER).link).toBe(
+      '/bookings?role=renter',
     );
   });
 });
@@ -195,10 +200,19 @@ describe('describeNotice for rental events', () => {
     expect(renter.body).toContain('Return the item now');
   });
 
-  it('falls back to the rentals page without a rental ID', () => {
-    const { rentalId: _unused, ...noId } = rental;
-    expect(notice('rental.started', noId, RENTER).link).toBe('/rentals');
-  });
+  it.each([
+    'rental.started',
+    'rental.reminded',
+    'rental.overdue',
+    'rental.closed',
+  ])(
+    "falls back to each participant's rentals tab for %s without a rental ID",
+    (type) => {
+      const { rentalId: _unused, ...noId } = rental;
+      expect(notice(type, noId, OWNER).link).toBe('/rentals?role=owner');
+      expect(notice(type, noId, RENTER).link).toBe('/rentals?role=renter');
+    },
+  );
 });
 
 describe('describeNotice with unexpected input', () => {
@@ -227,9 +241,15 @@ describe('describeNotice with unexpected input', () => {
 
   it('treats the viewer as the renter when the owner is missing', () => {
     const { ownerId: _unused, ...noOwner } = booking;
-    expect(notice('booking.confirmed', noOwner, '').body).toMatch(
-      /^The owner approved/,
-    );
+    const text = notice('booking.confirmed', noOwner, '');
+    expect(text.body).toMatch(/^The owner approved/);
+    expect(text.link).toBe('/rentals?role=renter');
+  });
+
+  it('recognizes the owner when IDs differ only by case', () => {
+    const text = notice('booking.confirmed', booking, OWNER.toUpperCase());
+    expect(text.body).toMatch(/^You approved/);
+    expect(text.link).toBe('/rentals?role=owner');
   });
 
   it('ignores a late fee that is not a positive number', () => {

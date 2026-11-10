@@ -1,0 +1,11 @@
+[33m[Nest] 1  - [39m11/10/2026, 3:22:56 PM [33m   WARN[39m [38;5;3m[DataSourceNameRegistry] [39m[33mA data source with the default name is already registered. Multiple data sources must be registered with unique names; otherwise, they will override each other. Please assign a unique "name" property to each TypeOrmModule.forRoot()/forRootAsync() registration.[39m
+[32m[Nest] 1  - [39m11/10/2026, 3:22:56 PM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m[38;5;3m +4ms[39m
+[32m[Nest] 1  - [39m11/10/2026, 3:22:56 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +63ms[39m
+[32m[Nest] 1  - [39m11/10/2026, 3:22:56 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mClientsModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 1  - [39m11/10/2026, 3:22:56 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m11/10/2026, 3:22:56 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSeedModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m11/10/2026, 3:22:56 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 1  - [39m11/10/2026, 3:22:56 PM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmCoreModule dependencies initialized[39m[38;5;3m +73ms[39m
+[32m[Nest] 1  - [39m11/10/2026, 3:22:59 PM [32m    LOG[39m [38;5;3m[Seed] [39m[32mInserted 1500 new listings of 1500; 0 calendar setups failed[39m
+ Container campuskitbench7dbc5cfbfd-listing-run-e9127319dc87 Creating 
+ Container campuskitbench7dbc5cfbfd-listing-run-e9127319dc87 Created 
