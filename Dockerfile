@@ -9,15 +9,16 @@ RUN --mount=type=cache,target=/root/.npm npm install --ignore-scripts --no-audit
 COPY . .
 ARG APP
 RUN npx nest build ${APP}
+# Keep only the files this service loads at runtime (its own slice of node_modules).
+RUN node scripts/trace-runtime.mjs ${APP} /out \
+  && cp package.json /out/ \
+  && mkdir -p /out/libs/contracts \
+  && cp -r libs/contracts/proto /out/libs/contracts/
 
 FROM node:24-alpine
 WORKDIR /app
 ENV NODE_ENV=production
-COPY package.json package-lock.json ./
-# --ignore-scripts: the prepare script runs husky, a devDependency that --omit=dev leaves out.
-RUN --mount=type=cache,target=/root/.npm npm install --omit=dev --ignore-scripts --no-audit --no-fund
 ARG APP
 ENV APP=${APP}
-COPY --from=build /app/dist/apps/${APP} ./dist/apps/${APP}
-COPY libs/contracts/proto ./libs/contracts/proto
+COPY --from=build /out ./
 CMD node dist/apps/${APP}/main.js
