@@ -13,6 +13,7 @@ if (!app || !outDir) throw new Error('usage: trace-runtime.mjs <app> <outDir>');
 // Add an entry here when a container logs "package is missing" or "Cannot find package".
 const DYNAMIC_DEPS = {
   typeorm: ['pg'],
+  '@nestjs/microservices': ['@grpc/grpc-js', '@grpc/proto-loader'],
 };
 
 const require = createRequire(path.resolve('package.json'));
